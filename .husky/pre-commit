@@ -6,3 +6,5 @@ bun run gitleaks dir -v --no-banner
 
 echo "Running Prettier for code formatting..."
 lint-staged
+
+bun lint:fix
