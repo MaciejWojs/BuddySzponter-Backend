@@ -1,0 +1,8 @@
+bun typecheck
+
+echo "Checking for secrets with Gitleaks..."
+
+bun run gitleaks dir -v --no-banner
+
+echo "Running Prettier for code formatting..."
+lint-staged
