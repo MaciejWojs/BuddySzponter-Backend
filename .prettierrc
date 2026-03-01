@@ -3,9 +3,6 @@
   "singleQuote": true,
   "trailingComma": "all",
   "tabWidth": 2,
-  "plugins": [
-    "prettier-plugin-embed",
-    "prettier-plugin-sql"
-  ],
+  "plugins": ["prettier-plugin-embed", "prettier-plugin-sql"],
   "keywordCase": "upper"
 }
