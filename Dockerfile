@@ -19,6 +19,6 @@ COPY --from=builder /BS/package.json /app/
 # COPY --from=builder /BS/prisma /app/prisma
 # COPY --from=builder /BS/prisma.config.ts /app/
 
-EXPOSE 5000 5001 5002
+EXPOSE 3000
 
 CMD ["bun", "run", "prod"]
