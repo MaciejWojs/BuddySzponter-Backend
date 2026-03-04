@@ -239,3 +239,9 @@ $RECYCLE.BIN/
 
 .env*
 !.env.example
+.dist/
+*.pgsql
+docs/
+diagrams/**/*.png
+diagrams/**/*.jpg
+diagrams/**/*.svg

@@ -1,0 +1,105 @@
+services:
+  waf:
+    image: owasp/modsecurity-crs:nginx-alpine
+    container_name: BS-WAF
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      # - ./nginx-waf/modsecurity.conf:/etc/nginx/modsecurity.conf
+      - ./nginx-waf/nginx.conf:/etc/nginx/templates/conf.d/default.conf.template
+      - ./nginx-waf/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+    networks:
+      - backend
+  db:
+    image: postgres:18.3-alpine3.23
+    container_name: BS-Postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '5432:5432'
+    networks:
+      - backend
+    # volumes:
+    # - postgres_data:/var/lib/postgresql/data
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  app:
+    image: buddy-szponter-backend:latest
+    # container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: BS-Backend
+    restart: unless-stopped
+    networks:
+      - backend
+    depends_on:
+      - db
+      - cache
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      VALKEY_URL: valkey://default:${VALKEY_PASSWORD}@cache:6379/0
+      SALT: ${SALT}
+      PEPPER: ${PEPPER}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      DEVELOPMENT: ${DEVELOPMENT} # true or false
+
+  cache:
+    image: valkey/valkey:9-alpine3.22
+    container_name: BS-CacheValkey
+    restart: unless-stopped
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD}
+      VALKEY_USER: ${VALKEY_USER}
+    command: valkey-server --requirepass ${VALKEY_PASSWORD}
+    ports:
+      - '6379:6379'
+    networks:
+      - backend
+
+  simple-storage:
+    image: minio/minio:latest
+    container_name: BS-MinIO
+    restart: unless-stopped
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live' ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - backend
+    entrypoint: >
+      sh -c " /usr/bin/minio server /data --console-address ':9001' &
+
+      echo '⏳ Waiting for MinIO to start...'; until curl -s http://localhost:9000/minio/health/live >/dev/null; do
+        sleep 1;
+      done
+
+      echo '✅ MinIO is ready. Setting up buckets...'; 
+
+      mc alias set simplestorage http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; 
+
+      mc mb simplestorage/photos || true; mc anonymous set download simplestorage/photos || true;
+
+      echo '✅ Buckets initialized.'; sleep 2s; wait "
+
+networks:
+  backend:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
