@@ -24,10 +24,8 @@ services:
       - '5432:5432'
     networks:
       - backend
-    # volumes:
-    # - postgres_data:/var/lib/postgresql/data
-    volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # volumes:
+      # - postgres_data:/var/lib/postgresql/data
 
   app:
     image: buddy-szponter-backend:latest
