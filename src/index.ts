@@ -1,7 +1,12 @@
 import { Hono } from 'hono';
 import { initSocket, getEngine } from './socket';
+import { configProvider } from './config/configProvider';
 
 const app = new Hono().basePath('/api/v1');
+const isDevelopment = configProvider.get('DEVELOPMENT');
+
+console.log('Running in development mode:', isDevelopment);
+
 
 initSocket();
 const engine = getEngine();

@@ -1,5 +1,7 @@
 {
   "name": "buddy-szponter-backend",
+  "private": true,
+  "version": "1.0.0",
   "lint-staged": {
     "*.ts": "prettier --write",
     "*.tsx": "prettier --write",
@@ -9,6 +11,8 @@
   },
   "scripts": {
     "dev": "bun run --hot src/index.ts",
+    "minify": "bun run typecheck && bun build src/index.ts --target bun --outdir .dist --minify --sourcemap",
+    "prod": "bun run --bun .dist/index.js",
     "prepare": "husky install",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
