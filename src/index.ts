@@ -1,12 +1,15 @@
 import { Hono } from 'hono';
 import { initSocket, getEngine } from './socket';
 import { configProvider } from './config/configProvider';
+import authRouter from './modules/auth/api/auth.routes';
+import usersRouter from './modules/users/api/users.routes';
+import sessionRouter from './modules/sessions/api/sessions.routes';
 
 const app = new Hono().basePath('/api/v1');
+
 const isDevelopment = configProvider.get('DEVELOPMENT');
 
 console.log('Running in development mode:', isDevelopment);
-
 
 initSocket();
 const engine = getEngine();
@@ -16,6 +19,9 @@ app.get('/', (c) =>
     'This is the Buddy Szponter backend. WebSocket endpoint is at /socket.io/',
   ),
 );
+app.route('/auth', authRouter);
+app.route('/users', usersRouter);
+app.route('/sessions', sessionRouter);
 
 const { websocket } = engine.handler();
 
