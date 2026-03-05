@@ -9,7 +9,10 @@ class ConfigProvider {
       this.config = envSchema.parse(environment);
     } catch (error) {
       console.error('Environment variables validation failed:', error);
-      process.exit(1);
+      throw new Error(
+        'Invalid environment variables. Please check your .env file and refer to the ZOD schema.',
+        { cause: error },
+      );
     }
   }
 
