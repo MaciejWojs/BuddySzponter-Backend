@@ -2,7 +2,7 @@ import { env } from 'bun';
 import { envSchema, type ENV } from './env';
 
 class ConfigProvider {
-  private config: ENV;
+  private readonly config: ENV;
 
   constructor(environment: Record<string, string | undefined> = env) {
     try {
