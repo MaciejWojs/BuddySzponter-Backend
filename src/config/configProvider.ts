@@ -3,7 +3,7 @@ import { envSchema, type ENV } from './env';
 
 class ConfigProvider {
   private readonly config: ENV;
-  private static instance: ConfigProvider;
+  private static instance: ConfigProvider | undefined;
 
   private constructor(environment: Record<string, string | undefined> = env) {
     try {
