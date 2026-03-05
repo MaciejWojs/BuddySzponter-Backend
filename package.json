@@ -24,7 +24,8 @@
     "@socket.io/bun-engine": "^0.1.0",
     "hono": "^4.12.5",
     "socket.io": "^4.8.3",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@0xts/gitleaks-cli": "^0.1.3",
