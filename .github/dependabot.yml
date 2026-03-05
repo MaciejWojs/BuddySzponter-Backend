@@ -1,0 +1,57 @@
+version: 2
+enable-beta-ecosystems: true
+updates:
+  # Group Bun-managed projects together using `directories`. Dependabot will
+  # create separate PRs per dependency as needed, but the configuration is
+  # centrally defined here.
+  - package-ecosystem: "bun"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/Warsaw"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+    # Grouping: combine patch and minor updates into single PRs to reduce noise
+    groups:
+      bun-small-updates:
+        patterns:
+          - "*" # match all dependencies
+        update-types:
+          - patch
+          - minor
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/Warsaw"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+  # Separate entry for docker-compose files.
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/Warsaw"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
