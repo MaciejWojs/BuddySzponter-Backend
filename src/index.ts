@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { initSocket, getEngine } from './socket';
 
-const app = new Hono();
+const app = new Hono().basePath('/api/v1');
 
 initSocket();
 const engine = getEngine();
