@@ -1,5 +1,6 @@
 import { env } from 'bun';
 import { envSchema, type ENV } from './env';
+import logger from '@logger';
 
 class ConfigProvider {
   private readonly config: ENV;
@@ -9,7 +10,7 @@ class ConfigProvider {
     try {
       this.config = envSchema.parse(environment);
     } catch (error) {
-      console.error('Environment variables validation failed:', error);
+      logger.error('Environment variables validation failed:', error);
       process.exit(1);
     }
   }
