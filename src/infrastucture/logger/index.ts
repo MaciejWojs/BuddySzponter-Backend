@@ -34,14 +34,18 @@ if (!isDevelopment) {
 }
 
 type LogMethod = 'info' | 'warn' | 'error' | 'debug';
+const wasDisplayed = new Map<LogMethod, boolean>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const wrapConsole =
   (method: LogMethod) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (...args: any[]) => {
-    logger.warn(
-      `Using console.${method} is discouraged. Please use the logger instance instead.`,
-    );
+    if (!wasDisplayed.get(method)) {
+      logger.warn(
+        `Using console.${method} is discouraged. Please use the logger instance instead.`,
+      );
+      wasDisplayed.set(method, true);
+    }
     logger[method](args[0], ...args.slice(1));
   };
 
