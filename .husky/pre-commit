@@ -1,10 +1,11 @@
+echo "Running TypeScript type checks..."
 bun typecheck
 
 echo "Checking for secrets with Gitleaks..."
-
 bun run gitleaks dir -v --no-banner
 
-echo "Running Prettier for code formatting..."
+echo "Running ESLint with auto-fix..."
 bun lint:fix
 
+echo "Running Prettier for code formatting..."
 lint-staged
