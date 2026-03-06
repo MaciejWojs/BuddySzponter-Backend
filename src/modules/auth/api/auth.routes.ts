@@ -1,8 +1,12 @@
 import { Hono } from 'hono';
+import { registerSchema } from './auth.schema';
+import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
 
 const authRouter = new Hono();
 
-authRouter.post('/register', (c) => {
+authRouter.post('/register', zValidator('json', registerSchema), (c) => {
+  const data = c.req.valid('json');
+  console.log('Received registration data:', data);
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
   return c.json({ message: 'User registered successfully' });
 });

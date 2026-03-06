@@ -4,6 +4,7 @@ import { configProvider } from './config/configProvider';
 import authRouter from './modules/auth/api/auth.routes';
 import usersRouter from './modules/users/api/users.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
+import { HTTPException } from 'hono/http-exception';
 
 const app = new Hono().basePath('/api/v1');
 
@@ -13,6 +14,20 @@ console.log('Running in development mode:', isDevelopment);
 
 initSocket();
 const engine = getEngine();
+
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return c.json(
+      {
+        message: err.message,
+        errors: err.cause,
+      },
+      err.status,
+    );
+  }
+
+  return c.json({ message: 'Internal Server Error' }, 500);
+});
 
 app.get('/', (c) =>
   c.text(
