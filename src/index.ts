@@ -25,7 +25,9 @@ app.onError((err, c) => {
       err.status,
     );
   }
-
+  if (isDevelopment) {
+    console.error('Unhandled error in global error handler:', err);
+  }
   return c.json({ message: 'Internal Server Error' }, 500);
 });
 
