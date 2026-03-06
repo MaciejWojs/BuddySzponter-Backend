@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const registerSchema = z
+export const registerBoddySchema = z
   .object({
     nickname: z.string().min(3).max(20),
     email: z.email(),
@@ -17,7 +17,7 @@ export const registerSchema = z
     }
   });
 
-export const loginSchema = z.object({
+export const loginBodySchema = z.object({
   email: z.email(),
   password: z.string().min(8),
 });
@@ -30,7 +30,7 @@ export const logoutSchema = z.object({
   refreshToken: z.string(),
 });
 
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerBoddySchema>;
+export type LoginInput = z.infer<typeof loginBodySchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 export type LogoutInput = z.infer<typeof logoutSchema>;
