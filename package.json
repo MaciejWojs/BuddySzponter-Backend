@@ -13,15 +13,20 @@
     "dev": "bun run --hot src/index.ts",
     "minify": "bun run typecheck && bun build src/index.ts --target bun --outdir .dist --minify --sourcemap",
     "prod": "bun run --bun .dist/index.js",
-    "prepare": "husky install",
+    "prepare": "husky",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "bunx --bun tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "migrate": "bun --bun drizzle-kit migrate",
+    "generate": "bun --bun drizzle-kit generate",
+    "push": "bun --bun drizzle-kit push"
   },
   "dependencies": {
     "@socket.io/bun-engine": "^0.1.0",
+    "drizzle-kit": "1.0.0-beta.12-5845444",
+    "drizzle-orm": "1.0.0-beta.12-5845444",
     "hono": "^4.12.5",
     "socket.io": "^4.8.3",
     "zod": "^4.3.6",
