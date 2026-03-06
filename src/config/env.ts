@@ -8,7 +8,6 @@ export const envSchema = z.object({
   PEPPER: z.string().min(8).max(64),
   SALT: z.string().min(8).max(64),
 
-  POSTGRES_PASSWORD: z.string().min(1).max(64),
   DATABASE_URL: z.string().min(1),
 
   JWT_ACCESS_SECRET: z.string().min(16).max(256),
