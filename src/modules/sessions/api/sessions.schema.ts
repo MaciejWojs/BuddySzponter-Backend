@@ -12,7 +12,7 @@ export const createSessionSchema = z.object({
 // });
 
 export const deleteSessionSchema = z.object({
-  sessionId: z.int(),
+  id: z.int(),
 });
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
