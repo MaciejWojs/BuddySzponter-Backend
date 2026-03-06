@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const registerBoddySchema = z
+export const registerBodySchema = z
   .object({
     nickname: z.string().min(3).max(20),
     email: z.email(),
@@ -30,7 +30,7 @@ export const logoutSchema = z.object({
   refreshToken: z.string(),
 });
 
-export type RegisterInput = z.infer<typeof registerBoddySchema>;
+export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 export type LogoutInput = z.infer<typeof logoutSchema>;
