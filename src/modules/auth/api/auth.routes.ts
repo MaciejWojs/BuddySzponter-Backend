@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { registerSchema } from './auth.schema';
+import { loginSchema, registerSchema } from './auth.schema';
 import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
 
 const authRouter = new Hono();
@@ -11,7 +11,9 @@ authRouter.post('/register', zValidator('json', registerSchema), (c) => {
   return c.json({ message: 'User registered successfully' });
 });
 
-authRouter.post('/login', (c) => {
+authRouter.post('/login', zValidator('json', loginSchema), (c) => {
+  const data = c.req.valid('json');
+  console.log('Received login data:', data);
   // Here you would handle the logic for logging in a user, such as validating credentials and generating a token.
   return c.json({ message: 'User logged in successfully' });
 });
