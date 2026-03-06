@@ -7,7 +7,7 @@ export const patchUserSchema = z.object({
 });
 
 export const deleteUserSchema = z.object({
-  userId: z.int(),
+  id: z.int(),
 });
 
 export type PatchUserInput = z.infer<typeof patchUserSchema>;
