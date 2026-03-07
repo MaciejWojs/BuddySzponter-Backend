@@ -2,11 +2,6 @@ import { Hono } from 'hono';
 
 const usersRouter = new Hono();
 
-usersRouter.post('/', (c) => {
-  // Here you would handle the logic for creating a new user, such as validating input and storing user data.
-  return c.json({ message: 'User created successfully' });
-});
-
 usersRouter.get('/', (c) => {
   return c.json({ message: 'Users endpoint' });
 });
