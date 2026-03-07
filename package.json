@@ -45,6 +45,7 @@
     "@types/zxcvbn": "^4.4.5",
     "drizzle-seed": "1.0.0-beta.12-5845444",
     "eslint": "^10.0.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.3.2",
     "prettier": "^3.8.1",
