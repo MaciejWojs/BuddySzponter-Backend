@@ -17,7 +17,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "allowUnreachableCode": false,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@logger": ["src/infrastucture/logger"]
     }
