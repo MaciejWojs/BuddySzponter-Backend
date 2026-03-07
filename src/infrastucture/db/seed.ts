@@ -1,11 +1,11 @@
 import { db } from './client';
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema';
-import { configProvider } from 'src/config/configProvider';
 import logger from '@logger';
+import { env } from 'bun';
 
 async function main() {
-  if (!configProvider.get('DEVELOPMENT')) {
+  if (!env.DEVELOPMENT) {
     logger.warn(
       'Seeding is only allowed in development environment. Aborting.',
     );
