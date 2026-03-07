@@ -1,2 +1,2 @@
 export { DeviceId } from './DeviceId.vo';
-export { IpAddress } from './ipAddress';
+export { IpAddress } from './IpAddress.vo';
