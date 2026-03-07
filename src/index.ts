@@ -6,8 +6,12 @@ import usersRouter from './modules/users/api/users.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
 import { HTTPException } from 'hono/http-exception';
 import logger from '@logger';
+import { logger as honoLogger } from 'hono/logger';
+import { showRoutes } from 'hono/dev';
 
 const app = new Hono().basePath('/api/v1');
+
+app.use('*', honoLogger());
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 
@@ -40,6 +44,10 @@ app.route('/users', usersRouter);
 app.route('/sessions', sessionRouter);
 
 const { websocket } = engine.handler();
+
+if (isDevelopment) {
+  showRoutes(app);
+}
 
 export default {
   port: 3000,
