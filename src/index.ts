@@ -4,19 +4,35 @@ import { configProvider } from './config/configProvider';
 import authRouter from './modules/auth/api/auth.routes';
 import usersRouter from './modules/users/api/users.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
-import { logger } from 'hono/logger';
+import { HTTPException } from 'hono/http-exception';
+import logger from '@logger';
+import { logger as honoLogger } from 'hono/logger';
 import { showRoutes } from 'hono/dev';
 
 const app = new Hono().basePath('/api/v1');
 
-app.use('*', logger());
+app.use('*', honoLogger());
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 
-console.log('Running in development mode:', isDevelopment);
-
 initSocket();
 const engine = getEngine();
+
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return c.json(
+      {
+        message: err.message,
+        errors: err.cause,
+      },
+      err.status,
+    );
+  }
+  if (isDevelopment) {
+    logger.error('Unhandled error in global error handler:', err);
+  }
+  return c.json({ message: 'Internal Server Error' }, 500);
+});
 
 app.get('/', (c) =>
   c.text(
