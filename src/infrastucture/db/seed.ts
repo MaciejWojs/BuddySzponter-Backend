@@ -2,16 +2,17 @@ import { db } from './client';
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema';
 import { configProvider } from 'src/config/configProvider';
+import logger from '@logger';
 
 async function main() {
   if (!configProvider.get('DEVELOPMENT')) {
-    console.warn(
+    logger.warn(
       'Seeding is only allowed in development environment. Aborting.',
     );
     return;
   }
 
-  console.log('Resetting and seeding the database...');
+  logger.info('Resetting and seeding the database...');
   await reset(db, schema);
   await seed(db, schema).refine((f) => ({
     usersTable: {

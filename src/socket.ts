@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { Server as Engine } from '@socket.io/bun-engine';
+import logger from '@logger';
 
 let io: Server;
 let engine: Engine;
@@ -13,14 +14,14 @@ export function initSocket() {
   io.bind(engine);
 
   io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
+    logger.info(`Client connected: ${socket.id}`);
 
     socket.on('message', (message) => {
-      console.log('Received message:', message);
+      logger.info(`Received message from ${socket.id}: ${message}`);
       socket.send('Message received: ' + message);
     });
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+      logger.info(`Client disconnected: ${socket.id}`);
     });
   });
 
