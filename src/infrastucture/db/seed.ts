@@ -5,7 +5,10 @@ import logger from '@logger';
 import { env } from 'bun';
 
 async function main() {
-  if (!env.DEVELOPMENT) {
+  const isDevelopment =
+    env.DEVELOPMENT === 'true' || env.DEVELOPMENT === '1';
+
+  if (!isDevelopment) {
     logger.warn(
       'Seeding is only allowed in development environment. Aborting.',
     );
