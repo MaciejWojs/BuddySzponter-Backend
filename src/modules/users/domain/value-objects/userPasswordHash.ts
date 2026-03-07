@@ -3,7 +3,6 @@ import zxcvbn from 'zxcvbn';
 
 export class Password {
   static readonly MIN_SCORE = 3;
-  static readonly COST = 10;
 
   private constructor(private readonly pass: string) {}
 
@@ -12,8 +11,7 @@ export class Password {
     if (score < this.MIN_SCORE) throw new Error('Password is too weak');
 
     const hashed = await password.hash(raw, {
-      algorithm: 'bcrypt',
-      cost: this.COST,
+      algorithm: 'argon2id',
     });
 
     return new Password(hashed);
