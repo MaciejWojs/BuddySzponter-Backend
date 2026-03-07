@@ -1,6 +1,6 @@
-import { Server } from 'socket.io';
-import { Server as Engine } from '@socket.io/bun-engine';
 import logger from '@logger';
+import { Server as Engine } from '@socket.io/bun-engine';
+import { Server } from 'socket.io';
 
 let io: Server;
 let engine: Engine;
