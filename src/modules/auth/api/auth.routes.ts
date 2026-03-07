@@ -1,7 +1,8 @@
-import { Hono } from 'hono';
-import { loginBodySchema, registerBodySchema } from './auth.schema';
-import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
 import logger from '@logger';
+import { Hono } from 'hono';
+import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
+
+import { loginBodySchema, registerBodySchema } from './auth.schema';
 
 const authRouter = new Hono();
 

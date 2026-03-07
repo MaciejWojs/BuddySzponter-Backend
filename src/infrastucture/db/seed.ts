@@ -1,8 +1,9 @@
-import { db } from './client';
-import { reset, seed } from 'drizzle-seed';
-import * as schema from './schema';
-import { configProvider } from 'src/config/configProvider';
 import logger from '@logger';
+import { reset, seed } from 'drizzle-seed';
+import { configProvider } from 'src/config/configProvider';
+
+import { db } from './client';
+import * as schema from './schema';
 
 async function main() {
   if (!configProvider.get('DEVELOPMENT')) {

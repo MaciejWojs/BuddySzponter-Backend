@@ -1,8 +1,10 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { usersTable } from '@infra/db/schema';
-import { CreateUser, IUserDAO } from './IUserDAO';
 import { eq } from 'drizzle-orm';
+
 import { UserDbRecord } from '@/shared/types';
+
+import { CreateUser, IUserDAO } from './IUserDAO';
 
 export class DrizzleUserDao
   extends BaseDao<UserDbRecord, CreateUser>

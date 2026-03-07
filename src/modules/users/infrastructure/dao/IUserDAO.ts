@@ -1,4 +1,5 @@
 import { RegisterInput } from '@modules/auth/api/auth.schema';
+
 import { UserDbRecord } from '@/shared/types';
 
 export type CreateUser = Omit<RegisterInput, 'passwordConfirm'>;

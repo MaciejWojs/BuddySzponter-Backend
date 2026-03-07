@@ -1,8 +1,8 @@
-import * as zod from 'zod';
-import type { ValidationTargets } from 'hono';
 import { zValidator as zv } from '@hono/zod-validator';
+import type { ValidationTargets } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
+import * as zod from 'zod';
 
 export const zValidator = <
   T extends zod.ZodType,

@@ -1,6 +1,7 @@
-import { UserDbRecord } from '@/shared/types';
-import { IUserCacheDao } from './IUserCacheDao';
 import { BaseCacheDao } from '@/infrastucture/cache/baseCache.dao';
+import { UserDbRecord } from '@/shared/types';
+
+import { IUserCacheDao } from './IUserCacheDao';
 
 export class UsersCacheDao
   extends BaseCacheDao<UserDbRecord>

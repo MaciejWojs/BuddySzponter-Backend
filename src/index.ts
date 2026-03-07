@@ -1,13 +1,14 @@
+import logger from '@logger';
 import { Hono } from 'hono';
-import { initSocket, getEngine } from './socket';
+import { showRoutes } from 'hono/dev';
+import { HTTPException } from 'hono/http-exception';
+import { logger as honoLogger } from 'hono/logger';
+
 import { configProvider } from './config/configProvider';
 import authRouter from './modules/auth/api/auth.routes';
-import usersRouter from './modules/users/api/users.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
-import { HTTPException } from 'hono/http-exception';
-import logger from '@logger';
-import { logger as honoLogger } from 'hono/logger';
-import { showRoutes } from 'hono/dev';
+import usersRouter from './modules/users/api/users.routes';
+import { getEngine, initSocket } from './socket';
 
 const app = new Hono().basePath('/api/v1');
 
