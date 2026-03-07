@@ -1,7 +1,6 @@
 import { UserDbRecord } from '@/shared/types';
 import { IUserCacheDao } from './IUserCacheDao';
 import { BaseCacheDao } from '@/infrastucture/cache/baseCache.dao';
-import logger from '@/infrastucture/logger';
 
 export class UsersCacheDao
   extends BaseCacheDao<UserDbRecord>
@@ -25,7 +24,6 @@ export class UsersCacheDao
       JSON.stringify(record),
     );
     if (result !== 'OK') {
-      logger.error(`Failed to create cache record { ${key}, ${record} }`);
       throw new Error('Failed to create cache record');
     }
     return record;

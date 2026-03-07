@@ -1,7 +1,7 @@
-import { UsersCacheDao } from 'src/modules/users/infrastructure/cache/usersCache.dao';
+import { UsersCacheDao } from '@modules/users/infrastructure/cache/usersCache.dao';
 
 export class CacheDaoFactory {
-  UsersCacheDao() {
+  usersCacheDao() {
     return new UsersCacheDao();
   }
 }
