@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "294c3ddb-fba3-4ad9-ba78-196426567fad",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -605,14 +603,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "auth_sessions_userId_users_id_fkey",
@@ -622,14 +616,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "deviceId"
-      ],
+      "columns": ["deviceId"],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "auth_sessions_deviceId_devices_id_fkey",
@@ -639,14 +629,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "guestId"
-      ],
+      "columns": ["guestId"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "connection_sessions_guestId_users_id_fkey",
@@ -656,14 +642,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "hostId"
-      ],
+      "columns": ["hostId"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "connection_sessions_hostId_users_id_fkey",
@@ -673,14 +655,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "guestDeviceId"
-      ],
+      "columns": ["guestDeviceId"],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "connection_sessions_guestDeviceId_devices_id_fkey",
@@ -690,14 +668,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "hostDeviceId"
-      ],
+      "columns": ["hostDeviceId"],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "connection_sessions_hostDeviceId_devices_id_fkey",
@@ -707,14 +681,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "devices_userId_users_id_fkey",
@@ -724,14 +694,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_roles_userId_users_id_fkey",
@@ -741,14 +707,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "roleId"
-      ],
+      "columns": ["roleId"],
       "schemaTo": "public",
       "tableTo": "roles",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_roles_roleId_roles_id_fkey",
@@ -757,9 +719,7 @@
       "table": "user_roles"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "auth_sessions_pkey",
       "schema": "public",
@@ -767,9 +727,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "connection_sessions_pkey",
       "schema": "public",
@@ -777,9 +735,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "devices_pkey",
       "schema": "public",
@@ -787,9 +743,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "roles_pkey",
       "schema": "public",
@@ -797,9 +751,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "user_roles_pkey",
       "schema": "public",
@@ -807,9 +759,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -818,10 +768,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "userId",
-        "roleId"
-      ],
+      "columns": ["userId", "roleId"],
       "nullsNotDistinct": false,
       "name": "user_role_unique",
       "entityType": "uniques",
@@ -830,9 +777,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "name"
-      ],
+      "columns": ["name"],
       "nullsNotDistinct": false,
       "name": "roles_name_key",
       "schema": "public",
@@ -841,9 +786,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "public",
