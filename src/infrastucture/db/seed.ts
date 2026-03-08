@@ -1,12 +1,11 @@
 import logger from '@logger';
+import { env } from 'bun';
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema';
-import logger from '@logger';
-import { env } from 'bun';
+import { db } from './client';
 
 async function main() {
-  const isDevelopment =
-    env.DEVELOPMENT === 'true' || env.DEVELOPMENT === '1';
+  const isDevelopment = env.DEVELOPMENT === 'true' || env.DEVELOPMENT === '1';
 
   if (!isDevelopment) {
     logger.warn(
