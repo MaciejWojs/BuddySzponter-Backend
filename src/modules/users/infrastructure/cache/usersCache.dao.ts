@@ -1,4 +1,4 @@
-import { BaseCacheDao } from '@/infrastucture/cache/baseCache.dao';
+import { BaseCacheDao } from '@infra/cache/baseCache.dao';
 import { UserDbRecord } from '@/shared/types';
 
 import { IUserCacheDao } from './IUserCacheDao';
