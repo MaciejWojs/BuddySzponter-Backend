@@ -1,8 +1,9 @@
 import logger from '@logger';
 import { env } from 'bun';
 import { reset, seed } from 'drizzle-seed';
-import * as schema from './schema';
+
 import { db } from './client';
+import * as schema from './schema';
 
 async function main() {
   const isDevelopment = env.DEVELOPMENT === 'true' || env.DEVELOPMENT === '1';

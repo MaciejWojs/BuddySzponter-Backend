@@ -1,5 +1,6 @@
 import { UserId } from 'src/modules/users/domain/value-objects';
 import { DeviceId, IpAddress } from 'src/shared/value-objects';
+
 import { AuthSessionId, AuthSessionRefreshTokenHash } from '../value-objects';
 
 export class AuthSession {
