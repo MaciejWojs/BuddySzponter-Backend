@@ -5,7 +5,7 @@ export class AuthSessionId {
     }
   }
 
-  getValue(): number {
+  get value(): number {
     return this.id;
   }
 }
