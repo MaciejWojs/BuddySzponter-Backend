@@ -1,5 +1,5 @@
+import logger from '@logger';
 import { Hono } from 'hono';
-import { loginBodySchema, registerBodySchema } from './auth.schema';
 import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
 import {
   InternalServerErrorResponse,
@@ -10,6 +10,9 @@ import {
   registerPayloadSchema,
 } from './schemas/auth.responses.schema';
 import { StatusCodes } from 'http-status-codes';
+
+import { loginBodySchema, registerBodySchema } from './auth.schema';
+
 const authRouter = new Hono();
 
 authRouter.post('/register', zValidator('json', registerBodySchema), (c) => {

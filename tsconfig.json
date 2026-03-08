@@ -19,7 +19,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@logger": ["src/infrastucture/logger"]
+      "@/*": ["./src/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@infra/*": ["./src/infrastucture/*"],
+      "@core/*": ["./src/core/*"],
+      "@logger": ["./src/infrastucture/logger"]
     }
   },
   "include": ["src/**/*.ts"]

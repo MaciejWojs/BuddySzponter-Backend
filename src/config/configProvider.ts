@@ -1,6 +1,7 @@
-import { env } from 'bun';
-import { envSchema, type ENV } from './env';
 import logger from '@logger';
+import { env } from 'bun';
+
+import { type ENV, envSchema } from './env';
 
 class ConfigProvider {
   private readonly config: ENV;
