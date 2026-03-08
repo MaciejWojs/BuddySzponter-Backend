@@ -1,4 +1,4 @@
-import { db } from './client';
+import logger from '@logger';
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema';
 import logger from '@logger';
