@@ -1,4 +1,5 @@
 import { RoleId } from '@/shared/value-objects';
+
 import { RoleName } from '../value-objects';
 
 export class Role {
