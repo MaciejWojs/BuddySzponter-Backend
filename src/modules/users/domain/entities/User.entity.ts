@@ -1,5 +1,6 @@
-import { Email, Password, UserId, UserNickname } from '../value-objects';
+import { UserId } from '@/shared/value-objects';
 
+import { Email, Password, UserNickname } from '../value-objects';
 export class User {
   constructor(
     readonly id: UserId,

@@ -1,6 +1,8 @@
-import logger from '@logger';
 import { Hono } from 'hono';
+import { StatusCodes } from 'http-status-codes';
 import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
+
+import { loginBodySchema, registerBodySchema } from './auth.schema';
 import {
   InternalServerErrorResponse,
   loginPayloadSchema,
@@ -9,9 +11,6 @@ import {
   refreshPayloadSchema,
   registerPayloadSchema,
 } from './schemas/auth.responses.schema';
-import { StatusCodes } from 'http-status-codes';
-
-import { loginBodySchema, registerBodySchema } from './auth.schema';
 
 const authRouter = new Hono();
 
