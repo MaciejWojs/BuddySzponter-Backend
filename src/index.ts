@@ -1,11 +1,11 @@
 import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { Scalar } from '@scalar/hono-api-reference';
 import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
 import { StatusCodes } from 'http-status-codes';
-import { OpenAPIHono } from 'node_modules/@hono/zod-openapi/dist';
 
 import { version } from '../package.json';
 import { configProvider } from './config/configProvider';
