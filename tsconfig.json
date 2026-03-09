@@ -23,6 +23,7 @@
       "@modules/*": ["./src/modules/*"],
       "@infra/*": ["./src/infrastucture/*"],
       "@core/*": ["./src/core/*"],
+      "@shared/*": ["./src/shared/*"],
       "@logger": ["./src/infrastucture/logger"]
     }
   },
