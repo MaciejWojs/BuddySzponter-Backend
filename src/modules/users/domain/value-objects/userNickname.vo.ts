@@ -5,7 +5,7 @@ export class UserNickname {
     }
   }
 
-  getValue(): string {
+  get value(): string {
     return this.nickname;
   }
 }

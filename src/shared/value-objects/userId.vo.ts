@@ -5,7 +5,7 @@ export class UserId {
     }
   }
 
-  getValue(): number {
+  get value(): number {
     return this.id;
   }
 }

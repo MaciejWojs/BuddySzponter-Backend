@@ -1,7 +1,7 @@
-export class AuthSessionId {
+export class RoleId {
   constructor(private id: number) {
     if (id <= 0) {
-      throw new Error('AuthSessionId must be a positive integer');
+      throw new Error('RoleId must be a positive integer');
     }
   }
 

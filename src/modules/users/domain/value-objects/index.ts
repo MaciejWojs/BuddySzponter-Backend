@@ -1,4 +1,3 @@
-export * from './userEmail.vo';
-export * from './userId.vo';
-export * from './userNickname.vo';
-export * from './userPassword.vo';
+export { Email } from './userEmail.vo';
+export { UserNickname } from './userNickname.vo';
+export { Password } from './userPassword.vo';

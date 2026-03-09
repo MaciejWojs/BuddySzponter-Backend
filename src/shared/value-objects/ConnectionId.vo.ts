@@ -1,7 +1,7 @@
-export class AuthSessionId {
+export class ConnectionId {
   constructor(private id: number) {
     if (id <= 0) {
-      throw new Error('AuthSessionId must be a positive integer');
+      throw new Error('ConnectionId must be a positive integer');
     }
   }
 
