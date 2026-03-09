@@ -1,16 +1,21 @@
+import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
-import { Hono } from 'hono';
+import { Scalar } from '@scalar/hono-api-reference';
 import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
+import { StatusCodes } from 'http-status-codes';
 
+import { version } from '../package.json';
 import { configProvider } from './config/configProvider';
 import authRouter from './modules/auth/api/auth.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
 import usersRouter from './modules/users/api/users.routes';
+import { defaultHook } from './shared/api/openapi/defaultHook';
 import { getEngine, initSocket } from './socket';
 
-const app = new Hono().basePath('/api/v1');
+const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
 
 app.use('*', honoLogger());
 
@@ -32,7 +37,10 @@ app.onError((err, c) => {
   if (isDevelopment) {
     logger.error('Unhandled error in global error handler:', err);
   }
-  return c.json({ message: 'Internal Server Error' }, 500);
+  return c.json(
+    { message: 'Internal Server Error' },
+    StatusCodes.INTERNAL_SERVER_ERROR,
+  );
 });
 
 app.get('/', (c) =>
@@ -47,6 +55,21 @@ app.route('/sessions', sessionRouter);
 const { websocket } = engine.handler();
 
 if (isDevelopment) {
+  app.doc('/docs', (c) => ({
+    openapi: '3.0.0',
+    info: {
+      version: version,
+      title: 'My API',
+    },
+    servers: [
+      {
+        url: new URL(c.req.url).origin,
+        description: 'Current environment',
+      },
+    ],
+  }));
+  app.get('/docs/scalar', Scalar({ url: '/api/v1/docs' }));
+  app.get('/docs/ui', swaggerUI({ url: '/api/v1/docs' }));
   showRoutes(app);
 }
 

@@ -12,7 +12,7 @@ export const zValidator = <
   schema: T,
 ) =>
   // prettier-ignore
-  zv(target, schema, (result, _c) => { //eslint-disable-line @typescript-eslint/no-unused-vars
+  zv(target, schema, (result, _c) => {  
     if (!result.success) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',

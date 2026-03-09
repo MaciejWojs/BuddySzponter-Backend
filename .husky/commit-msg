@@ -1,2 +1,6 @@
+if [ "$GITHUB_ACTOR" = "dependabot[bot]" ]; then
+  exit 0
+fi
+
 echo "Checking for conventional commits with commitlint..."
 bunx commitlint --edit "$1"
