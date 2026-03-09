@@ -3,7 +3,7 @@ import {
   validationErrorResponseSchema,
 } from '@shared/api/schemas/error.schema';
 
-export const unprocessableEntityRespone = {
+export const unprocessableEntityResponse = {
   422: {
     description: 'Validation error',
     content: {

@@ -1,4 +1,4 @@
-import z from 'zod';
+import { z } from 'zod';
 
 export const internalServerErrorResponseSchema = z.object({
   message: z.literal('Internal Server Error'),
