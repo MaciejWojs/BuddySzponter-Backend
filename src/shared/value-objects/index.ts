@@ -1,2 +1,5 @@
+export { ConnectionId } from './ConnectionId.vo';
 export { DeviceId } from './DeviceId.vo';
 export { IpAddress } from './IpAddress.vo';
+export { RoleId } from './RoleId.vo';
+export { UserId } from './userId.vo';
