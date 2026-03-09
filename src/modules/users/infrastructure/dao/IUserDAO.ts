@@ -1,4 +1,4 @@
-import { RegisterInput } from '@modules/auth/api/auth.schema';
+import { RegisterInput } from '@modules/auth/api/schemas/auth.requests.schema';
 
 import { UserDbRecord } from '@/shared/types';
 
