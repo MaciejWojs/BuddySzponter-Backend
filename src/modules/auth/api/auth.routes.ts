@@ -1,21 +1,18 @@
-import logger from '@logger';
-import { Hono } from 'hono';
-import { zValidator } from 'src/shared/api/middleware/validator-wrapper';
-import {
-  InternalServerErrorResponse,
-  loginPayloadSchema,
-  logoutPayloadSchema,
-  mePayloadSchema,
-  refreshPayloadSchema,
-  registerPayloadSchema,
-} from './schemas/auth.responses.schema';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { defaultHook } from '@shared/api/openapi/defaultHook';
 import { StatusCodes } from 'http-status-codes';
 
-import { loginBodySchema, registerBodySchema } from './auth.schema';
+import {
+  loginRoute,
+  logoutRoute,
+  meRoute,
+  refreshRoute,
+  registerRoute,
+} from './auth.openapi';
 
-const authRouter = new Hono();
+const authRouter = new OpenAPIHono({ defaultHook });
 
-authRouter.post('/register', zValidator('json', registerBodySchema), (c) => {
+authRouter.openapi(registerRoute, (c) => {
   // Example validated data access
   //const data = c.req.valid('json');
 
@@ -25,84 +22,43 @@ authRouter.post('/register', zValidator('json', registerBodySchema), (c) => {
     message: 'User registered successfully',
   };
 
-  const result = registerPayloadSchema.safeParse(payload);
-
-  if (!result.success) {
-    const internalError: InternalServerErrorResponse = {
-      success: false,
-    };
-    return c.json(internalError, StatusCodes.INTERNAL_SERVER_ERROR);
-  }
-
-  return c.json(payload);
+  return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.post('/login', zValidator('json', loginBodySchema), (c) => {
+authRouter.openapi(loginRoute, (c) => {
   const payload = {
     message: 'User logged in successfully',
   };
 
-  const result = loginPayloadSchema.safeParse(payload);
-
-  if (!result.success) {
-    const internalError: InternalServerErrorResponse = {
-      success: false,
-    };
-    return c.json(internalError, StatusCodes.INTERNAL_SERVER_ERROR);
-  }
   // Here you would handle the logic for logging in a user, such as validating credentials and generating a token.
-  return c.json(payload);
+  return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.post('/refresh', (c) => {
+authRouter.openapi(refreshRoute, (c) => {
   const payload = {
     message: 'Token refreshed successfully',
   };
 
-  const result = refreshPayloadSchema.safeParse(payload);
-
-  if (!result.success) {
-    const internalError: InternalServerErrorResponse = {
-      success: false,
-    };
-    return c.json(internalError, StatusCodes.INTERNAL_SERVER_ERROR);
-  }
   // Here you would handle the logic for refreshing a user's authentication token, such as validating the refresh token and generating a new access token.
-  return c.json(payload);
+  return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.post('/logout', (c) => {
+authRouter.openapi(logoutRoute, (c) => {
   const payload = {
     message: 'User logged out successfully',
   };
 
-  const result = logoutPayloadSchema.safeParse(payload);
-
-  if (!result.success) {
-    const internalError: InternalServerErrorResponse = {
-      success: false,
-    };
-    return c.json(internalError, StatusCodes.INTERNAL_SERVER_ERROR);
-  }
   // Here you would handle the logic for logging out a user, such as invalidating a token or clearing session data.
-  return c.json(payload);
+  return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.get('/me', (c) => {
+authRouter.openapi(meRoute, (c) => {
   const payload = {
     message: 'Authenticated user information retrieved successfully',
   };
 
-  const result = mePayloadSchema.safeParse(payload);
-
-  if (!result.success) {
-    const internalError: InternalServerErrorResponse = {
-      success: false,
-    };
-    return c.json(internalError, StatusCodes.INTERNAL_SERVER_ERROR);
-  }
   // Here you would handle the logic for retrieving the authenticated user's information, such as validating the token and querying user data.
-  return c.json(payload);
+  return c.json(payload, StatusCodes.OK);
 });
 
 export default authRouter;
