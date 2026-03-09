@@ -3,10 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "lint-staged": {
-    "*.ts": "prettier --write",
-    "*.tsx": "prettier --write",
-    "*.js": "prettier --write",
-    "*.jsx": "prettier --write",
+    "*.{ts,tsx,js,jsx}": "prettier --write",
     "package.json": "prettier --write"
   },
   "scripts": {
@@ -25,7 +22,10 @@
     "seed": "bun run --bun src/infrastucture/db/seed.ts"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.6.0",
+    "@hono/zod-openapi": "^1.2.2",
     "@hono/zod-validator": "^0.7.6",
+    "@scalar/hono-api-reference": "^0.10.0",
     "@socket.io/bun-engine": "^0.1.0",
     "drizzle-kit": "1.0.0-beta.12-5845444",
     "drizzle-orm": "1.0.0-beta.12-5845444",
