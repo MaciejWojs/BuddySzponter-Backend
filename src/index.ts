@@ -2,9 +2,11 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { Scalar } from '@scalar/hono-api-reference';
+import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
+import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { StatusCodes } from 'http-status-codes';
 
 import { version } from '../package.json';
@@ -17,10 +19,31 @@ import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
 
-app.use('*', honoLogger());
+app.use(honoLogger());
+app.use('*', async (c, next) => {
+  await next();
+
+  if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
+    return;
+  }
+
+  if (c.req.path.endsWith('/docs')) {
+    logger.info('Skipping middleware for docs endpoint');
+    return;
+  }
+
+  const res = c.res;
+  if (res.headers.get('Content-Type')?.includes('application/json')) {
+    const data = await res.json(); // <-- tutaj masz obiekt {}
+
+    // Encrypt the response data:
+    const encryptedData = { payload: encryptPayload(data) };
+    // ustawiasz nową odpowiedź
+    c.res = c.json(encryptedData, res.status as ContentfulStatusCode);
+  }
+});
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
-
 initSocket();
 const engine = getEngine();
 
