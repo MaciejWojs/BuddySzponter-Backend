@@ -12,6 +12,10 @@ export const envSchema = z.object({
 
   JWT_ACCESS_SECRET: z.string().min(16).max(256),
   JWT_REFRESH_SECRET: z.string().min(16).max(256),
+  PAYLOAD_SECRET: z.string().min(64).max(64),
+  PAYLOAD_ENCRYPTED: z
+    .enum(['true', 'false', '1', '0'])
+    .transform((val) => val === 'true' || val === '1'),
 });
 
 export type ENV = z.infer<typeof envSchema>;
