@@ -4,10 +4,10 @@ import { User } from '@modules/users/domain/entities/User.entity';
 import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
-import { UserRepository } from '@modules/users/infrastructure/repositories/UserRepository';
+import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
 
 export class RegisterUser {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(input: RegisterInput): Promise<User> {
     if (input.password !== input.passwordConfirm) {
