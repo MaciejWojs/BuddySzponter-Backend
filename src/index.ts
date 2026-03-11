@@ -28,7 +28,6 @@ app.use('*', async (c, next) => {
   }
 
   if (c.req.path.endsWith('/docs')) {
-    logger.info('Skipping middleware for docs endpoint');
     return;
   }
 
