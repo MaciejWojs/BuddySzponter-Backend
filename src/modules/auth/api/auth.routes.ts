@@ -17,7 +17,7 @@ import {
 
 const authRouter = new OpenAPIHono({ defaultHook });
 
-authRouter.openapi(registerRoute, (c) => {
+authRouter.openapi(registerRoute, async (c) => {
   // Example validated data access
   const data = c.req.valid('json');
 
@@ -27,7 +27,7 @@ authRouter.openapi(registerRoute, (c) => {
   const registerUser = new RegisterUser(userRepository);
 
   try {
-    registerUser.execute(data);
+    await registerUser.execute(data);
   } catch {
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
       message: 'Failed to register user',
