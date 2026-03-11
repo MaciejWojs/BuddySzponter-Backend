@@ -6,6 +6,8 @@ import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
 
+import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
+
 export class RegisterUser {
   constructor(private readonly userRepository: IUserRepository) {}
 
@@ -29,12 +31,15 @@ export class RegisterUser {
     let savedUser: User;
     try {
       savedUser = await this.userRepository.createUser(user);
-    } catch {
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        throw err;
+      }
       //   if (err instanceof UserAlreadyExistsError) {
       //     throw err;
       //   }
       //TODO: Handle specific errors like user already exists, validation errors, etc. When we have our custom error classes defined.
-      throw new Error('Failed to register user');
+      throw new Error('Failed to register user', { cause: err });
     }
 
     //TODO: Emit user registered event which will trigger cache update and other side effects
