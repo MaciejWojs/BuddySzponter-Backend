@@ -2,7 +2,7 @@ import { BaseDao } from '@infra/db/base.dao';
 import { devicesTable } from '@infra/db/schema';
 import { eq } from 'drizzle-orm';
 
-import { CreateDevice, IDevicesDAO, DeviceDbRecord } from './IDevicesDao';
+import { CreateDevice, DeviceDbRecord, IDevicesDAO } from './IDevicesDao';
 
 export class DrizzleDevicesDao
   extends BaseDao<DeviceDbRecord, CreateDevice>
