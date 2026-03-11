@@ -3,7 +3,7 @@ import { UserId } from '@/shared/value-objects';
 import { Email, Password, UserNickname } from '../value-objects';
 export class User {
   constructor(
-    readonly id: UserId,
+    readonly id: UserId | null,
     readonly email: Email,
     readonly nickname: UserNickname,
     readonly password: Password,

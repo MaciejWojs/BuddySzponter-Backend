@@ -9,13 +9,29 @@ import {
   refreshRoute,
   registerRoute,
 } from './auth.openapi';
+import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { RegisterUser } from '../application/use-cases/registerUser';
+import { HTTPException } from 'hono/http-exception';
 
 const authRouter = new OpenAPIHono({ defaultHook });
 
 authRouter.openapi(registerRoute, (c) => {
   // Example validated data access
-  //const data = c.req.valid('json');
+  const data = c.req.valid('json');
 
+  const daoFactory = new DaoFactory();
+  const userDao = daoFactory.db.userDao();
+  const userRepository = new UserRepository(userDao);
+  const registerUser = new RegisterUser(userRepository);
+
+  try {
+    registerUser.execute(data);
+  } catch {
+    throw new HTTPException(StatusCodes.BAD_REQUEST, {
+      message: 'Failed to register user',
+    });
+  }
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
 
   const payload = {
