@@ -34,11 +34,9 @@ app.use('*', async (c, next) => {
 
   const res = c.res;
   if (res.headers.get('Content-Type')?.includes('application/json')) {
-    const data = await res.json(); // <-- tutaj masz obiekt {}
+    const data = await res.json();
 
-    // Encrypt the response data:
     const encryptedData = { payload: encryptPayload(data) };
-    // ustawiasz nową odpowiedź
     c.res = c.json(encryptedData, res.status as ContentfulStatusCode);
   }
 });
