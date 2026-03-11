@@ -4,6 +4,7 @@ import { User } from '../../domain/entities/User.entity';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';
 import { IUserDAO } from '../dao/IUserDAO';
+import { UserMapper } from '@/shared/mappers/userMapper';
 
 export class UserRepository implements IUserRepository {
   constructor(protected readonly dao: IUserDAO) {}
@@ -24,15 +25,7 @@ export class UserRepository implements IUserRepository {
       throw new Error('Failed to create user');
     }
 
-    const finalUser = new User(
-      new UserId(result.id),
-      new Email(result.email),
-      new UserNickname(result.nickname),
-      Password.fromHash(result.password),
-      result.isBanned,
-      result.createdAt,
-      result.updatedAt,
-    );
+    const finalUser = UserMapper.toDomain(result);
     return finalUser;
   }
 
@@ -42,15 +35,7 @@ export class UserRepository implements IUserRepository {
       throw new Error('User not found');
     }
 
-    return new User(
-      new UserId(result.id),
-      new Email(result.email),
-      new UserNickname(result.nickname),
-      Password.fromHash(result.password),
-      result.isBanned,
-      result.createdAt,
-      result.updatedAt,
-    );
+    return UserMapper.toDomain(result);
   }
 
   async findById(id: UserId): Promise<User> {
@@ -74,17 +59,17 @@ export class UserRepository implements IUserRepository {
     if (!user.id) {
       throw new Error('User ID is required for update');
     }
-    const result = await this.dao.save({
-      id: user.id.value,
-      email: user.email.value,
-      password: user.password.value,
-      nickname: user.nickname.value,
-      isBanned: user.isBanned,
-      createdAt: user.createdAt,
-      updatedAt: new Date(),
-    });
-
-    if (!result) {
+    try {
+      await this.dao.save({
+        id: user.id.value,
+        email: user.email.value,
+        password: user.password.value,
+        nickname: user.nickname.value,
+        isBanned: user.isBanned,
+        createdAt: user.createdAt,
+        updatedAt: new Date(),
+      });
+    } catch {
       throw new Error('Failed to update user');
     }
 
