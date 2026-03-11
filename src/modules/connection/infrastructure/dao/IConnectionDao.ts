@@ -6,8 +6,8 @@ export type CreateConnection = Omit<ConnectionDbRecord, 'id' | 'createdAt'>;
 
 export interface IConnectionDAO {
   findById(id: number): Promise<ConnectionDbRecord | null>;
-  findByGuestId(userId: number): Promise<ConnectionDbRecord[]>;
-  findByHostId(userId: number): Promise<ConnectionDbRecord[]>;
+  findByGuestId(guestId: number): Promise<ConnectionDbRecord[]>;
+  findByHostId(hostId: number): Promise<ConnectionDbRecord[]>;
   findByStatus(status: string): Promise<ConnectionDbRecord[]>;
   findActiveByUserId(userId: number): Promise<ConnectionDbRecord[]>;
   findByGuestDeviceId(deviceId: number): Promise<ConnectionDbRecord[]>;
