@@ -4,9 +4,15 @@ import { configProvider } from '@/config/configProvider';
 
 const algorithm = 'aes-256-gcm';
 
-const key = Buffer.from(configProvider.get('PAYLOAD_SECRET'), 'hex');
-
 export function encryptPayload(data: object) {
+  const key = configProvider.get('PAYLOAD_SECRET');
+
+  if (!key) {
+    throw new Error(
+      'PAYLOAD_SECRET is required when PAYLOAD_ENCRYPTED is enabled',
+    );
+  }
+
   const iv = crypto.randomBytes(12);
 
   const cipher = crypto.createCipheriv(algorithm, key, iv);
