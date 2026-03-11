@@ -1,9 +1,9 @@
 import { encryptPayload } from '@shared/utils/encrypt-payload';
-import { Context, Next } from 'hono';
+import { createMiddleware } from 'hono/factory';
 
 import { configProvider } from '@/config/configProvider';
 
-export const encryptPayloadBody = async (c: Context, next: Next) => {
+export const encryptPayloadBody = createMiddleware(async (c, next) => {
   await next();
 
   if (!configProvider.get('PAYLOAD_ENCRYPTED')) return;
@@ -39,4 +39,4 @@ export const encryptPayloadBody = async (c: Context, next: Next) => {
     status: res.status,
     headers,
   });
-};
+});
