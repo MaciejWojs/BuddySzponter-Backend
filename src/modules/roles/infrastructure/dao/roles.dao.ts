@@ -1,7 +1,7 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { eq } from 'drizzle-orm';
 
-import { rolesTable } from '@/infrastucture/db/schema';
+import { rolesTable } from '@infra/db/schema';
 
 import { CreateRole, IRolesDAO, RoleDbRecord } from './IRolesDao';
 
