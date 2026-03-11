@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { connectionSessionsTable } from '@infra/db/schema';
-import { eq, or, and } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 
 import { CreateSession, ISessionDAO, SessionDbRecord } from './ISessionDao';
 
