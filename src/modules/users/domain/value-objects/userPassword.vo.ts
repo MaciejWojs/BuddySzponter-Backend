@@ -1,5 +1,15 @@
 import { password } from 'bun';
 import zxcvbn from 'zxcvbn';
+import {
+  PasswordScoreTooLowError,
+  PasswordTooLongError,
+  PasswordTooShortError,
+  PasswordWithoutDigitError,
+  PasswordWithoutLowerCaseError,
+  PasswordWithoutSpecialCharacterError,
+  PasswordWithoutUpperCaseError,
+} from '../errors';
+import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 
 export class Password {
   static readonly MIN_SCORE = 3;
@@ -36,27 +46,23 @@ export class Password {
   }
 
   private static checkPasswordRequirements(pass: string): Error | false {
-    const { score, feedback } = zxcvbn(pass);
-    if (score < this.MIN_SCORE) {
-      return new Error(
-        `Password is too weak: ${feedback.suggestions.join(' ')}`,
-      );
-    }
-
     if (pass.length < this.MIN_LENGTH) {
-      return new Error(
-        `Password must be at least ${this.MIN_LENGTH} characters long`,
-      );
+      return new PasswordTooShortError(this.MIN_LENGTH);
     }
 
     if (pass.length > this.MAX_LENGTH) {
-      return new Error(
-        `Password must be at most ${this.MAX_LENGTH} characters long`,
-      );
+      return new PasswordTooLongError(this.MAX_LENGTH);
     }
 
     if (pass === pass[0]!.repeat(pass.length)) {
-      return new Error('Password cannot consist of the same character');
+      return new PasswordValidationError(
+        'Password cannot consist of the same character',
+      );
+    }
+
+    const { score, feedback } = zxcvbn(pass);
+    if (score < this.MIN_SCORE) {
+      return new PasswordScoreTooLowError(score, feedback.suggestions);
     }
 
     const hasLower = /[a-z]/.test(pass);
@@ -64,13 +70,10 @@ export class Password {
     const hasDigit = /\d/.test(pass);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
 
-    if (!hasUpper)
-      return new Error('Password must contain at least one uppercase letter');
-    if (!hasLower)
-      return new Error('Password must contain at least one lowercase letter');
-    if (!hasDigit) return new Error('Password must contain at least one digit');
-    if (!hasSpecialChar)
-      return new Error('Password must contain at least one special character');
+    if (!hasUpper) return new PasswordWithoutUpperCaseError();
+    if (!hasLower) return new PasswordWithoutLowerCaseError();
+    if (!hasDigit) return new PasswordWithoutDigitError();
+    if (!hasSpecialChar) return new PasswordWithoutSpecialCharacterError();
 
     return false;
   }
