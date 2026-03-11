@@ -1,4 +1,5 @@
 import { validate } from 'email-validator';
+
 import { InvalidEmailAddress } from '../errors/InvalidEmailAddress';
 export class Email {
   private readonly email: string;
