@@ -1,5 +1,8 @@
 import { password } from 'bun';
 import zxcvbn from 'zxcvbn';
+
+import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
+
 import {
   PasswordScoreTooLowError,
   PasswordTooLongError,
@@ -9,7 +12,6 @@ import {
   PasswordWithoutSpecialCharacterError,
   PasswordWithoutUpperCaseError,
 } from '../errors';
-import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 
 export class Password {
   static readonly MIN_SCORE = 3;
