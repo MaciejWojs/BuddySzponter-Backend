@@ -35,6 +35,10 @@ export class RegisterUser {
       if (err instanceof ValidationError) {
         throw err;
       }
+
+      if (err instanceof Error && err.message.includes('already exists')) {
+        throw new Error('User with this email already exists', { cause: err });
+      }
       //   if (err instanceof UserAlreadyExistsError) {
       //     throw err;
       //   }
