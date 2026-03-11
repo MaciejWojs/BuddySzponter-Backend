@@ -1,7 +1,12 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
+import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
+import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+
+import { RegisterUser } from '../application/use-cases/registerUser';
 import {
   loginRoute,
   logoutRoute,
@@ -12,10 +17,22 @@ import {
 
 const authRouter = new OpenAPIHono({ defaultHook });
 
-authRouter.openapi(registerRoute, (c) => {
+authRouter.openapi(registerRoute, async (c) => {
   // Example validated data access
-  //const data = c.req.valid('json');
+  const data = c.req.valid('json');
 
+  const daoFactory = new DaoFactory();
+  const userDao = daoFactory.db.userDao();
+  const userRepository = new UserRepository(userDao);
+  const registerUser = new RegisterUser(userRepository);
+
+  try {
+    await registerUser.execute(data);
+  } catch {
+    throw new HTTPException(StatusCodes.BAD_REQUEST, {
+      message: 'Failed to register user',
+    });
+  }
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
 
   const payload = {
