@@ -35,8 +35,13 @@ authRouter.openapi(registerRoute, async (c) => {
         message: error.message,
       });
     }
+    if (error instanceof Error) {
+      throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: error.message,
+      });
+    }
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
-      message: 'Failed to register user',
+      message: 'An unexpected error occurred during registration',
     });
   }
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
