@@ -1,6 +1,7 @@
 import { BaseDao } from '@infra/db/base.dao';
-import { eq } from 'drizzle-orm';
 import { authSessionsTable } from '@infra/db/schema';
+import { eq } from 'drizzle-orm';
+
 import { CreateSession, ISessionDAO, SessionDbRecord } from './ISessionDao';
 
 export class DrizzleSessionDao
