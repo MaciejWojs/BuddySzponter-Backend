@@ -1,10 +1,10 @@
 // modules/auth/application/use-cases/registerUser.ts
 import { RegisterInput } from '@modules/auth/api/schemas/auth.requests.schema';
-import { UserRepository } from '@modules/users/infrastructure/repositories/UserRepository';
 import { User } from '@modules/users/domain/entities/User.entity';
 import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
+import { UserRepository } from '@modules/users/infrastructure/repositories/UserRepository';
 
 export class RegisterUser {
   constructor(private readonly userRepository: UserRepository) {}

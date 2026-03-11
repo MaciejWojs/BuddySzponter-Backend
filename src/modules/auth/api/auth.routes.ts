@@ -1,7 +1,12 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
+import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
+import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+
+import { RegisterUser } from '../application/use-cases/registerUser';
 import {
   loginRoute,
   logoutRoute,
@@ -9,10 +14,6 @@ import {
   refreshRoute,
   registerRoute,
 } from './auth.openapi';
-import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
-import { DaoFactory } from '@/infrastucture/factories/daoFactory';
-import { RegisterUser } from '../application/use-cases/registerUser';
-import { HTTPException } from 'hono/http-exception';
 
 const authRouter = new OpenAPIHono({ defaultHook });
 

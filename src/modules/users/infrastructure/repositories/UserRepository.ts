@@ -1,4 +1,5 @@
 import { UserId } from '@/shared/value-objects';
+
 import { User } from '../../domain/entities/User.entity';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';

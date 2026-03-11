@@ -1,5 +1,6 @@
-import { User } from '../entities/User.entity';
 import { UserId } from '@shared/value-objects';
+
+import { User } from '../entities/User.entity';
 import { Email } from '../value-objects';
 
 export interface IUserRepository {
