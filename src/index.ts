@@ -2,11 +2,9 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { Scalar } from '@scalar/hono-api-reference';
-import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
-import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { StatusCodes } from 'http-status-codes';
 
 import { version } from '../package.json';
@@ -14,31 +12,14 @@ import { configProvider } from './config/configProvider';
 import authRouter from './modules/auth/api/auth.routes';
 import sessionRouter from './modules/sessions/api/sessions.routes';
 import usersRouter from './modules/users/api/users.routes';
+import { encryptPayloadBody } from './shared/api/middleware/encrypt-body-payload';
 import { defaultHook } from './shared/api/openapi/defaultHook';
 import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
 
 app.use(honoLogger());
-app.use('*', async (c, next) => {
-  await next();
-
-  if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
-    return;
-  }
-
-  if (c.req.path.endsWith('/docs')) {
-    return;
-  }
-
-  const res = c.res;
-  if (res.headers.get('Content-Type')?.includes('application/json')) {
-    const data = await res.json();
-
-    const encryptedData = { payload: encryptPayload(data) };
-    c.res = c.json(encryptedData, res.status as ContentfulStatusCode);
-  }
-});
+app.use('*', encryptPayloadBody);
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();
