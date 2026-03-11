@@ -1,10 +1,10 @@
+import { UserMapper } from '@/shared/mappers/userMapper';
 import { UserId } from '@/shared/value-objects';
 
 import { User } from '../../domain/entities/User.entity';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';
 import { IUserDAO } from '../dao/IUserDAO';
-import { UserMapper } from '@/shared/mappers/userMapper';
 
 export class UserRepository implements IUserRepository {
   constructor(protected readonly dao: IUserDAO) {}

@@ -1,10 +1,10 @@
 // modules/auth/application/use-cases/registerUser.ts
 import { RegisterInput } from '@modules/auth/api/schemas/auth.requests.schema';
 import { User } from '@modules/users/domain/entities/User.entity';
+import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
 import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
-import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
 
 export class RegisterUser {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -33,6 +33,7 @@ export class RegisterUser {
       //   if (err instanceof UserAlreadyExistsError) {
       //     throw err;
       //   }
+      //TODO: Handle specific errors like user already exists, validation errors, etc. When we have our custom error classes defined.
       throw new Error('Failed to register user');
     }
 
