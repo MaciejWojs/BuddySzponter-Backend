@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
 import { RegisterUser } from '../application/use-cases/registerUser';
@@ -31,6 +32,18 @@ authRouter.openapi(registerRoute, async (c) => {
     await registerUser.execute(data);
   } catch (error) {
     if (error instanceof ValidationError) {
+      if (error instanceof PasswordValidationError) {
+        throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+          message: 'ValidationError',
+          cause: [
+            {
+              field: 'password',
+              message: error.message,
+            },
+          ],
+        });
+      }
+
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: error.message,
       });
