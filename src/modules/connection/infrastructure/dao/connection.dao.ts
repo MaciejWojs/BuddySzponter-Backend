@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { connectionSessionsTable } from '@infra/db/schema';
-import { and, eq, or } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 import {
   ConnectionDbRecord,
@@ -39,32 +39,6 @@ export class DrizzleConnectionDao
       .select()
       .from(connectionSessionsTable)
       .where(eq(connectionSessionsTable.hostId, userId));
-
-    return Connections;
-  }
-
-  async findByStatus(status: string): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.status, status));
-
-    return Connections;
-  }
-
-  async findActiveByUserId(userId: number): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionSessionsTable)
-      .where(
-        and(
-          eq(connectionSessionsTable.status, 'active'),
-          or(
-            eq(connectionSessionsTable.guestId, userId),
-            eq(connectionSessionsTable.hostId, userId),
-          ),
-        ),
-      );
 
     return Connections;
   }
