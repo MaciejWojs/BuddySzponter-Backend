@@ -24,6 +24,7 @@ export class RegisterUser {
       new UserNickname(input.nickname),
       password,
       false,
+      false,
       new Date(),
       new Date(),
     );

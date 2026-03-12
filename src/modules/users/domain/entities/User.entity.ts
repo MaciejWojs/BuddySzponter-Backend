@@ -8,6 +8,7 @@ export class User {
     readonly nickname: UserNickname,
     readonly password: Password,
     readonly isBanned: boolean,
+    readonly isDeleted: boolean,
     readonly createdAt: Date,
     readonly updatedAt: Date,
   ) {}
@@ -18,6 +19,7 @@ export class User {
       changes.nickname ?? this.nickname,
       changes.password ?? this.password,
       changes.isBanned ?? this.isBanned,
+      changes.isDeleted ?? this.isDeleted,
       changes.createdAt ?? this.createdAt,
       new Date(),
     );
@@ -36,5 +38,13 @@ export class User {
   }
   unban(): User {
     return this.copy({ isBanned: false });
+  }
+
+  delete(): User {
+    return this.copy({ isDeleted: true });
+  }
+
+  restore(): User {
+    return this.copy({ isDeleted: false });
   }
 }

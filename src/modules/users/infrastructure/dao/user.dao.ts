@@ -2,6 +2,7 @@ import { BaseDao } from '@infra/db/base.dao';
 import { usersTable } from '@infra/db/schema';
 import { eq } from 'drizzle-orm';
 
+import { DrizzleRoleDao } from '@/modules/roles/infrastructure/dao/roles.dao';
 import { UserDbRecord } from '@/shared/types';
 
 import { CreateUser, IUserDAO } from './IUserDAO';
@@ -23,9 +24,21 @@ export class DrizzleUserDao
     return user[0] ?? null;
   }
   override async create(data: CreateUser): Promise<UserDbRecord | null> {
+    const roleDao = new DrizzleRoleDao();
+    const defaultRole = await roleDao.findByName('user');
+    
+    if (!defaultRole) {
+      throw new Error('Default role "user" not found');
+    }
+
+    const crateUser = {
+      ...data,
+      roleId: defaultRole?.id,
+    };
+
     const [newUser] = await this.database
       .insert(usersTable)
-      .values(data)
+      .values(crateUser)
       .returning();
     return newUser ?? null;
   }
