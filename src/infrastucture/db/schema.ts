@@ -1,69 +1,57 @@
 import {
   boolean,
+  inet,
   integer,
   pgTable,
   timestamp,
-  unique,
   varchar,
 } from 'drizzle-orm/pg-core';
 
-/*
-ROLES
-*/
-
 export const rolesTable = pgTable('roles', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 50 }).notNull().unique(),
-  createdAt: timestamp().defaultNow().notNull(),
+  name: varchar({ length: 100 }).notNull().unique(),
+  description: varchar({ length: 255 }),
 });
-
-/*
-USERS
-*/
 
 export const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  roleId: integer()
+    .notNull()
+    .references(() => rolesTable.id, { onDelete: 'no action' }),
 
   email: varchar({ length: 255 }).notNull().unique(),
+  nickname: varchar({ length: 100 }).notNull(),
   password: varchar({ length: 255 }).notNull(),
 
-  nickname: varchar({ length: 100 }).notNull(),
-
   isBanned: boolean().default(false).notNull(),
+  isDeleted: boolean().default(false).notNull(),
 
   createdAt: timestamp().defaultNow().notNull(),
   updatedAt: timestamp().defaultNow().notNull(),
 });
 
-/*
-USER ROLES (many-to-many)
-*/
+export const authSessionsTable = pgTable('auth_sessions', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: integer()
+    .notNull()
+    .references(() => usersTable.id, { onDelete: 'no action' }),
+  deviceId: integer()
+    .notNull()
+    .references(() => devicesTable.id, { onDelete: 'no action' }),
 
-export const userRolesTable = pgTable(
-  'user_roles',
-  {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  refreshTokenHash: varchar({ length: 255 }).notNull(),
 
-    userId: integer()
-      .notNull()
-      .references(() => usersTable.id, { onDelete: 'cascade' }),
+  ipAddress: inet().notNull(),
+  userAgent: varchar({ length: 500 }).notNull(),
 
-    roleId: integer()
-      .notNull()
-      .references(() => rolesTable.id, { onDelete: 'cascade' }),
+  revoked: boolean().default(false).notNull(),
 
-    createdAt: timestamp().defaultNow().notNull(),
-  },
-  (t) => [unique('user_role_unique').on(t.userId, t.roleId)],
-);
-
-/*
-DEVICES
-*/
+  createdAt: timestamp().defaultNow().notNull(),
+  expiresAt: timestamp().notNull(),
+});
 
 export const devicesTable = pgTable('devices', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-
   userId: integer()
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
@@ -73,69 +61,41 @@ export const devicesTable = pgTable('devices', {
   name: varchar({ length: 255 }),
 
   deviceType: varchar({ length: 50 }).notNull(), // mobile / desktop / tablet
-
   os: varchar({ length: 100 }),
   browser: varchar({ length: 100 }),
 
   createdAt: timestamp().defaultNow().notNull(),
+  lastUsedAt: timestamp(),
 });
 
-/*
-AUTH SESSIONS
-*/
-
-export const authSessionsTable = pgTable('auth_sessions', {
+export const connectionSessionsTable = pgTable('connection_logs', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-
-  userId: integer()
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-
-  deviceId: integer()
-    .notNull()
-    .references(() => devicesTable.id, { onDelete: 'cascade' }),
-
-  refreshTokenHash: varchar({ length: 255 }).notNull(),
-
-  ipAddress: varchar({ length: 100 }).notNull(),
-
-  userAgent: varchar({ length: 500 }).notNull(),
-
-  revoked: boolean().default(false).notNull(),
-
-  createdAt: timestamp().defaultNow().notNull(),
-
-  expiresAt: timestamp().notNull(),
-});
-
-/*
-CONNECTION SESSIONS
-(np. WebRTC / remote session)
-*/
-
-export const connectionSessionsTable = pgTable('connection_sessions', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-
   guestId: integer()
     .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-
+    .references(() => usersTable.id, { onDelete: 'no action' }),
   hostId: integer()
     .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-
+    .references(() => usersTable.id, { onDelete: 'no action' }),
   guestDeviceId: integer()
     .notNull()
-    .references(() => devicesTable.id, { onDelete: 'cascade' }),
-
+    .references(() => devicesTable.id, { onDelete: 'no action' }),
   hostDeviceId: integer()
     .notNull()
-    .references(() => devicesTable.id, { onDelete: 'cascade' }),
+    .references(() => devicesTable.id, { onDelete: 'no action' }),
 
-  status: varchar({ length: 50 }).default('pending').notNull(),
-  // pending | active | rejected | closed
+  guestIpAddress: inet().notNull(),
+  hostIpAddress: inet().notNull(),
 
-  createdAt: timestamp().defaultNow().notNull(),
+  startedAt: timestamp().notNull(),
+  endedAt: timestamp().notNull(),
 
-  expiresAt: timestamp().notNull(),
+  connectionCode: varchar({ length: 10 }).notNull(),
+  connectionPasswordHash: varchar({ length: 255 }).notNull(),
+});
+
+export const appVersionTable = pgTable('app_version', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  version: varchar({ length: 50 }).notNull(),
+  codename: varchar({ length: 100 }),
+  isSupported: boolean().default(true).notNull(),
 });
