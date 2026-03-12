@@ -5,20 +5,34 @@ import {
   UserNickname,
 } from '@/modules/users/domain/value-objects';
 
+import { ValidationError } from '../errors/Specialized/ValidationError';
 import { UserDbRecord } from '../types';
 import { UserId } from '../value-objects';
 
 export class UserMapper {
   static toDomain(userDbRecord: UserDbRecord): User {
-    return new User(
-      new UserId(userDbRecord.id),
-      new Email(userDbRecord.email),
-      new UserNickname(userDbRecord.nickname),
-      Password.fromHash(userDbRecord.password),
-      userDbRecord.isBanned,
-      userDbRecord.createdAt,
-      userDbRecord.updatedAt,
-    );
+    let user;
+
+    try {
+      user = new User(
+        new UserId(userDbRecord.id),
+        new Email(userDbRecord.email),
+        new UserNickname(userDbRecord.nickname),
+        Password.fromHash(userDbRecord.password),
+        userDbRecord.isBanned,
+        userDbRecord.createdAt,
+        userDbRecord.updatedAt,
+      );
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        throw err;
+      }
+      throw new Error('Failed to map user record to domain entity', {
+        cause: err,
+      });
+    }
+
+    return user;
   }
 
   static toPersistence(user: User): UserDbRecord {

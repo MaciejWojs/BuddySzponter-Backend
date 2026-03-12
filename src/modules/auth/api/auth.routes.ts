@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
 import { RegisterUser } from '../application/use-cases/registerUser';
 import {
@@ -28,9 +29,19 @@ authRouter.openapi(registerRoute, async (c) => {
 
   try {
     await registerUser.execute(data);
-  } catch {
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: error.message,
+      });
+    }
+    if (error instanceof Error) {
+      throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: error.message,
+      });
+    }
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
-      message: 'Failed to register user',
+      message: 'An unexpected error occurred during registration',
     });
   }
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.

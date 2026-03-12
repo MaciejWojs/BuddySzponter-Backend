@@ -1,7 +1,9 @@
+import { UserNicknameEmptyError } from '../errors/UserNicknameEmptyError';
+
 export class UserNickname {
   constructor(private nickname: string) {
     if (nickname.trim().length === 0) {
-      throw new Error('UserNickname cannot be empty');
+      throw new UserNicknameEmptyError();
     }
   }
 
