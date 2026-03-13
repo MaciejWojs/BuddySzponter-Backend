@@ -62,9 +62,9 @@ export class DrizzleUserDao
         roleName: rolesTable.name,
       })
       .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
       .where(eq(usersTable.email, email))
-      .limit(1)
-      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id));
+      .limit(1);
 
     return user[0] ?? null;
   }
