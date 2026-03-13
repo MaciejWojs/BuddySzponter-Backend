@@ -33,9 +33,10 @@ export class DrizzleRoleDao
   }
 
   override async create(data: CreateRole): Promise<RoleDbRecord | null> {
+    const roleToInsert = { ...data, name: data.name.toUpperCase() };
     const [newRole] = await this.database
       .insert(rolesTable)
-      .values(data)
+      .values(roleToInsert)
       .returning();
     return newRole ?? null;
   }
@@ -50,9 +51,10 @@ export class DrizzleRoleDao
   }
   override async save(role: RoleDbRecord): Promise<RoleDbRecord> {
     const { id, ...data } = role;
+    const roleToSave = { ...data, name: data.name.toUpperCase() };
     const [updatedRole] = await this.database
       .update(rolesTable)
-      .set(data)
+      .set(roleToSave)
       .where(eq(rolesTable.id, id))
       .returning();
 
