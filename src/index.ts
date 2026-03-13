@@ -14,12 +14,22 @@ import { StatusCodes } from 'http-status-codes';
 
 import { version } from '../package.json';
 import { configProvider } from './config/configProvider';
+import { seedRoles } from './infrastucture/db/seed';
 import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
 
 app.use(honoLogger());
 app.use('*', encryptPayloadBody);
+
+seedRoles()
+  .then(() => {
+    logger.info('Database seeded with initial roles');
+  })
+  .catch((error) => {
+    logger.error('Failed to seed database with initial roles', error);
+    process.exitCode = 1;
+  });
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();

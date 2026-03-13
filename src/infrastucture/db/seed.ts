@@ -18,9 +18,6 @@ async function main() {
   logger.info('Resetting and seeding the database...');
   await reset(db, schema);
   await seed(db, schema).refine((f) => ({
-    usersTable: {
-      count: 10,
-    },
     rolesTable: {
       count: 3,
       columns: {
@@ -30,17 +27,27 @@ async function main() {
         }),
       },
     },
-    userRolesTable: {
+    usersTable: {
       count: 10,
       columns: {
-        userId: f.valuesFromArray({
-          values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-          isUnique: true,
+        roleId: f.valuesFromArray({
+          values: [1, 2, 3],
         }),
-        roleId: f.valuesFromArray({ values: [1, 2, 3] }),
       },
     },
   }));
 }
 
-main();
+if (require.main === module) {
+  main().catch((error) => {
+    logger.error('Database seeding failed', error);
+    process.exit(1);
+  });
+}
+
+export const seedRoles = async () => {
+  await db
+    .insert(schema.rolesTable)
+    .values([{ name: 'USER' }, { name: 'ADMIN' }])
+    .onConflictDoNothing({ target: schema.rolesTable.name });
+};
