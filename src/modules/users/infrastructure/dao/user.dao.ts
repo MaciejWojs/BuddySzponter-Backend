@@ -30,7 +30,8 @@ export class DrizzleUserDao
   override async create(
     data: CreateUser,
   ): Promise<UserDbRecordWithRole | null> {
-    const { roleName, ...insertData } = data;
+    const { roleName: role, ...insertData } = data;
+    const roleName = role.toUpperCase();
 
     const [insertedUser] = await this.database
       .insert(usersTable)
