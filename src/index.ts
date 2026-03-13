@@ -15,6 +15,7 @@ import { StatusCodes } from 'http-status-codes';
 import { version } from '../package.json';
 import { configProvider } from './config/configProvider';
 import { seedRoles } from './infrastucture/db/seed';
+import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
@@ -37,13 +38,29 @@ const engine = getEngine();
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
-    return c.json(
-      {
-        message: err.message,
-        errors: err.cause,
-      },
-      err.status,
-    );
+    const errorResponse = {
+      message: err.message,
+      cause: err.cause,
+    };
+
+    const result = defaultErrorResponseSchema.safeParse(errorResponse);
+
+    if (!result.success) {
+      const errorDetails = result.error.issues
+        .map((issue) => {
+          const path =
+            issue.path.length > 0
+              ? `['${issue.path.join('.')}' - ${issue.message}]`
+              : `[${issue.message}]`;
+          return path;
+        })
+        .join(', ');
+      const requestInfo = `[${err.status}] ${c.req.method} ${c.req.url}`;
+      const message = `[FIX IT!] Error response validation failed during ${requestInfo} with ${errorDetails}`;
+      logger.error(message);
+    }
+
+    return c.json(errorResponse, err.status);
   }
   if (isDevelopment) {
     logger.error('Unhandled error in global error handler:', err);

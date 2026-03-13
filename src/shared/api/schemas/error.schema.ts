@@ -4,6 +4,18 @@ export const internalServerErrorResponseSchema = z.object({
   message: z.literal('Internal Server Error'),
 });
 
+export const defaultErrorResponseSchema = z.object({
+  message: z.string(),
+  cause: z.array(
+    z
+      .object({
+        field: z.string('Field name must be a string'),
+        error: z.string('Error message must be a string'),
+      })
+      .strict(),
+  ),
+});
+
 /**
  * 422 Validation error (zValidator / Zod)
  */

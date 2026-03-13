@@ -1,4 +1,5 @@
 // modules/auth/application/use-cases/registerUser.ts
+import logger from '@logger';
 import { RegisterInput } from '@modules/auth/api/schemas/auth.requests.schema';
 import { User } from '@modules/users/domain/entities/User.entity';
 import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
@@ -7,11 +8,11 @@ import { UserNickname } from '@modules/users/domain/value-objects/userNickname.v
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
 
 import { IRolesDAO } from '@/modules/roles/infrastructure/dao/IRolesDao';
+import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
 import { RoleId } from '@/modules/users/domain/value-objects/RoleId.vo';
 import { RoleName } from '@/modules/users/domain/value-objects/RoleName.vo';
 import { UserRole } from '@/modules/users/domain/value-objects/userRole.vo';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
-
 export class RegisterUser {
   constructor(
     private readonly userRepository: IUserRepository,
@@ -48,6 +49,13 @@ export class RegisterUser {
       savedUser = await this.userRepository.createUser(user);
     } catch (err) {
       if (err instanceof ValidationError) {
+        throw err;
+      }
+
+      if (err instanceof UserAlreadyExistError) {
+        logger.warn(
+          'Re-throwing UserAlreadyExistError during user registration',
+        );
         throw err;
       }
 

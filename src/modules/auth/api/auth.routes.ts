@@ -1,9 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import logger from '@logger';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
 import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
@@ -39,7 +41,7 @@ authRouter.openapi(registerRoute, async (c) => {
           cause: [
             {
               field: 'password',
-              message: error.message,
+              error: error.message,
             },
           ],
         });
@@ -47,6 +49,20 @@ authRouter.openapi(registerRoute, async (c) => {
 
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: error.message,
+      });
+    }
+    if (error instanceof UserAlreadyExistError) {
+      logger.warn(
+        `User registration failed due to existing user: ${error.message}`,
+      );
+      throw new HTTPException(StatusCodes.CONFLICT, {
+        message: 'ConflictError',
+        cause: [
+          {
+            field: 'email',
+            error: error.message,
+          },
+        ],
       });
     }
     if (error instanceof Error) {

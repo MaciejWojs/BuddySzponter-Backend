@@ -2,6 +2,7 @@ import { UserMapper } from '@/shared/mappers/userMapper';
 import { UserId } from '@/shared/value-objects';
 
 import { User } from '../../domain/entities/User.entity';
+import { UserAlreadyExistWithEmailError } from '../../domain/errors/UserAlreadyExistWithEmailError';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';
 import { RoleId } from '../../domain/value-objects/RoleId.vo';
@@ -15,7 +16,7 @@ export class UserRepository implements IUserRepository {
   async createUser(user: Omit<User, 'id'>): Promise<User> {
     const userExists = await this.dao.findByEmail(user.email.value);
     if (userExists) {
-      throw new Error('User with this email already exists');
+      throw new UserAlreadyExistWithEmailError(user.email);
     }
 
     const result = await this.dao.create({
