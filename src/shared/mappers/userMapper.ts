@@ -27,8 +27,8 @@ export class UserMapper {
           new RoleId(userDbRecord.roleId),
           new RoleName(userDbRecord.roleName),
         ),
-        userDbRecord.isDeleted,
         userDbRecord.isBanned,
+        userDbRecord.isDeleted,
         userDbRecord.createdAt,
         userDbRecord.updatedAt,
       );
