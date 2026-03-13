@@ -1,3 +1,4 @@
+import { Password } from '@/modules/users/domain/value-objects';
 import {
   ConnectionId,
   DeviceId,
@@ -6,8 +7,6 @@ import {
 } from '@/shared/value-objects';
 
 import { ConnectionCode, ConnectionStatus } from '../value-objects/';
-
-import { Password } from '@/modules/users/domain/value-objects';
 
 export class Connection {
   constructor(
