@@ -44,7 +44,7 @@ export class Password {
   }
 
   async verify(pass: string): Promise<boolean> {
-    return await password.verify(pass, this.hashedPass);
+    return password.verify(pass, this.hashedPass);
   }
 
   private static checkPasswordRequirements(pass: string): Error | false {
