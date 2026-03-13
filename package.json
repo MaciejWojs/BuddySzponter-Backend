@@ -19,6 +19,7 @@
     "migrate": "bun --bun drizzle-kit migrate",
     "generate": "bun --bun drizzle-kit generate",
     "push": "bun --bun drizzle-kit push",
+    "reset": "bun run --bun src/infrastucture/db/reset-db.ts",
     "seed": "bun run --bun src/infrastucture/db/seed.ts"
   },
   "dependencies": {

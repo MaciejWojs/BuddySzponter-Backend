@@ -1,4 +1,4 @@
-import { RoleIdError } from '@/modules/roles/domain/errors/RoleIdError';
+import { RoleIdError } from '../errors/RoleIdError';
 
 export class RoleId {
   constructor(private id: number) {

@@ -1,10 +1,13 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import logger from '@logger';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
+import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
 import { RegisterUser } from '../application/use-cases/registerUser';
@@ -24,15 +27,42 @@ authRouter.openapi(registerRoute, async (c) => {
 
   const daoFactory = new DaoFactory();
   const userDao = daoFactory.db.userDao();
+  const roleDao = daoFactory.db.roleDao();
   const userRepository = new UserRepository(userDao);
-  const registerUser = new RegisterUser(userRepository);
+  const registerUser = new RegisterUser(userRepository, roleDao);
 
   try {
     await registerUser.execute(data);
   } catch (error) {
     if (error instanceof ValidationError) {
+      if (error instanceof PasswordValidationError) {
+        throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+          message: 'ValidationError',
+          cause: [
+            {
+              field: 'password',
+              error: error.message,
+            },
+          ],
+        });
+      }
+
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: error.message,
+      });
+    }
+    if (error instanceof UserAlreadyExistError) {
+      logger.warn(
+        `User registration failed due to existing user: ${error.message}`,
+      );
+      throw new HTTPException(StatusCodes.CONFLICT, {
+        message: 'ConflictError',
+        cause: [
+          {
+            field: 'email',
+            error: error.message,
+          },
+        ],
       });
     }
     if (error instanceof Error) {

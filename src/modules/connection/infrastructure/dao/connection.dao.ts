@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
-import { connectionSessionsTable } from '@infra/db/schema';
-import { and, eq, or } from 'drizzle-orm';
+import { connectionLogsTable } from '@infra/db/schema';
+import { eq } from 'drizzle-orm';
 
 import {
   ConnectionDbRecord,
@@ -18,8 +18,8 @@ export class DrizzleConnectionDao
   override async findById(id: number): Promise<ConnectionDbRecord | null> {
     const Connection = await this.database
       .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.id, id))
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.id, id))
       .limit(1);
 
     return Connection[0] ?? null;
@@ -28,8 +28,8 @@ export class DrizzleConnectionDao
   async findByGuestId(userId: number): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.guestId, userId));
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.guestId, userId));
 
     return Connections;
   }
@@ -37,34 +37,8 @@ export class DrizzleConnectionDao
   async findByHostId(userId: number): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.hostId, userId));
-
-    return Connections;
-  }
-
-  async findByStatus(status: string): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.status, status));
-
-    return Connections;
-  }
-
-  async findActiveByUserId(userId: number): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionSessionsTable)
-      .where(
-        and(
-          eq(connectionSessionsTable.status, 'active'),
-          or(
-            eq(connectionSessionsTable.guestId, userId),
-            eq(connectionSessionsTable.hostId, userId),
-          ),
-        ),
-      );
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.hostId, userId));
 
     return Connections;
   }
@@ -72,8 +46,8 @@ export class DrizzleConnectionDao
   async findByGuestDeviceId(deviceId: number): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.guestDeviceId, deviceId));
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.guestDeviceId, deviceId));
 
     return Connections;
   }
@@ -81,8 +55,8 @@ export class DrizzleConnectionDao
   async findByHostDeviceId(deviceId: number): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
-      .from(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.hostDeviceId, deviceId));
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.hostDeviceId, deviceId));
 
     return Connections;
   }
@@ -91,7 +65,7 @@ export class DrizzleConnectionDao
     data: CreateConnection,
   ): Promise<ConnectionDbRecord | null> {
     const [newConnection] = await this.database
-      .insert(connectionSessionsTable)
+      .insert(connectionLogsTable)
       .values(data)
       .returning();
     return newConnection ?? null;
@@ -99,8 +73,8 @@ export class DrizzleConnectionDao
 
   override async deleteById(id: number): Promise<boolean> {
     const result = await this.database
-      .delete(connectionSessionsTable)
-      .where(eq(connectionSessionsTable.id, id))
+      .delete(connectionLogsTable)
+      .where(eq(connectionLogsTable.id, id))
       .returning();
 
     return result.length > 0;
@@ -109,9 +83,9 @@ export class DrizzleConnectionDao
   override async save(record: ConnectionDbRecord): Promise<ConnectionDbRecord> {
     const { id, ...data } = record;
     const [updated] = await this.database
-      .update(connectionSessionsTable)
+      .update(connectionLogsTable)
       .set(data)
-      .where(eq(connectionSessionsTable.id, id))
+      .where(eq(connectionLogsTable.id, id))
       .returning();
     if (!updated) throw new Error(`Connection with id ${id} not found`);
     return updated;

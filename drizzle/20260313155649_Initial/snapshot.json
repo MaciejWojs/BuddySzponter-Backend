@@ -1,9 +1,17 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "294c3ddb-fba3-4ad9-ba78-196426567fad",
-  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "id": "42cbe4fe-acbe-49a3-86a6-384d04821ebf",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
   "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "app_version",
+      "entityType": "tables",
+      "schema": "public"
+    },
     {
       "isRlsEnabled": false,
       "name": "auth_sessions",
@@ -12,7 +20,7 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "connection_sessions",
+      "name": "connection_logs",
       "entityType": "tables",
       "schema": "public"
     },
@@ -30,15 +38,70 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "user_roles",
+      "name": "users",
       "entityType": "tables",
       "schema": "public"
     },
     {
-      "isRlsEnabled": false,
-      "name": "users",
-      "entityType": "tables",
-      "schema": "public"
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "app_version_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "app_version"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "version",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "app_version"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "codename",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "app_version"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "name": "isSupported",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "app_version"
     },
     {
       "type": "integer",
@@ -102,7 +165,7 @@
       "table": "auth_sessions"
     },
     {
-      "type": "varchar(100)",
+      "type": "inet",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -175,7 +238,7 @@
       "generated": null,
       "identity": {
         "type": "always",
-        "name": "connection_sessions_id_seq",
+        "name": "connection_logs_id_seq",
         "increment": "1",
         "startWith": "1",
         "minValue": "1",
@@ -186,7 +249,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "type": "integer",
@@ -199,7 +262,7 @@
       "name": "guestId",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "type": "integer",
@@ -212,7 +275,7 @@
       "name": "hostId",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "type": "integer",
@@ -225,7 +288,7 @@
       "name": "guestDeviceId",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "type": "integer",
@@ -238,33 +301,33 @@
       "name": "hostDeviceId",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
-      "type": "varchar(50)",
+      "type": "inet",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'pending'",
+      "default": null,
       "generated": null,
       "identity": null,
-      "name": "status",
+      "name": "guestIpAddress",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
-      "type": "timestamp",
+      "type": "inet",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "now()",
+      "default": null,
       "generated": null,
       "identity": null,
-      "name": "createdAt",
+      "name": "hostIpAddress",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "type": "timestamp",
@@ -274,10 +337,49 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "expiresAt",
+      "name": "startedAt",
       "entityType": "columns",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "endedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "connection_logs"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "connectionCode",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "connection_logs"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "connectionPasswordHash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "connection_logs"
     },
     {
       "type": "integer",
@@ -393,6 +495,19 @@
       "table": "devices"
     },
     {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastUsedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "devices"
+    },
+    {
       "type": "integer",
       "typeSchema": null,
       "notNull": true,
@@ -415,7 +530,7 @@
       "table": "roles"
     },
     {
-      "type": "varchar(50)",
+      "type": "varchar(100)",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -428,78 +543,17 @@
       "table": "roles"
     },
     {
-      "type": "timestamp",
+      "type": "varchar(255)",
       "typeSchema": null,
-      "notNull": true,
+      "notNull": false,
       "dimensions": 0,
-      "default": "now()",
+      "default": null,
       "generated": null,
       "identity": null,
-      "name": "createdAt",
+      "name": "description",
       "entityType": "columns",
       "schema": "public",
       "table": "roles"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": {
-        "type": "always",
-        "name": "user_roles_id_seq",
-        "increment": "1",
-        "startWith": "1",
-        "minValue": "1",
-        "maxValue": "2147483647",
-        "cache": 1,
-        "cycle": false
-      },
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "user_roles"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "userId",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "user_roles"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "roleId",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "user_roles"
-    },
-    {
-      "type": "timestamp",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "createdAt",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "user_roles"
     },
     {
       "type": "integer",
@@ -524,14 +578,14 @@
       "table": "users"
     },
     {
-      "type": "varchar(255)",
+      "type": "integer",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "email",
+      "name": "roleId",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -544,7 +598,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "password",
+      "name": "email",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -563,6 +617,19 @@
       "table": "users"
     },
     {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "password",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
       "type": "boolean",
       "typeSchema": null,
       "notNull": true,
@@ -571,6 +638,19 @@
       "generated": null,
       "identity": null,
       "name": "isBanned",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "isDeleted",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -603,12 +683,16 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["userId"],
+      "columns": [
+        "userId"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
+      "onDelete": "NO ACTION",
       "name": "auth_sessions_userId_users_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -616,12 +700,16 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["deviceId"],
+      "columns": [
+        "deviceId"
+      ],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
+      "onDelete": "NO ACTION",
       "name": "auth_sessions_deviceId_devices_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -629,62 +717,82 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["guestId"],
+      "columns": [
+        "guestId"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "connection_sessions_guestId_users_id_fkey",
+      "onDelete": "NO ACTION",
+      "name": "connection_logs_guestId_users_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "nameExplicit": false,
-      "columns": ["hostId"],
+      "columns": [
+        "hostId"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "connection_sessions_hostId_users_id_fkey",
+      "onDelete": "NO ACTION",
+      "name": "connection_logs_hostId_users_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "nameExplicit": false,
-      "columns": ["guestDeviceId"],
+      "columns": [
+        "guestDeviceId"
+      ],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "connection_sessions_guestDeviceId_devices_id_fkey",
+      "onDelete": "NO ACTION",
+      "name": "connection_logs_guestDeviceId_devices_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "nameExplicit": false,
-      "columns": ["hostDeviceId"],
+      "columns": [
+        "hostDeviceId"
+      ],
       "schemaTo": "public",
       "tableTo": "devices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "connection_sessions_hostDeviceId_devices_id_fkey",
+      "onDelete": "NO ACTION",
+      "name": "connection_logs_hostDeviceId_devices_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "connection_sessions"
+      "table": "connection_logs"
     },
     {
       "nameExplicit": false,
-      "columns": ["userId"],
+      "columns": [
+        "userId"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "devices_userId_users_id_fkey",
@@ -694,32 +802,35 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["userId"],
-      "schemaTo": "public",
-      "tableTo": "users",
-      "columnsTo": ["id"],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "user_roles_userId_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "user_roles"
-    },
-    {
-      "nameExplicit": false,
-      "columns": ["roleId"],
+      "columns": [
+        "roleId"
+      ],
       "schemaTo": "public",
       "tableTo": "roles",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "user_roles_roleId_roles_id_fkey",
+      "onDelete": "NO ACTION",
+      "name": "users_roleId_roles_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "user_roles"
+      "table": "users"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "app_version_pkey",
+      "schema": "public",
+      "table": "app_version",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "auth_sessions_pkey",
       "schema": "public",
@@ -727,15 +838,19 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
-      "name": "connection_sessions_pkey",
+      "name": "connection_logs_pkey",
       "schema": "public",
-      "table": "connection_sessions",
+      "table": "connection_logs",
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "devices_pkey",
       "schema": "public",
@@ -743,7 +858,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "roles_pkey",
       "schema": "public",
@@ -751,15 +868,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
-      "nameExplicit": false,
-      "name": "user_roles_pkey",
-      "schema": "public",
-      "table": "user_roles",
-      "entityType": "pks"
-    },
-    {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -767,17 +878,21 @@
       "entityType": "pks"
     },
     {
-      "nameExplicit": true,
-      "columns": ["userId", "roleId"],
+      "nameExplicit": false,
+      "columns": [
+        "version"
+      ],
       "nullsNotDistinct": false,
-      "name": "user_role_unique",
-      "entityType": "uniques",
+      "name": "app_version_version_key",
       "schema": "public",
-      "table": "user_roles"
+      "table": "app_version",
+      "entityType": "uniques"
     },
     {
       "nameExplicit": false,
-      "columns": ["name"],
+      "columns": [
+        "name"
+      ],
       "nullsNotDistinct": false,
       "name": "roles_name_key",
       "schema": "public",
@@ -786,7 +901,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["email"],
+      "columns": [
+        "email"
+      ],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "public",

@@ -1,6 +1,6 @@
-import { connectionSessionsTable } from '@infra/db/schema';
+import { connectionLogsTable } from '@infra/db/schema';
 
-export type ConnectionDbRecord = typeof connectionSessionsTable.$inferSelect;
+export type ConnectionDbRecord = typeof connectionLogsTable.$inferSelect;
 
 export type CreateConnection = Omit<ConnectionDbRecord, 'id' | 'createdAt'>;
 
@@ -8,8 +8,6 @@ export interface IConnectionDAO {
   findById(id: number): Promise<ConnectionDbRecord | null>;
   findByGuestId(guestId: number): Promise<ConnectionDbRecord[]>;
   findByHostId(hostId: number): Promise<ConnectionDbRecord[]>;
-  findByStatus(status: string): Promise<ConnectionDbRecord[]>;
-  findActiveByUserId(userId: number): Promise<ConnectionDbRecord[]>;
   findByGuestDeviceId(deviceId: number): Promise<ConnectionDbRecord[]>;
   findByHostDeviceId(deviceId: number): Promise<ConnectionDbRecord[]>;
   create(data: CreateConnection): Promise<ConnectionDbRecord | null>;
