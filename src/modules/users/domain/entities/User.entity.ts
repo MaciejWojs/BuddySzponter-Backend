@@ -1,12 +1,14 @@
 import { UserId } from '@/shared/value-objects';
 
 import { Email, Password, UserNickname } from '../value-objects';
+import { UserRole } from '../value-objects/userRole.vo';
 export class User {
   constructor(
     readonly id: UserId | null,
     readonly email: Email,
     readonly nickname: UserNickname,
     readonly password: Password,
+    readonly role: UserRole,
     readonly isBanned: boolean,
     readonly isDeleted: boolean,
     readonly createdAt: Date,
@@ -18,6 +20,7 @@ export class User {
       changes.email ?? this.email,
       changes.nickname ?? this.nickname,
       changes.password ?? this.password,
+      changes.role ?? this.role,
       changes.isBanned ?? this.isBanned,
       changes.isDeleted ?? this.isDeleted,
       changes.createdAt ?? this.createdAt,
@@ -46,5 +49,9 @@ export class User {
 
   restore(): User {
     return this.copy({ isDeleted: false });
+  }
+
+  isAdmin(): boolean {
+    return this.role.name === 'ADMIN';
   }
 }

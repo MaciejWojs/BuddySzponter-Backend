@@ -1,9 +1,9 @@
 import { BaseDao } from '@infra/db/base.dao';
-import { usersTable } from '@infra/db/schema';
-import { eq } from 'drizzle-orm';
+import { rolesTable, usersTable } from '@infra/db/schema';
+import { eq, getColumns } from 'drizzle-orm';
 
-import { DrizzleRoleDao } from '@/modules/roles/infrastructure/dao/roles.dao';
 import { UserDbRecord } from '@/shared/types';
+import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
 
 import { CreateUser, IUserDAO } from './IUserDAO';
 
@@ -14,33 +14,48 @@ export class DrizzleUserDao
   constructor() {
     super();
   }
-  override async findById(id: number): Promise<UserDbRecord | null> {
+  override async findById(id: number): Promise<UserDbRecordWithRole | null> {
     const user = await this.database
-      .select()
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name,
+      })
       .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
       .where(eq(usersTable.id, id))
       .limit(1);
 
     return user[0] ?? null;
   }
-  override async create(data: CreateUser): Promise<UserDbRecord | null> {
-    const roleDao = new DrizzleRoleDao();
-    const defaultRole = await roleDao.findByName('user');
-    
+  override async create(
+    data: CreateUser,
+  ): Promise<UserDbRecordWithRole | null> {
+    const [defaultRole] = await this.database
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.name, 'user'))
+      .limit(1);
+
     if (!defaultRole) {
       throw new Error('Default role "user" not found');
     }
 
-    const crateUser = {
-      ...data,
-      roleId: defaultRole?.id,
-    };
-
-    const [newUser] = await this.database
+    const [insertedUser] = await this.database
       .insert(usersTable)
-      .values(crateUser)
+      .values({
+        ...data,
+        roleId: defaultRole.id,
+      })
       .returning();
-    return newUser ?? null;
+
+    if (!insertedUser) {
+      return null;
+    }
+
+    return {
+      ...insertedUser,
+      roleName: defaultRole.name,
+    };
   }
 
   override async deleteById(id: number): Promise<boolean> {
@@ -51,12 +66,16 @@ export class DrizzleUserDao
 
     return result.length > 0;
   }
-  async findByEmail(email: string): Promise<UserDbRecord | null> {
+  async findByEmail(email: string): Promise<UserDbRecordWithRole | null> {
     const user = await this.database
-      .select()
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name,
+      })
       .from(usersTable)
       .where(eq(usersTable.email, email))
-      .limit(1);
+      .limit(1)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id));
 
     return user[0] ?? null;
   }

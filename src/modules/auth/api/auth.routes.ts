@@ -25,8 +25,9 @@ authRouter.openapi(registerRoute, async (c) => {
 
   const daoFactory = new DaoFactory();
   const userDao = daoFactory.db.userDao();
+  const roleDao = daoFactory.db.roleDao();
   const userRepository = new UserRepository(userDao);
-  const registerUser = new RegisterUser(userRepository);
+  const registerUser = new RegisterUser(userRepository, roleDao);
 
   try {
     await registerUser.execute(data);

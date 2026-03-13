@@ -22,10 +22,11 @@ export class DrizzleRoleDao
   }
 
   async findByName(name: string): Promise<RoleDbRecord | null> {
+    const search = name.toUpperCase();
     const role = await this.database
       .select()
       .from(rolesTable)
-      .where(eq(rolesTable.name, name))
+      .where(eq(rolesTable.name, search))
       .limit(1);
 
     return role[0] ?? null;

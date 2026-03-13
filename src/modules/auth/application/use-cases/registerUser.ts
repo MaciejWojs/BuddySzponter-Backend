@@ -6,23 +6,37 @@ import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
 import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
 
+import { IRolesDAO } from '@/modules/roles/infrastructure/dao/IRolesDao';
+import { RoleId } from '@/modules/users/domain/value-objects/RoleId.vo';
+import { RoleName } from '@/modules/users/domain/value-objects/RoleName.vo';
+import { UserRole } from '@/modules/users/domain/value-objects/userRole.vo';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
 export class RegisterUser {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly roleDao: IRolesDAO,
+  ) {}
 
   async execute(input: RegisterInput): Promise<User> {
     if (input.password !== input.passwordConfirm) {
       throw new Error('Passwords do not match');
     }
 
+    const role = await this.roleDao.findByName('USER');
+    if (!role) {
+      throw new Error('Default user role not found');
+    }
+
     const password = await Password.create(input.password);
+    const userRole = new UserRole(new RoleId(role.id), new RoleName(role.name));
 
     const user = new User(
       null,
       new Email(input.email),
       new UserNickname(input.nickname),
       password,
+      userRole,
       false,
       false,
       new Date(),
