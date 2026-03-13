@@ -22,6 +22,8 @@ export class UserRepository implements IUserRepository {
       email: user.email.value,
       password: user.password.value,
       nickname: user.nickname.value,
+      roleId: user.role.id,
+      roleName: user.role.name,
     });
 
     if (!result) {

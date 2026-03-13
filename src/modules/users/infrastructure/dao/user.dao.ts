@@ -30,22 +30,11 @@ export class DrizzleUserDao
   override async create(
     data: CreateUser,
   ): Promise<UserDbRecordWithRole | null> {
-    const [defaultRole] = await this.database
-      .select()
-      .from(rolesTable)
-      .where(eq(rolesTable.name, 'user'))
-      .limit(1);
-
-    if (!defaultRole) {
-      throw new Error('Default role "user" not found');
-    }
+    const { roleName, ...insertData } = data;
 
     const [insertedUser] = await this.database
       .insert(usersTable)
-      .values({
-        ...data,
-        roleId: defaultRole.id,
-      })
+      .values(insertData)
       .returning();
 
     if (!insertedUser) {
@@ -54,7 +43,7 @@ export class DrizzleUserDao
 
     return {
       ...insertedUser,
-      roleName: defaultRole.name,
+      roleName,
     };
   }
 

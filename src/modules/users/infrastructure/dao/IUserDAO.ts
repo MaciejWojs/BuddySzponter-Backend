@@ -1,9 +1,13 @@
-import { RegisterInput } from '@modules/auth/api/schemas/auth.requests.schema';
-
 import { UserDbRecord } from '@/shared/types';
 import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
 
-export type CreateUser = Omit<RegisterInput, 'passwordConfirm'>;
+export type CreateUser = {
+  email: string;
+  password: string;
+  nickname: string;
+  roleId: number;
+  roleName: string;
+};
 
 export interface IUserDAO {
   findById(id: number): Promise<UserDbRecordWithRole | null>;
