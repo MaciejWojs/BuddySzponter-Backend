@@ -1,17 +1,27 @@
-import { ConnectionId, DeviceId, UserId } from '@/shared/value-objects';
+import { Password } from '@/modules/users/domain/value-objects';
+import {
+  ConnectionId,
+  DeviceId,
+  IpAddress,
+  UserId,
+} from '@/shared/value-objects';
 
-import { ConnectionStatus } from '../value-objects/';
+import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 
 export class Connection {
   constructor(
     readonly id: ConnectionId,
-    readonly guestId: UserId,
-    readonly hostId: UserId,
-    readonly guestDeviceId: DeviceId,
-    readonly hostDeviceId: DeviceId,
+    readonly guestId: UserId | null,
+    readonly hostId: UserId | null,
+    readonly guestDeviceId: DeviceId | null,
+    readonly hostDeviceId: DeviceId | null,
+    readonly code: ConnectionCode,
+    readonly guestIp: IpAddress,
+    readonly hostIp: IpAddress,
     readonly status: ConnectionStatus,
-    readonly createdAt: Date,
-    readonly expiresAt: Date,
+    readonly password: Password,
+    readonly startedAt: Date,
+    readonly endedAt: Date,
   ) {}
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
@@ -20,11 +30,19 @@ export class Connection {
       changes.hostId ?? this.hostId,
       changes.guestDeviceId ?? this.guestDeviceId,
       changes.hostDeviceId ?? this.hostDeviceId,
+      changes.code ?? this.code,
+      changes.guestIp ?? this.guestIp,
+      changes.hostIp ?? this.hostIp,
       changes.status ?? this.status,
-      changes.createdAt ?? this.createdAt,
-      changes.expiresAt ?? this.expiresAt,
+      changes.password ?? this.password,
+      changes.startedAt ?? this.startedAt,
+      changes.endedAt ?? this.endedAt,
     );
   }
+  async comparePassword(password: string): Promise<boolean> {
+    return this.password.verify(password);
+  }
+
   updateStatus(status: ConnectionStatus): Connection {
     return this.copy({ status });
   }

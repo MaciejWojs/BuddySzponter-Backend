@@ -5,10 +5,10 @@ import { User } from '@modules/users/domain/entities/User.entity';
 import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
 import { Email } from '@modules/users/domain/value-objects/userEmail.vo';
 import { UserNickname } from '@modules/users/domain/value-objects/userNickname.vo';
-import { Password } from '@modules/users/domain/value-objects/userPassword.vo';
 
 import { IRolesDAO } from '@/modules/roles/infrastructure/dao/IRolesDao';
 import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
+import { Password } from '@/modules/users/domain/value-objects/Password.vo';
 import { RoleId } from '@/modules/users/domain/value-objects/RoleId.vo';
 import { RoleName } from '@/modules/users/domain/value-objects/RoleName.vo';
 import { UserRole } from '@/modules/users/domain/value-objects/userRole.vo';
