@@ -1,2 +1,2 @@
-export { UserDbRecord } from './UserDB';
 export { DeviceDbRecord } from './DeviceDB';
+export { UserDbRecord } from './UserDB';
