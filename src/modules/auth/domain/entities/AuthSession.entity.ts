@@ -1,6 +1,4 @@
-import { DeviceUUID, IpAddress } from 'src/shared/value-objects';
-
-import { UserId } from '@/shared/value-objects';
+import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
 import { AuthSessionRefreshTokenHash, AuthSessionUUID } from '../value-objects';
 

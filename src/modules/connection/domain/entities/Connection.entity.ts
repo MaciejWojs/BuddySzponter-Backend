@@ -10,11 +10,11 @@ import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 
 export class Connection {
   constructor(
-    readonly ConnectionUuid: ConnectionUUID,
+    readonly id: ConnectionUUID,
     readonly guestId: UserId | null,
     readonly hostId: UserId | null,
-    readonly guestDeviceId: DeviceUUID,
-    readonly hostDeviceId: DeviceUUID,
+    readonly guestDeviceId: DeviceUUID | null,
+    readonly hostDeviceId: DeviceUUID | null,
     readonly code: ConnectionCode,
     readonly guestIp: IpAddress,
     readonly hostIp: IpAddress,
@@ -25,7 +25,7 @@ export class Connection {
   ) {}
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
-      changes.ConnectionUuid ?? this.ConnectionUuid,
+      changes.id ?? this.id,
       changes.guestId ?? this.guestId,
       changes.hostId ?? this.hostId,
       changes.guestDeviceId ?? this.guestDeviceId,

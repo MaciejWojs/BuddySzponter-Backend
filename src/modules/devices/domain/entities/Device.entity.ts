@@ -11,7 +11,7 @@ import {
 export class Device {
   constructor(
     readonly id: DeviceUUID,
-    readonly userId: UserId,
+    readonly userId: UserId | null,
     readonly fingerprint: DeviceFingerprint,
     readonly name: DeviceName,
     readonly type: DeviceType,

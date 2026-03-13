@@ -1,4 +1,4 @@
-import z from 'zod';
+import { z } from 'zod';
 
 export class BaseUUID {
   constructor(private id: string = crypto.randomUUID()) {
