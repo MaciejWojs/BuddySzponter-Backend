@@ -1,14 +1,14 @@
-import { DeviceId, IpAddress } from 'src/shared/value-objects';
+import { DeviceUUID, IpAddress } from 'src/shared/value-objects';
 
 import { UserId } from '@/shared/value-objects';
 
-import { AuthSessionId, AuthSessionRefreshTokenHash } from '../value-objects';
+import { AuthSessionRefreshTokenHash, AuthSessionUUID } from '../value-objects';
 
 export class AuthSession {
   constructor(
-    readonly id: AuthSessionId,
+    readonly id: AuthSessionUUID,
     readonly userId: UserId,
-    readonly deviceId: DeviceId,
+    readonly deviceId: DeviceUUID,
     readonly ipAddress: IpAddress,
     readonly refreshTokenHash: AuthSessionRefreshTokenHash,
     readonly userAgent: string,

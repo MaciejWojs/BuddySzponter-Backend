@@ -1,7 +1,7 @@
 import { Password } from '@/modules/users/domain/value-objects';
 import {
-  ConnectionId,
-  DeviceId,
+  ConnectionUUID,
+  DeviceUUID,
   IpAddress,
   UserId,
 } from '@/shared/value-objects';
@@ -10,11 +10,11 @@ import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 
 export class Connection {
   constructor(
-    readonly id: ConnectionId,
+    readonly ConnectionUuid: ConnectionUUID,
     readonly guestId: UserId | null,
     readonly hostId: UserId | null,
-    readonly guestDeviceId: DeviceId | null,
-    readonly hostDeviceId: DeviceId | null,
+    readonly guestDeviceId: DeviceUUID,
+    readonly hostDeviceId: DeviceUUID,
     readonly code: ConnectionCode,
     readonly guestIp: IpAddress,
     readonly hostIp: IpAddress,
@@ -25,7 +25,7 @@ export class Connection {
   ) {}
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
-      changes.id ?? this.id,
+      changes.ConnectionUuid ?? this.ConnectionUuid,
       changes.guestId ?? this.guestId,
       changes.hostId ?? this.hostId,
       changes.guestDeviceId ?? this.guestDeviceId,

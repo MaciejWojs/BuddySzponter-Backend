@@ -11,7 +11,7 @@ export class DrizzleDevicesDao
   constructor() {
     super();
   }
-  override async findById(id: number): Promise<DeviceDbRecord | null> {
+  override async findById(id: string): Promise<DeviceDbRecord | null> {
     const device = await this.database
       .select()
       .from(devicesTable)
@@ -83,7 +83,7 @@ export class DrizzleDevicesDao
     return newDevice ?? null;
   }
 
-  override async deleteById(id: number): Promise<boolean> {
+  override async deleteById(id: string): Promise<boolean> {
     const result = await this.database
       .delete(devicesTable)
       .where(eq(devicesTable.id, id))

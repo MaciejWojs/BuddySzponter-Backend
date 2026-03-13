@@ -4,8 +4,8 @@ import {
   integer,
   pgTable,
   timestamp,
+  uuid,
   varchar,
-  uuid
 } from 'drizzle-orm/pg-core';
 
 export const rolesTable = pgTable('roles', {

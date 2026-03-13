@@ -2,7 +2,6 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import authRouter from '@modules/auth/api/auth.routes';
-import sessionRouter from '@modules/sessions/api/sessions.routes';
 import usersRouter from '@modules/users/api/users.routes';
 import { Scalar } from '@scalar/hono-api-reference';
 import { encryptPayloadBody } from '@shared/api/middleware/encrypt-body-payload';
@@ -11,6 +10,8 @@ import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
 import { StatusCodes } from 'http-status-codes';
+
+import connectionRouter from '@/modules/connection/api/connection.routes';
 
 import { version } from '../package.json';
 import { configProvider } from './config/configProvider';
@@ -68,7 +69,7 @@ app.get('/', (c) =>
 );
 app.route('/auth', authRouter);
 app.route('/users', usersRouter);
-app.route('/sessions', sessionRouter);
+app.route('/connections', connectionRouter);
 
 const { websocket } = engine.handler();
 

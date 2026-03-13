@@ -5,12 +5,12 @@ export type ConnectionDbRecord = typeof connectionLogsTable.$inferSelect;
 export type CreateConnection = Omit<ConnectionDbRecord, 'id' | 'createdAt'>;
 
 export interface IConnectionDAO {
-  findById(id: number): Promise<ConnectionDbRecord | null>;
+  findById(id: string): Promise<ConnectionDbRecord | null>;
   findByGuestId(guestId: number): Promise<ConnectionDbRecord[]>;
   findByHostId(hostId: number): Promise<ConnectionDbRecord[]>;
-  findByGuestDeviceId(deviceId: number): Promise<ConnectionDbRecord[]>;
-  findByHostDeviceId(deviceId: number): Promise<ConnectionDbRecord[]>;
+  findByGuestDeviceId(deviceId: string): Promise<ConnectionDbRecord[]>;
+  findByHostDeviceId(deviceId: string): Promise<ConnectionDbRecord[]>;
   create(data: CreateConnection): Promise<ConnectionDbRecord | null>;
-  deleteById(id: number): Promise<boolean>;
+  deleteById(id: string): Promise<boolean>;
   save(record: ConnectionDbRecord): Promise<ConnectionDbRecord>;
 }
