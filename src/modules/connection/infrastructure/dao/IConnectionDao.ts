@@ -1,6 +1,6 @@
-import { connectionSessionsTable } from '@infra/db/schema';
+import { connectionLogsTable } from '@infra/db/schema';
 
-export type ConnectionDbRecord = typeof connectionSessionsTable.$inferSelect;
+export type ConnectionDbRecord = typeof connectionLogsTable.$inferSelect;
 
 export type CreateConnection = Omit<ConnectionDbRecord, 'id' | 'createdAt'>;
 

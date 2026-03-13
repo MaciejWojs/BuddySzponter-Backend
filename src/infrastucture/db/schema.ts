@@ -68,7 +68,7 @@ export const devicesTable = pgTable('devices', {
   lastUsedAt: timestamp(),
 });
 
-export const connectionSessionsTable = pgTable('connection_logs', {
+export const connectionLogsTable = pgTable('connection_logs', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   guestId: integer()
     .notNull()
