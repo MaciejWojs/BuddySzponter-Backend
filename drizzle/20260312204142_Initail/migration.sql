@@ -69,3 +69,8 @@ ALTER TABLE "connection_logs" ADD CONSTRAINT "connection_logs_guestDeviceId_devi
 ALTER TABLE "connection_logs" ADD CONSTRAINT "connection_logs_hostDeviceId_devices_id_fkey" FOREIGN KEY ("hostDeviceId") REFERENCES "devices"("id");--> statement-breakpoint
 ALTER TABLE "devices" ADD CONSTRAINT "devices_userId_users_id_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_roleId_roles_id_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id");
+
+
+INSERT INTO "roles" ("name", "description") VALUES
+('USER', 'Regular user with standard permissions'),
+('ADMIN', 'Administrator with elevated permissions');

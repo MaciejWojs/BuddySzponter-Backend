@@ -44,10 +44,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-
-export const seedRoles = async () => {
-  await db
-    .insert(schema.rolesTable)
-    .values([{ name: 'USER' }, { name: 'ADMIN' }])
-    .onConflictDoNothing({ target: schema.rolesTable.name });
-};
