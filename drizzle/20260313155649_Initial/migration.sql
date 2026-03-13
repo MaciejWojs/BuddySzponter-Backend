@@ -1,6 +1,6 @@
 CREATE TABLE "app_version" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "app_version_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"version" varchar(50) NOT NULL,
+	"version" varchar(50) NOT NULL UNIQUE,
 	"codename" varchar(100),
 	"isSupported" boolean DEFAULT true NOT NULL
 );
@@ -69,7 +69,6 @@ ALTER TABLE "connection_logs" ADD CONSTRAINT "connection_logs_guestDeviceId_devi
 ALTER TABLE "connection_logs" ADD CONSTRAINT "connection_logs_hostDeviceId_devices_id_fkey" FOREIGN KEY ("hostDeviceId") REFERENCES "devices"("id");--> statement-breakpoint
 ALTER TABLE "devices" ADD CONSTRAINT "devices_userId_users_id_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_roleId_roles_id_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id");
-
 
 INSERT INTO "roles" ("name", "description") VALUES
 ('USER', 'Regular user with standard permissions'),

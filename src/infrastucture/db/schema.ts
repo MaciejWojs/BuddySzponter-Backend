@@ -95,7 +95,7 @@ export const connectionLogsTable = pgTable('connection_logs', {
 
 export const appVersionTable = pgTable('app_version', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  version: varchar({ length: 50 }).notNull(),
+  version: varchar({ length: 50 }).notNull().unique(),
   codename: varchar({ length: 100 }),
   isSupported: boolean().default(true).notNull(),
 });

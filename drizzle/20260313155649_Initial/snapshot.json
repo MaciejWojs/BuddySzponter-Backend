@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "26ab70c2-ad90-42c0-9729-19e1a3394a13",
+  "id": "42cbe4fe-acbe-49a3-86a6-384d04821ebf",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -876,6 +876,17 @@
       "schema": "public",
       "table": "users",
       "entityType": "pks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "version"
+      ],
+      "nullsNotDistinct": false,
+      "name": "app_version_version_key",
+      "schema": "public",
+      "table": "app_version",
+      "entityType": "uniques"
     },
     {
       "nameExplicit": false,
