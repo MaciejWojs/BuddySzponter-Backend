@@ -1,7 +1,7 @@
 import { Password } from '@/modules/users/domain/value-objects';
 import {
-  ConnectionId,
-  DeviceId,
+  ConnectionUUID,
+  DeviceUUID,
   IpAddress,
   UserId,
 } from '@/shared/value-objects';
@@ -10,11 +10,11 @@ import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 
 export class Connection {
   constructor(
-    readonly id: ConnectionId,
+    readonly id: ConnectionUUID,
     readonly guestId: UserId | null,
     readonly hostId: UserId | null,
-    readonly guestDeviceId: DeviceId | null,
-    readonly hostDeviceId: DeviceId | null,
+    readonly guestDeviceId: DeviceUUID | null,
+    readonly hostDeviceId: DeviceUUID | null,
     readonly code: ConnectionCode,
     readonly guestIp: IpAddress,
     readonly hostIp: IpAddress,

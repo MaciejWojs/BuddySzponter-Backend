@@ -4,6 +4,7 @@ import {
   integer,
   pgTable,
   timestamp,
+  uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
 
@@ -31,13 +32,13 @@ export const usersTable = pgTable('users', {
 });
 
 export const authSessionsTable = pgTable('auth_sessions', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: uuid().defaultRandom().primaryKey(),
   userId: integer()
     .notNull()
-    .references(() => usersTable.id, { onDelete: 'no action' }),
-  deviceId: integer()
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
+  deviceId: uuid()
     .notNull()
-    .references(() => devicesTable.id, { onDelete: 'no action' }),
+    .references(() => devicesTable.id, { onDelete: 'cascade' }),
 
   refreshTokenHash: varchar({ length: 255 }).notNull(),
 
@@ -51,10 +52,8 @@ export const authSessionsTable = pgTable('auth_sessions', {
 });
 
 export const devicesTable = pgTable('devices', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer()
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
+  id: uuid().defaultRandom().primaryKey(),
+  userId: integer().references(() => usersTable.id, { onDelete: 'cascade' }),
 
   fingerprint: varchar({ length: 255 }).notNull(),
 
@@ -69,19 +68,15 @@ export const devicesTable = pgTable('devices', {
 });
 
 export const connectionLogsTable = pgTable('connection_logs', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  guestId: integer()
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'no action' }),
-  hostId: integer()
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'no action' }),
-  guestDeviceId: integer()
-    .notNull()
-    .references(() => devicesTable.id, { onDelete: 'no action' }),
-  hostDeviceId: integer()
-    .notNull()
-    .references(() => devicesTable.id, { onDelete: 'no action' }),
+  id: uuid().defaultRandom().primaryKey(),
+  guestId: integer().references(() => usersTable.id, { onDelete: 'set null' }),
+  hostId: integer().references(() => usersTable.id, { onDelete: 'set null' }),
+  guestDeviceId: uuid().references(() => devicesTable.id, {
+    onDelete: 'set null',
+  }),
+  hostDeviceId: uuid().references(() => devicesTable.id, {
+    onDelete: 'set null',
+  }),
 
   guestIpAddress: inet().notNull(),
   hostIpAddress: inet().notNull(),

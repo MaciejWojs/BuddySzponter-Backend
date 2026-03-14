@@ -8,7 +8,7 @@ import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
 import { CreateUser, IUserDAO } from './IUserDAO';
 
 export class DrizzleUserDao
-  extends BaseDao<UserDbRecord, CreateUser>
+  extends BaseDao<UserDbRecord, CreateUser, number>
   implements IUserDAO
 {
   constructor() {

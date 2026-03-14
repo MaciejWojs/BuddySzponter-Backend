@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { CreateRole, IRolesDAO, RoleDbRecord } from './IRolesDao';
 
 export class DrizzleRoleDao
-  extends BaseDao<RoleDbRecord, CreateRole>
+  extends BaseDao<RoleDbRecord, CreateRole, number>
   implements IRolesDAO
 {
   constructor() {

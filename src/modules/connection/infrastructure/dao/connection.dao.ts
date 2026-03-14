@@ -15,7 +15,7 @@ export class DrizzleConnectionDao
   constructor() {
     super();
   }
-  override async findById(id: number): Promise<ConnectionDbRecord | null> {
+  override async findById(id: string): Promise<ConnectionDbRecord | null> {
     const Connection = await this.database
       .select()
       .from(connectionLogsTable)
@@ -43,7 +43,7 @@ export class DrizzleConnectionDao
     return Connections;
   }
 
-  async findByGuestDeviceId(deviceId: number): Promise<ConnectionDbRecord[]> {
+  async findByGuestDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
       .from(connectionLogsTable)
@@ -52,7 +52,7 @@ export class DrizzleConnectionDao
     return Connections;
   }
 
-  async findByHostDeviceId(deviceId: number): Promise<ConnectionDbRecord[]> {
+  async findByHostDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
     const Connections = await this.database
       .select()
       .from(connectionLogsTable)
@@ -71,7 +71,7 @@ export class DrizzleConnectionDao
     return newConnection ?? null;
   }
 
-  override async deleteById(id: number): Promise<boolean> {
+  override async deleteById(id: string): Promise<boolean> {
     const result = await this.database
       .delete(connectionLogsTable)
       .where(eq(connectionLogsTable.id, id))
