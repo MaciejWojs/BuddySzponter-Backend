@@ -1,2 +1,2 @@
-export { AuthSessionId } from './authSessionId.vo';
 export { AuthSessionRefreshTokenHash } from './authSessionRefreshTokenHash.vo';
+export { AuthSessionUUID } from './authSessionUUID.vo';

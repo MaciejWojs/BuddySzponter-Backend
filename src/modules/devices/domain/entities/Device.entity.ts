@@ -1,4 +1,4 @@
-import { DeviceId, UserId } from '@/shared/value-objects';
+import { DeviceUUID, UserId } from '@/shared/value-objects';
 
 import {
   DeviceBrowser,
@@ -10,8 +10,8 @@ import {
 
 export class Device {
   constructor(
-    readonly id: DeviceId,
-    readonly userId: UserId,
+    readonly id: DeviceUUID,
+    readonly userId: UserId | null,
     readonly fingerprint: DeviceFingerprint,
     readonly name: DeviceName,
     readonly type: DeviceType,
