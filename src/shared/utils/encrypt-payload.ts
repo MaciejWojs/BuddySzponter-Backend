@@ -1,18 +1,8 @@
 import crypto from 'node:crypto';
 
-import { configProvider } from '@/config/configProvider';
-
 const algorithm = 'aes-256-gcm';
 
-export function encryptPayload(data: object) {
-  const key = configProvider.get('PAYLOAD_SECRET');
-
-  if (!key) {
-    throw new Error(
-      'PAYLOAD_SECRET is required when PAYLOAD_ENCRYPTED is enabled',
-    );
-  }
-
+export function encryptPayload(data: object, key: Buffer) {
   const iv = crypto.randomBytes(12);
 
   const cipher = crypto.createCipheriv(algorithm, key, iv);
