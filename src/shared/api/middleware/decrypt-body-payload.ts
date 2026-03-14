@@ -1,8 +1,9 @@
 import { createMiddleware } from 'hono/factory';
 
+import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 import { decryptPayload } from '@/shared/utils/decrypt-payload';
-import { configProvider } from '@/config/configProvider';
+
 import { encryptPayloadSchema } from '../schemas/encryptedPayload.schema';
 
 /**

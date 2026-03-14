@@ -2,8 +2,8 @@ import logger from '@logger';
 import { createMiddleware } from 'hono/factory';
 import { StatusCodes } from 'http-status-codes';
 
-import { client } from '@/infrastucture/cache/client';
 import { configProvider } from '@/config/configProvider';
+import { client } from '@/infrastucture/cache/client';
 
 const SESSION_DURATION_SECONDS = 900;
 

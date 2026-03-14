@@ -1,4 +1,5 @@
 import { createDecipheriv } from 'crypto';
+
 import { EncryptedPayload } from '../api/schemas/encryptedPayload.schema';
 
 export function decryptPayload(p: EncryptedPayload, key: string): object {
