@@ -18,6 +18,7 @@ export const ConnectionCreateRoute = createRoute({
   method: 'post',
   path: '/',
   tags: ['Connection'],
+  summary: 'Create a new connection',
   request: {
     body: {
       content: {
@@ -44,6 +45,7 @@ export const ConnectionJoinRoute = createRoute({
   method: 'post',
   path: '/join',
   tags: ['Connection'],
+  summary: 'Join an existing connection',
   request: {
     body: {
       content: {

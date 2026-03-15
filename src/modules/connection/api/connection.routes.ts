@@ -1,4 +1,4 @@
-import { OpenAPIHono } from '@hono/zod-openapi';
+import { OpenAPIHono, z } from '@hono/zod-openapi';
 import { randomBytes } from 'crypto';
 import { getConnInfo } from 'hono/bun';
 import { HTTPException } from 'hono/http-exception';
@@ -11,7 +11,10 @@ import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidati
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 import { IpAddress } from '@/shared/value-objects';
 
-import { ConnectionCreateRoute } from './connection.openapi';
+import {
+  ConnectionCreateRoute,
+  ConnectionJoinRoute,
+} from './connection.openapi';
 
 const connectionsRouter = new OpenAPIHono({ defaultHook });
 
@@ -35,6 +38,10 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
         });
       }
     }
+
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+    });
   }
   const reqIpAddress =
     c.req.header('X-Real-IP') ||
@@ -73,34 +80,32 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
   do {
     code = randomBytes(4).toString('hex'); // 4 bytes -> 8 hex characters
     const result = await client.setnx(
-      `connection_code:${code}${password!.value}`,
+      `connection_code:${code}`,
       JSON.stringify({
         status: 'pending',
         HostIpAddress: ipA.value,
+        password: password!.value,
         connectionUUID: conUUID,
         hostFingerprint: data.fingerprint,
         hostId: data.userId,
-        connectionAttempts: 0,
       }),
     );
 
     if (result === 1) {
       keyGenerationSuccess = true;
-      const ttlResult = await client.expire(
-        `connection_code:${code}${password!.value}`,
-        120,
-      );
+      const ttlResult = await client.expire(`connection_code:${code}`, 120);
       if (ttlResult !== 1) {
-        client.del(`connection_code:${code}${password!.value}`);
+        client.del(`connection_code:${code}`);
         continue; // Retry if setting TTL failed
       }
 
       expiresAt = new Date(Date.now() + 120 * 1000);
+      client.setex(`connection_attempts:${code}`, 120, '0');
     }
   } while (!keyGenerationSuccess);
 
   if (!expiresAt) {
-    client.del(`connection_code:${code}${password!.value}`);
+    client.del(`connection_code:${code}`);
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
       message: 'Failed to generate connection code',
     });
@@ -110,16 +115,87 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
     connectionUUID: conUUID,
     expiresAt: expiresAt,
   };
-
   return c.json(payload, StatusCodes.OK);
 });
 
-// You can add more connection-related data here if needed
-// connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
-//   // Example validated data access
-//   const data = c.req.valid('json');
-//   // Implement your connection joining logic here
-//   return c.json({ message: 'Connection joined successfully', data });
-// });
+connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
+  const data = c.req.valid('json');
+  const connectionCode = data.connectionCode;
+
+  const key = `connection_code:${connectionCode}`;
+  const attemptsKey = `connection_attempts:${connectionCode}`;
+  let newPassword;
+
+  try {
+    newPassword = await Password.fromHash(data.password);
+  } catch (error) {
+    if (
+      error instanceof ValidationError &&
+      error instanceof PasswordValidationError
+    ) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: 'ValidationError',
+        cause: [
+          {
+            field: 'password',
+            error: error.message,
+          },
+        ],
+      });
+    }
+
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+    });
+  }
+
+  if (!client.connected) {
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+    });
+  }
+
+  const connectionDataRaw = await client.get(key);
+
+  if (!connectionDataRaw) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'Invalid connection code',
+    });
+  }
+
+  let connectionData;
+  try {
+    connectionData = JSON.parse(connectionDataRaw);
+  } catch {
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: 'Failed to parse connection data',
+    });
+  }
+  if (connectionData.connectionAttempts > 5) {
+    throw new HTTPException(StatusCodes.TOO_MANY_REQUESTS, {
+      message: 'Too many attempts',
+    });
+  }
+
+  if (!newPassword.verify(connectionData.password)) {
+    await client.incr(attemptsKey);
+
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'Incorrect password',
+    });
+  }
+
+  await client.del(attemptsKey);
+
+  const UUID = z.uuid().safeParse(connectionData.connectionUUID);
+  if (!UUID.success) {
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: 'Invalid connection UUID format',
+    });
+  }
+
+  const payload = { connectionUUID: UUID.data };
+  return c.json(payload, StatusCodes.OK);
+});
 
 export default connectionsRouter;
