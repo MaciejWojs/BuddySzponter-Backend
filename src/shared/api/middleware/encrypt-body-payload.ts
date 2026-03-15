@@ -2,6 +2,7 @@ import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { createMiddleware } from 'hono/factory';
 
 import { configProvider } from '@/config/configProvider';
+import { client } from '@/infrastucture/cache/client';
 
 export const encryptPayloadBody = createMiddleware(async (c, next) => {
   await next();
@@ -10,6 +11,8 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
 
   const path = c.req.path;
   if (path.endsWith('/docs')) return;
+
+  if (path.endsWith('/crypto/handshake')) return;
 
   const res = c.res;
   if (!res) return;
@@ -26,9 +29,16 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
     // If response is not valid JSON, skip encryption
     return;
   }
+  const sessionId = c.req.header('X-session-id');
+  if (!sessionId) return;
+
+  const key = await client.get(`handshake:${sessionId}`);
+  if (!key) return;
+
+  const keyBuffer = Buffer.from(key, 'base64');
 
   const encrypted = {
-    payload: encryptPayload(data),
+    payload: encryptPayload(data, keyBuffer),
   };
 
   const headers = new Headers(res.headers);
