@@ -1,4 +1,4 @@
-import { UserIdError } from "@/modules/users/domain/errors/UserIdError";
+import { UserIdError } from '@/modules/users/domain/errors/UserIdError';
 
 export class UserId {
   constructor(private id: number) {
