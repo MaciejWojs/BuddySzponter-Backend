@@ -6,7 +6,7 @@ import {
   ConnectionDbRecord,
   CreateConnection,
   IConnectionDAO,
-} from './IConnectionDao';
+} from './IConnectionDao.db';
 
 export class DrizzleConnectionDao
   extends BaseDao<ConnectionDbRecord, CreateConnection>

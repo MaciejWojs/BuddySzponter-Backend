@@ -1,42 +1,28 @@
 import { Password } from '@/modules/users/domain/value-objects';
-import {
-  ConnectionUUID,
-  DeviceUUID,
-  IpAddress,
-  UserId,
-} from '@/shared/value-objects';
+import { ConnectionUUID } from '@/shared/value-objects';
 
 import { ConnectionCode, ConnectionStatus } from '../value-objects/';
+import { ConnectionParticipant } from './ConnectionParticipant.entity';
 
 export class Connection {
   constructor(
     readonly id: ConnectionUUID,
-    readonly guestId: UserId | null,
-    readonly hostId: UserId | null,
-    readonly guestDeviceId: DeviceUUID | null,
-    readonly hostDeviceId: DeviceUUID | null,
+    readonly host: ConnectionParticipant,
+    readonly guest: ConnectionParticipant | null,
     readonly code: ConnectionCode,
-    readonly guestIp: IpAddress,
-    readonly hostIp: IpAddress,
-    readonly status: ConnectionStatus,
     readonly password: Password,
-    readonly startedAt: Date,
-    readonly endedAt: Date,
+    readonly startedAt: Date | null,
+    readonly status: ConnectionStatus = ConnectionStatus.INACTIVE,
   ) {}
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
       changes.id ?? this.id,
-      changes.guestId ?? this.guestId,
-      changes.hostId ?? this.hostId,
-      changes.guestDeviceId ?? this.guestDeviceId,
-      changes.hostDeviceId ?? this.hostDeviceId,
+      changes.host ?? this.host,
+      changes.guest ?? this.guest,
       changes.code ?? this.code,
-      changes.guestIp ?? this.guestIp,
-      changes.hostIp ?? this.hostIp,
-      changes.status ?? this.status,
       changes.password ?? this.password,
       changes.startedAt ?? this.startedAt,
-      changes.endedAt ?? this.endedAt,
+      changes.status ?? this.status,
     );
   }
   async comparePassword(password: string): Promise<boolean> {
@@ -45,5 +31,9 @@ export class Connection {
 
   updateStatus(status: ConnectionStatus): Connection {
     return this.copy({ status });
+  }
+
+  joinConnection(guest: ConnectionParticipant): Connection {
+    return this.copy({ guest, status: ConnectionStatus.ACTIVE, startedAt: new Date() });
   }
 }
