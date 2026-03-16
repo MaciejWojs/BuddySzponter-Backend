@@ -1,4 +1,4 @@
-import z from 'zod';
+import { z } from 'zod';
 
 export const handshakeResponseSchema = z.object({
   serverPublicKey: z
