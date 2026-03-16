@@ -8,12 +8,12 @@ import { client } from '@/infrastucture/cache/client';
 const SESSION_DURATION_SECONDS = 900;
 
 export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
-  await next();
-
   if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
     await next();
     return;
   }
+
+  await next();
 
   const sessionId = c.req.header('X-session-id');
   if (!sessionId) return;
