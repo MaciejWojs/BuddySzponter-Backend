@@ -2,6 +2,7 @@ import logger from '@logger';
 import { createMiddleware } from 'hono/factory';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
@@ -45,14 +46,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   }
 
   // Skip decryption for specific endpoints (e.g., handshake and documentation)
-  const excludedPaths = [
-    '/crypto/handshake',
-    '/docs',
-    '/docs/scalar',
-    '/docs/ui',
-  ];
-
-  if (excludedPaths.some((path) => req.path.endsWith(path))) {
+  if (APP_CONFIG.excludedPaths.some((path) => req.path.endsWith(path))) {
     return next();
   }
 
@@ -63,7 +57,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   }
 
   // Validate presence of X-session-id header and retrieve session key from cache and handle errors
-  const sessionId = req.header('X-session-id');
+  const sessionId = req.header(APP_CONFIG.headers.sessionId);
   if (!sessionId) {
     return c.json(
       { message: 'Missing X-session-id header' },
@@ -79,7 +73,9 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
     );
   }
 
-  const key = await client.get(`handshake:${sessionId}`);
+  const key = await client.get(
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+  );
   if (!key) {
     return c.json(
       { message: 'Invalid or expired session UUID' },

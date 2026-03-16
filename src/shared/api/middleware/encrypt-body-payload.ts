@@ -3,6 +3,7 @@ import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { createMiddleware } from 'hono/factory';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 
@@ -12,9 +13,7 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
   if (!configProvider.get('PAYLOAD_ENCRYPTED')) return;
 
   const path = c.req.path;
-  if (path.endsWith('/docs')) return;
-
-  if (path.endsWith('/crypto/handshake')) return;
+  if (APP_CONFIG.excludedPaths.some((p) => path.endsWith(p))) return;
 
   const res = c.res;
   if (!res) return;
@@ -31,7 +30,7 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
     // If response is not valid JSON, skip encryption
     return;
   }
-  const sessionId = c.req.header('X-session-id');
+  const sessionId = c.req.header(APP_CONFIG.headers.sessionId);
   if (!sessionId) {
     logger.warn(
       `Encryption required but X-session-id header is missing — path: ${c.req.path}`,
@@ -54,7 +53,9 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
     return;
   }
 
-  const key = await client.get(`handshake:${sessionId}`);
+  const key = await client.get(
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+  );
   if (!key) {
     logger.warn(
       `Encryption required but no session key found for session: ${sessionId} — path: ${c.req.path}`,

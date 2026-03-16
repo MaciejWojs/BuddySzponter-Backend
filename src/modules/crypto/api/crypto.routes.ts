@@ -3,11 +3,11 @@ import { defaultHook } from '@shared/api/openapi/defaultHook';
 import { createECDH, createHash, randomUUID } from 'crypto';
 import { ReasonPhrases } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { client } from '@/infrastucture/cache/client';
 
 import { handshakeRoute } from './crypto.openapi';
 
-const SESSION_DURATION_SECONDS = 900;
 const cryptoRouter = new OpenAPIHono({ defaultHook });
 
 cryptoRouter.openapi(handshakeRoute, async (c) => {
@@ -15,7 +15,7 @@ cryptoRouter.openapi(handshakeRoute, async (c) => {
 
   const clientPublicKey = Buffer.from(data.clientPublicKey, 'base64');
 
-  const ecdh = createECDH('prime256v1');
+  const ecdh = createECDH(APP_CONFIG.crypto.ecdhCurve);
   const serverPublicKey = ecdh.generateKeys('base64');
 
   const sharedSecret = ecdh.computeSecret(clientPublicKey, 'base64');
@@ -25,8 +25,8 @@ cryptoRouter.openapi(handshakeRoute, async (c) => {
   const sessionId = randomUUID();
 
   const result = await client.setex(
-    `handshake:${sessionId}`,
-    SESSION_DURATION_SECONDS,
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+    APP_CONFIG.cache.ttl.handshakeSession,
     aesKey.toString('base64'),
   );
 

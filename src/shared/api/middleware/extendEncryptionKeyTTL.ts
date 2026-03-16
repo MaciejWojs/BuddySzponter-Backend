@@ -2,10 +2,9 @@ import logger from '@logger';
 import { createMiddleware } from 'hono/factory';
 import { StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
-
-const SESSION_DURATION_SECONDS = 900;
 
 export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
   if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
@@ -15,13 +14,13 @@ export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
 
   await next();
 
-  const sessionId = c.req.header('X-session-id');
+  const sessionId = c.req.header(APP_CONFIG.headers.sessionId);
   if (!sessionId) return;
 
   if (c.res.status !== StatusCodes.OK) return;
   const result = await client.expire(
-    `handshake:${sessionId}`,
-    SESSION_DURATION_SECONDS,
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+    APP_CONFIG.cache.ttl.handshakeSession,
   );
 
   if (result !== 1) {

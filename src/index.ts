@@ -14,6 +14,7 @@ import { logger as honoLogger } from 'hono/logger';
 import { StatusCodes } from 'http-status-codes';
 
 import { version } from '../package.json';
+import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
 import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
@@ -98,8 +99,8 @@ if (isDevelopment) {
 }
 
 export default {
-  port: 3000,
-  idleTimeout: 30,
+  port: APP_CONFIG.server.port,
+  idleTimeout: APP_CONFIG.server.idleTimeout,
 
   //@ts-expect-error Its from Socket.IO Bun Engine github example, but it seems to be missing from types
   fetch(req, server) {
