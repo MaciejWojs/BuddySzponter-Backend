@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 
 import {
+  decryptionErrorResponse,
   internalServerErrorResponse,
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
@@ -44,6 +45,7 @@ export const registerRoute = createRoute({
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
   },
 });
 
@@ -72,6 +74,7 @@ export const loginRoute = createRoute({
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
   },
 });
 
@@ -100,6 +103,7 @@ export const refreshRoute = createRoute({
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
   },
 });
 
@@ -128,6 +132,7 @@ export const logoutRoute = createRoute({
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
   },
 });
 
@@ -146,5 +151,6 @@ export const meRoute = createRoute({
       },
     },
     ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
   },
 });

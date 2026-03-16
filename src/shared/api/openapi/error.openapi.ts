@@ -1,4 +1,5 @@
 import {
+  decryptionErrorResponseSchema,
   internalServerErrorResponseSchema,
   validationErrorResponseSchema,
 } from '@shared/api/schemas/error.schema';
@@ -20,6 +21,17 @@ export const internalServerErrorResponse = {
     content: {
       'application/json': {
         schema: internalServerErrorResponseSchema,
+      },
+    },
+  },
+};
+
+export const decryptionErrorResponse = {
+  400: {
+    description: 'Invalid encrypted payload',
+    content: {
+      'application/json': {
+        schema: decryptionErrorResponseSchema,
       },
     },
   },

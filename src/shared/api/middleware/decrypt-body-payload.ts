@@ -4,6 +4,7 @@ import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
+import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 import { decryptPayload } from '@/shared/utils/decrypt-payload';
 
 import { encryptPayloadSchema } from '../schemas/encryptedPayload.schema';
@@ -109,10 +110,19 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   try {
     decrypted = decryptPayload(data, key);
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error(`Decryption failed: ${error.message}`);
+    if (error instanceof ValidationError) {
+      logger.warn(`Decryption failed: ${error.message}`);
+      return c.json({ message: error.message }, StatusCodes.BAD_REQUEST);
     }
-    return c.json({ message: 'Decryption failed' }, StatusCodes.BAD_REQUEST);
+
+    if (error instanceof Error) {
+      logger.error(`Unexpected decryption failure: ${error.message}`);
+    }
+
+    return c.json(
+      { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
   }
 
   //! WORKAROUND - Modified req.json to return decrypted data for the rest of the handlers

@@ -1,5 +1,7 @@
 import { createDecipheriv } from 'crypto';
 
+import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
+
 import { EncryptedPayload } from '../api/schemas/encryptedPayload.schema';
 
 export function decryptPayload(p: EncryptedPayload, key: string): object {
@@ -12,13 +14,16 @@ export function decryptPayload(p: EncryptedPayload, key: string): object {
 
   const decipher = createDecipheriv('aes-256-gcm', keyBuffer, iv);
 
-  decipher.setAuthTag(tag);
+  try {
+    decipher.setAuthTag(tag);
 
-  const decrypted = Buffer.concat([
-    decipher.update(encrypted),
-    decipher.final(),
-  ]);
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
 
-  //! Wrap in try-catch (json parse is throwable)
-  return JSON.parse(decrypted.toString());
+    return JSON.parse(decrypted.toString());
+  } catch {
+    throw new ValidationError('Invalid encrypted payload');
+  }
 }
