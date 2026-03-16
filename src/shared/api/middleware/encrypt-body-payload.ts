@@ -1,5 +1,7 @@
+import logger from '@logger';
 import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { createMiddleware } from 'hono/factory';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
@@ -30,10 +32,39 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
     return;
   }
   const sessionId = c.req.header('X-session-id');
-  if (!sessionId) return;
+  if (!sessionId) {
+    logger.warn(
+      `Encryption required but X-session-id header is missing — path: ${c.req.path}`,
+    );
+    c.res = c.json(
+      { message: 'Missing X-session-id header' },
+      StatusCodes.UNAUTHORIZED,
+    );
+    return;
+  }
+
+  if (!client.connected) {
+    logger.error(
+      'Redis client is not connected — cannot retrieve session encryption key',
+    );
+    c.res = c.json(
+      { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+    return;
+  }
 
   const key = await client.get(`handshake:${sessionId}`);
-  if (!key) return;
+  if (!key) {
+    logger.warn(
+      `Encryption required but no session key found for session: ${sessionId} — path: ${c.req.path}`,
+    );
+    c.res = c.json(
+      { message: 'Invalid or expired session UUID' },
+      StatusCodes.UNAUTHORIZED,
+    );
+    return;
+  }
 
   const keyBuffer = Buffer.from(key, 'base64');
 
