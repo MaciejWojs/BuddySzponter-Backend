@@ -1,4 +1,4 @@
-import z from 'zod';
+import { z } from 'zod';
 export const encryptPayloadSchema = z.object({
   payload: z.object({
     iv: z.base64(),
