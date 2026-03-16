@@ -1,6 +1,7 @@
 import {
   decryptionErrorResponseSchema,
   internalServerErrorResponseSchema,
+  unauthorizedErrorResponseSchema,
   validationErrorResponseSchema,
 } from '@shared/api/schemas/error.schema';
 
@@ -32,6 +33,17 @@ export const decryptionErrorResponse = {
     content: {
       'application/json': {
         schema: decryptionErrorResponseSchema,
+      },
+    },
+  },
+};
+
+export const unauthorizedErrorResponse = {
+  401: {
+    description: 'Unauthorized - missing or invalid session',
+    content: {
+      'application/json': {
+        schema: unauthorizedErrorResponseSchema,
       },
     },
   },

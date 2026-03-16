@@ -36,3 +36,10 @@ export const decryptionErrorResponseSchema = z.object({
     'Invalid JSON request body',
   ]),
 });
+
+export const unauthorizedErrorResponseSchema = z.object({
+  message: z.enum([
+    'Missing X-session-id header',
+    'Invalid or expired session UUID',
+  ]),
+});
