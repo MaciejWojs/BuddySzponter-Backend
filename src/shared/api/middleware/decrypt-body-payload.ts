@@ -25,8 +25,10 @@ import { encryptPayloadSchema } from '../schemas/encryptedPayload.schema';
  * completely unaware that it was originally encrypted.
  *
  * @returns Bypasses if encryption is disabled, for safe methods, specific paths, or if content type is not JSON.
- * Otherwise, interrupts the flow and returns an appropriate error response (e.g., `401 Unauthorized`, `400 Bad Request`, `500 Internal Server Error`)
- * if a valid session is missing, its key has expired, the payload format is wrong, or decryption fails.
+ * Otherwise, interrupts the flow and returns an appropriate error response:
+ * `401 Unauthorized` when `X-session-id` is missing or the session key is invalid/expired,
+ * `400 Bad Request` when JSON/payload format is invalid or decryption validation fails,
+ * and `500 Internal Server Error` for unexpected infrastructure/runtime failures.
  */
 export const decryptBodyPayload = createMiddleware(async (c, next) => {
   const req = c.req;
