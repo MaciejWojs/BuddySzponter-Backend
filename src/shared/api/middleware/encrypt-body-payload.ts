@@ -1,15 +1,70 @@
+import logger from '@logger';
 import { encryptPayload } from '@shared/utils/encrypt-payload';
 import { createMiddleware } from 'hono/factory';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
+import { client } from '@/infrastucture/cache/client';
 
 export const encryptPayloadBody = createMiddleware(async (c, next) => {
-  await next();
-
-  if (!configProvider.get('PAYLOAD_ENCRYPTED')) return;
+  if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
+    await next();
+    return;
+  }
 
   const path = c.req.path;
-  if (path.endsWith('/docs')) return;
+  if (APP_CONFIG.excludedPaths.some((p) => path.endsWith(p))) {
+    await next();
+    return;
+  }
+
+  const method = c.req.method.toUpperCase();
+  if (['HEAD', 'OPTIONS'].includes(method)) {
+    await next();
+    return;
+  }
+
+  const sessionId = c.req.header(APP_CONFIG.headers.sessionId);
+  if (!sessionId) {
+    logger.warn(
+      `Encryption required but X-session-id header is missing — path: ${c.req.path}`,
+    );
+    c.res = c.json(
+      { message: 'Missing X-session-id header' },
+      StatusCodes.UNAUTHORIZED,
+    );
+    return;
+  }
+
+  if (!client.connected) {
+    logger.error(
+      'Redis client is not connected — cannot retrieve session encryption key',
+    );
+    c.res = c.json(
+      { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+    return;
+  }
+
+  const key = await client.get(
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+  );
+  if (!key) {
+    logger.warn(
+      `Encryption required but no session key found for session: ${sessionId} — path: ${c.req.path}`,
+    );
+    c.res = c.json(
+      { message: 'Invalid or expired session UUID' },
+      StatusCodes.UNAUTHORIZED,
+    );
+    return;
+  }
+
+  const keyBuffer = Buffer.from(key, 'base64');
+
+  await next();
 
   const res = c.res;
   if (!res) return;
@@ -28,7 +83,7 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
   }
 
   const encrypted = {
-    payload: encryptPayload(data),
+    payload: encryptPayload(data, keyBuffer),
   };
 
   const headers = new Headers(res.headers);

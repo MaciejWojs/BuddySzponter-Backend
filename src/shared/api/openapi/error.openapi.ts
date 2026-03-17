@@ -1,5 +1,7 @@
 import {
+  decryptionErrorResponseSchema,
   internalServerErrorResponseSchema,
+  unauthorizedErrorResponseSchema,
   validationErrorResponseSchema,
 } from '@shared/api/schemas/error.schema';
 
@@ -20,6 +22,28 @@ export const internalServerErrorResponse = {
     content: {
       'application/json': {
         schema: internalServerErrorResponseSchema,
+      },
+    },
+  },
+};
+
+export const decryptionErrorResponse = {
+  400: {
+    description: 'Invalid encrypted payload',
+    content: {
+      'application/json': {
+        schema: decryptionErrorResponseSchema,
+      },
+    },
+  },
+};
+
+export const unauthorizedErrorResponse = {
+  401: {
+    description: 'Unauthorized - missing or invalid session',
+    content: {
+      'application/json': {
+        schema: unauthorizedErrorResponseSchema,
       },
     },
   },

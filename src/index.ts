@@ -2,7 +2,8 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import authRouter from '@modules/auth/api/auth.routes';
-import connectionRouter from '@modules/connection/api/connection.routes';
+// import connectionRouter from '@modules/connection/api/connection.routes';
+import cryptoRouter from '@modules/crypto/api/crypto.routes';
 import usersRouter from '@modules/users/api/users.routes';
 import { Scalar } from '@scalar/hono-api-reference';
 import { encryptPayloadBody } from '@shared/api/middleware/encrypt-body-payload';
@@ -13,14 +14,19 @@ import { logger as honoLogger } from 'hono/logger';
 import { StatusCodes } from 'http-status-codes';
 
 import { version } from '../package.json';
+import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
+import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
+import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
 
 app.use(honoLogger());
+app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
+app.use('*', extendEncryptionKeyTTL);
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();
@@ -68,7 +74,8 @@ app.get('/', (c) =>
 );
 app.route('/auth', authRouter);
 app.route('/users', usersRouter);
-app.route('/connections', connectionRouter);
+// app.route('/connections', connectionRouter);
+app.route('/crypto', cryptoRouter);
 
 const { websocket } = engine.handler();
 
@@ -92,8 +99,8 @@ if (isDevelopment) {
 }
 
 export default {
-  port: 3000,
-  idleTimeout: 30,
+  port: APP_CONFIG.server.port,
+  idleTimeout: APP_CONFIG.server.idleTimeout,
 
   //@ts-expect-error Its from Socket.IO Bun Engine github example, but it seems to be missing from types
   fetch(req, server) {

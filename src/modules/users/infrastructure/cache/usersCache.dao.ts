@@ -1,5 +1,6 @@
 import { BaseCacheDao } from '@infra/cache/baseCache.dao';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { UserDbRecord } from '@/shared/types';
 
 import { IUserCacheDao } from './IUserCacheDao';
@@ -8,21 +9,20 @@ export class UsersCacheDao
   extends BaseCacheDao<UserDbRecord>
   implements IUserCacheDao
 {
-  static TTL = 60;
   constructor() {
     super();
   }
 
   override async findById(id: number): Promise<UserDbRecord | null> {
-    const key = `user:${id}`;
+    const key = `${APP_CONFIG.cache.keys.userPrefix}${id}`;
     const data = await this.client.get(key);
     return data ? JSON.parse(data) : null;
   }
   override async create(record: UserDbRecord): Promise<UserDbRecord> {
-    const key = `user:${record.id}`;
+    const key = `${APP_CONFIG.cache.keys.userPrefix}${record.id}`;
     const result = await this.client.setex(
       key,
-      UsersCacheDao.TTL,
+      APP_CONFIG.cache.ttl.user,
       JSON.stringify(record),
     );
     if (result !== 'OK') {
@@ -31,15 +31,15 @@ export class UsersCacheDao
     return record;
   }
   override async deleteById(id: number): Promise<boolean> {
-    const key = `user:${id}`;
+    const key = `${APP_CONFIG.cache.keys.userPrefix}${id}`;
     const result = await this.client.del(key);
     return result > 0;
   }
   override async save(record: UserDbRecord): Promise<UserDbRecord> {
-    const key = `user:${record.id}`;
+    const key = `${APP_CONFIG.cache.keys.userPrefix}${record.id}`;
     const result = await this.client.setex(
       key,
-      UsersCacheDao.TTL,
+      APP_CONFIG.cache.ttl.user,
       JSON.stringify(record),
     );
     if (result !== 'OK') {
