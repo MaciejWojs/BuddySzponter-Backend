@@ -92,20 +92,41 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
     );
 
     if (result === 1) {
-      keyGenerationSuccess = true;
       const ttlResult = await client.expire(`connection_code:${code}`, 120);
       if (ttlResult !== 1) {
-        client.del(`connection_code:${code}`);
+        try {
+          await client.del(`connection_code:${code}`);
+        } catch {
+          throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Failed to clean up invalid connection code',
+          });
+        }
         continue; // Retry if setting TTL failed
       }
 
       expiresAt = new Date(Date.now() + 120 * 1000);
-      client.setex(`connection_attempts:${code}`, 120, '0');
+      try {
+        const attemptsSetResult = await client.setex(
+          `connection_attempts:${code}`,
+          120,
+          '0',
+        );
+
+        if (attemptsSetResult !== 'OK') {
+          await client.del(`connection_code:${code}`);
+          continue;
+        }
+      } catch {
+        await client.del(`connection_code:${code}`);
+        continue;
+      }
+
+      keyGenerationSuccess = true;
     }
   } while (!keyGenerationSuccess);
 
   if (!expiresAt) {
-    client.del(`connection_code:${code}`);
+    await client.del(`connection_code:${code}`);
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
       message: 'Failed to generate connection code',
     });
@@ -124,30 +145,6 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
 
   const key = `connection_code:${connectionCode}`;
   const attemptsKey = `connection_attempts:${connectionCode}`;
-  let newPassword;
-
-  try {
-    newPassword = await Password.fromHash(data.password);
-  } catch (error) {
-    if (
-      error instanceof ValidationError &&
-      error instanceof PasswordValidationError
-    ) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [
-          {
-            field: 'password',
-            error: error.message,
-          },
-        ],
-      });
-    }
-
-    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
-    });
-  }
 
   if (!client.connected) {
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -171,13 +168,24 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
       message: 'Failed to parse connection data',
     });
   }
-  if (connectionData.connectionAttempts > 5) {
+
+  const attemptsRaw = await client.get(attemptsKey);
+  const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
+
+  if (Number.isNaN(attempts)) {
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: 'Failed to parse connection attempts',
+    });
+  }
+
+  if (attempts > 5) {
     throw new HTTPException(StatusCodes.TOO_MANY_REQUESTS, {
       message: 'Too many attempts',
     });
   }
 
-  if (!newPassword.verify(connectionData.password)) {
+  const storedPassword = Password.fromHash(connectionData.password);
+  if (!(await storedPassword.verify(data.password))) {
     await client.incr(attemptsKey);
 
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {

@@ -34,6 +34,10 @@ export class Connection {
   }
 
   joinConnection(guest: ConnectionParticipant): Connection {
-    return this.copy({ guest, status: ConnectionStatus.ACTIVE, startedAt: new Date() });
+    return this.copy({
+      guest,
+      status: ConnectionStatus.ACTIVE,
+      startedAt: new Date(),
+    });
   }
 }
