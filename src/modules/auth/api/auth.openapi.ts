@@ -155,7 +155,6 @@ export const meRoute = createRoute({
       },
     },
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
     ...unauthorizedErrorResponse,
   },
 });
