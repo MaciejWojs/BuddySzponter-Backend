@@ -8,28 +8,23 @@ import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 
 export const encryptPayloadBody = createMiddleware(async (c, next) => {
-  await next();
-
-  if (!configProvider.get('PAYLOAD_ENCRYPTED')) return;
-
-  const path = c.req.path;
-  if (APP_CONFIG.excludedPaths.some((p) => path.endsWith(p))) return;
-
-  const res = c.res;
-  if (!res) return;
-  if (res.status === 204) return;
-
-  const contentType = res.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) return;
-
-  let data;
-
-  try {
-    data = await res.clone().json();
-  } catch {
-    // If response is not valid JSON, skip encryption
+  if (!configProvider.get('PAYLOAD_ENCRYPTED')) {
+    await next();
     return;
   }
+
+  const path = c.req.path;
+  if (APP_CONFIG.excludedPaths.some((p) => path.endsWith(p))) {
+    await next();
+    return;
+  }
+
+  const method = c.req.method.toUpperCase();
+  if (['HEAD', 'OPTIONS'].includes(method)) {
+    await next();
+    return;
+  }
+
   const sessionId = c.req.header(APP_CONFIG.headers.sessionId);
   if (!sessionId) {
     logger.warn(
@@ -68,6 +63,24 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
   }
 
   const keyBuffer = Buffer.from(key, 'base64');
+
+  await next();
+
+  const res = c.res;
+  if (!res) return;
+  if (res.status === 204) return;
+
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) return;
+
+  let data;
+
+  try {
+    data = await res.clone().json();
+  } catch {
+    // If response is not valid JSON, skip encryption
+    return;
+  }
 
   const encrypted = {
     payload: encryptPayload(data, keyBuffer),
