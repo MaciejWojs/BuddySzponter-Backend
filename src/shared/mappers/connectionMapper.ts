@@ -1,18 +1,19 @@
 import { Connection } from '@/modules/connection/domain/entities/Connection.entity';
 import { ConnectionParticipant } from '@/modules/connection/domain/entities/ConnectionParticipant.entity';
-import { ConnectionPrimitive } from '../types/Connection';
 import {
-  ConnectionStatus,
   ConnectionCode,
+  ConnectionStatus,
 } from '@/modules/connection/domain/value-objects';
-import {
-  UserId,
-  DeviceUUID,
-  IpAddress,
-  ConnectionUUID,
-} from '@/shared/value-objects';
 import { DeviceFingerprint } from '@/modules/devices/domain/value-objects';
 import { Password } from '@/modules/users/domain/value-objects/Password.vo';
+import {
+  ConnectionUUID,
+  DeviceUUID,
+  IpAddress,
+  UserId,
+} from '@/shared/value-objects';
+
+import { ConnectionPrimitive } from '../types/Connection';
 
 export class ConnectionMapper {
   static toDomain(raw: ConnectionPrimitive): Connection {
@@ -46,6 +47,5 @@ export class ConnectionMapper {
       ConnectionStatus.fromString(raw.status),
     );
   }
-// TODO TRY CATCH ON THROWABLE METHODS/CONSTRUCTORS
-
+  // TODO TRY CATCH ON THROWABLE METHODS/CONSTRUCTORS
 }

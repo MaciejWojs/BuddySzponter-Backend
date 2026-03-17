@@ -1,8 +1,9 @@
+import { client } from '@/infrastucture/cache/client';
 import { ConnectionMapper } from '@/shared/mappers/connectionMapper';
+
 import { Connection } from '../../domain/entities/Connection.entity';
 import { IConnectionRepository } from '../../domain/repositories/IConnectionRepository';
 import { ConnectionCode, ConnectionStatus } from '../../domain/value-objects';
-import { client } from '@/infrastucture/cache/client';
 
 export class ConnectionRepository implements IConnectionRepository {
   static readonly CONNECTION_TTL_DURATION_SEC = 120; // 2 minutes
@@ -114,12 +115,12 @@ export class ConnectionRepository implements IConnectionRepository {
     if (!existingDataRaw) {
       return false; // Connection does not exist
     }
-    let existingData;
-    try {
-      existingData = JSON.parse(existingDataRaw);
-    } catch {
-      throw new Error('Failed to parse existing connection data from cache.');
-    }
+    // let existingData;
+    // try {
+    //   existingData = JSON.parse(existingDataRaw);
+    // } catch {
+    //   throw new Error('Failed to parse existing connection data from cache.');
+    // }
 
     const payload = {
       status: connection.status.value,
