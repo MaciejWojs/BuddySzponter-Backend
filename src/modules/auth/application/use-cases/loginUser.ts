@@ -7,11 +7,11 @@ export class LoginUser {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(input: LoginInput): Promise<void> {
-    let email = new Email(input.email);
+    const email = new Email(input.email);
 
     const user = await this.userRepository.findByEmail(email);
 
-    const isPasswordValid = user.password.verify(input.password);
+    const isPasswordValid = await user.password.verify(input.password);
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }

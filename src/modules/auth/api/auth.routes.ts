@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { client } from '@/infrastucture/cache/client';
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { InvalidEmailAddress } from '@/modules/users/domain/errors/InvalidEmailAddress';
 import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
 import { UserCacheRepository } from '@/modules/users/infrastructure/repositories/UserCacheRepository';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
@@ -97,7 +98,20 @@ authRouter.openapi(loginRoute, async (c) => {
   const loginUser = new LoginUser(userCacheRepository);
   try {
     await loginUser.execute(data);
-  } catch (_err) {
+    //TODO: Generate and return authentication token, set cookies, etc.
+  } catch (err) {
+    if (err instanceof InvalidEmailAddress) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: 'ValidationError',
+        cause: [
+          {
+            field: 'email',
+            error: err.message,
+          },
+        ],
+      });
+    }
+
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
       message: 'ValidationError',
       cause: [
