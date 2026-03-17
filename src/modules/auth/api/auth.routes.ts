@@ -12,6 +12,7 @@ import { UserRepository } from '@/modules/users/infrastructure/repositories/User
 import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
+import { LoginUser } from '../application/use-cases/loginUser';
 import { RegisterUser } from '../application/use-cases/registerUser';
 import {
   loginRoute,
@@ -86,7 +87,28 @@ authRouter.openapi(registerRoute, async (c) => {
   return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.openapi(loginRoute, (c) => {
+authRouter.openapi(loginRoute, async (c) => {
+  const data = c.req.valid('json');
+
+  const daoFactory = new DaoFactory();
+  const userDao = daoFactory.db.userDao();
+  const userRepository = new UserRepository(userDao);
+  const userCacheRepository = new UserCacheRepository(userRepository, client);
+  const loginUser = new LoginUser(userCacheRepository);
+  try {
+    await loginUser.execute(data);
+  } catch (_err) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [
+        {
+          field: 'email',
+          error: 'Invalid email format',
+        },
+      ],
+    });
+  }
+
   const payload = {
     message: 'User logged in successfully',
   };
