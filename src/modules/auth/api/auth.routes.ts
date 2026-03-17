@@ -4,8 +4,10 @@ import { defaultHook } from '@shared/api/openapi/defaultHook';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
+import { client } from '@/infrastucture/cache/client';
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
 import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
+import { UserCacheRepository } from '@/modules/users/infrastructure/repositories/UserCacheRepository';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
 import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
@@ -29,7 +31,8 @@ authRouter.openapi(registerRoute, async (c) => {
   const userDao = daoFactory.db.userDao();
   const roleDao = daoFactory.db.roleDao();
   const userRepository = new UserRepository(userDao);
-  const registerUser = new RegisterUser(userRepository, roleDao);
+  const userCacheRepository = new UserCacheRepository(userRepository, client);
+  const registerUser = new RegisterUser(userCacheRepository, roleDao);
 
   try {
     await registerUser.execute(data);

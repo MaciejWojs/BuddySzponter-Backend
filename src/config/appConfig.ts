@@ -18,6 +18,8 @@ export const APP_CONFIG = {
       handshakePrefix: 'handshake:',
       /** Prefix for cached user records: `user:<id>` */
       userPrefix: 'user:',
+      /** `user:id:<userId>` -> email mapping to allow cache lookups by user ID */
+      userIdPrefix: 'user:id:',
     },
     /** TTL values in seconds. */
     ttl: {
