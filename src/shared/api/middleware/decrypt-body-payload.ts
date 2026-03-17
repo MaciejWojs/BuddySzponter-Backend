@@ -8,7 +8,7 @@ import { client } from '@/infrastucture/cache/client';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 import { decryptPayload } from '@/shared/utils/decrypt-payload';
 
-import { encryptPayloadSchema } from '../schemas/encryptedPayload.schema';
+import { encryptedPayloadSchema } from '../schemas/encryptedPayload.schema';
 
 /**
  * Middleware responsible for automatically decrypting incoming request payloads (body).
@@ -95,7 +95,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   }
 
   // Validate the structure of the encrypted payload and handle validation errors
-  const result = encryptPayloadSchema.safeParse(data);
+  const result = encryptedPayloadSchema.safeParse(data);
   if (!result.success) {
     return c.json(
       { message: 'Data is not encrypted or wrong payload format' },
