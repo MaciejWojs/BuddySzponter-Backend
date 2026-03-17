@@ -16,6 +16,7 @@ import { StatusCodes } from 'http-status-codes';
 import { version } from '../package.json';
 import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
+import { initCache } from './infrastucture/cache/client';
 import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
@@ -30,6 +31,7 @@ app.use('*', extendEncryptionKeyTTL);
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();
+initCache();
 const engine = getEngine();
 
 app.onError((err, c) => {
