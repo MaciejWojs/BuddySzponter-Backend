@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 import { authSessionsTable } from '@infra/db/schema';
 
 export type AuthSessionDbRecord = typeof authSessionsTable.$inferSelect;

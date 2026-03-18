@@ -1,12 +1,13 @@
+import { eq } from 'drizzle-orm';
+
 import { BaseDao } from '@/infrastucture/db/base.dao';
+import * as schema from '@/infrastucture/db/schema';
 
 import {
   AuthSessionDbRecord,
   CreateAuthSession,
   IAuthSessionDao,
 } from './IAuthSessionDao';
-import * as schema from '@/infrastucture/db/schema';
-import { eq } from 'drizzle-orm';
 
 export class DrizzleAuthSessionDAO
   extends BaseDao<AuthSessionDbRecord, CreateAuthSession>
