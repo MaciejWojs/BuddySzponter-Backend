@@ -1,11 +1,8 @@
-echo "Running ESLint with auto-fix..."
-bun lint:fix
-
 echo "Running TypeScript type checks..."
 bun typecheck
 
 echo "Checking for secrets with Gitleaks..."
-bun run gitleaks dir -v --no-banner
+git diff --cached --name-only | xargs bun run gitleaks file -v --no-banner
 
 echo "Running Prettier for code formatting..."
 lint-staged
