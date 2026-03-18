@@ -1,0 +1,54 @@
+export const en = {
+  login: {
+    title: 'Login to BuddySzponter',
+    email: 'Email Address',
+    password: 'Password',
+    button: 'Sign in',
+    loading: 'Loading...',
+    passwordStrength: 'Password Strength',
+
+    passwordError: {
+      minLength: 'Password must be at least 8 characters',
+      required: 'Password is required',
+      weak: 'Password is too weak',
+    },
+
+    emailError: {
+      required: 'Email is required',
+      invalid: 'Please enter a valid email address',
+      maxLength: 'Email is too long',
+    },
+  },
+
+  validation: {
+    invalidEmail: 'Please enter a valid email address',
+    passwordTooShort: 'Password must be at least 6 characters',
+    required: 'This field is required',
+    passwordMinLength: 'Password must be at least {count} characters',
+    passwordMaxLetters: 'Password can contain at most {count} letters',
+    passwordRequiresLowercase: 'Password must contain a lowercase letter',
+    passwordRequiresUppercase: 'Password must contain an uppercase letter',
+    passwordRequiresDigit: 'Password must contain a digit',
+    passwordRequiresSpecialCharacter:
+      'Password must contain a special character',
+  },
+
+  hostForm: {
+    title: 'Share Control',
+    description:
+      'Enter the session code to hand over control of your device to another user.',
+    sessionCode: 'Access code',
+    sessionPassword: 'Password',
+    timeToJoin: 'Time left:',
+  },
+
+  alert: {
+    success: 'Success',
+    error: 'Error',
+    warning: 'Warning',
+    info: 'Information',
+    copy: 'Copied',
+  },
+} as const;
+
+export type LocaleKeys = keyof typeof en;

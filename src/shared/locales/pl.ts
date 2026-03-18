@@ -1,0 +1,53 @@
+export const pl = {
+  login: {
+    title: 'Zaloguj się do BuddySzponter',
+    email: 'Adres e-mail',
+    password: 'Hasło',
+    button: 'Zaloguj się',
+    loading: 'Ładowanie...',
+    passwordStrength: 'Siła hasła',
+
+    passwordError: {
+      minLength: 'Hasło jest za krótkie',
+      required: 'Hasło jest wymagane',
+      weak: 'Hasło jest zbyt słabe',
+    },
+
+    emailError: {
+      invalid: 'Wprowadź prawidłowy adres e-mail',
+      maxLength: 'Adres e-mail jest za długi',
+      required: 'Adres e-mail jest wymagany',
+    },
+  },
+
+  validation: {
+    invalidEmail: 'Podaj prawidłowy adres e-mail',
+    passwordTooShort: 'Hasło musi mieć co najmniej 6 znaków',
+    required: 'To pole jest wymagane',
+    passwordMinLength: 'Hasło musi mieć co najmniej {count} znaków',
+    passwordMaxLetters: 'Hasło może zawierać maksymalnie {count} liter',
+    passwordRequiresLowercase: 'Hasło musi zawierać małą literę',
+    passwordRequiresUppercase: 'Hasło musi zawierać wielką literę',
+    passwordRequiresDigit: 'Hasło musi zawierać cyfrę',
+    passwordRequiresSpecialCharacter: 'Hasło musi zawierać znak specjalny',
+  },
+
+  hostForm: {
+    title: 'Oddaj kontrolę',
+    description:
+      'Wprowadź kod sesji, aby oddać kontrolę nad swoim urządzeniem innemu użytkownikowi.',
+    sessionCode: 'Kod dostępu',
+    sessionPassword: 'Hasło',
+    timeToJoin: 'Pozostało:',
+  },
+
+  alert: {
+    success: 'Sukces',
+    error: 'Błąd',
+    warning: 'Ostrzeżenie',
+    info: 'Informacja',
+    copy: 'Skopiowano',
+  },
+} as const;
+
+export type LocaleKeys = keyof typeof pl;
