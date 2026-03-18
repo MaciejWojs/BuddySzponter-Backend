@@ -21,10 +21,13 @@ import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
+import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
+import { ENV } from '@shared/types/honoENV';
 
-const app = new OpenAPIHono({ defaultHook }).basePath('/api/v1');
+const app = new OpenAPIHono<ENV>({ defaultHook }).basePath('/api/v1');
 
 app.use(honoLogger());
+app.use('*', injectIpAddress);
 app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
 app.use('*', extendEncryptionKeyTTL);
