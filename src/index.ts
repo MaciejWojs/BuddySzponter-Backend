@@ -5,6 +5,7 @@ import authRouter from '@modules/auth/api/auth.routes';
 // import connectionRouter from '@modules/connection/api/connection.routes';
 import cryptoRouter from '@modules/crypto/api/crypto.routes';
 import i18nRouter from '@modules/i18n/api/i18n.routes';
+import coreRouter from '@modules/core/api/core.routes';
 import usersRouter from '@modules/users/api/users.routes';
 import { Scalar } from '@scalar/hono-api-reference';
 import { encryptPayloadBody } from '@shared/api/middleware/encrypt-body-payload';
@@ -80,7 +81,7 @@ app.route('/users', usersRouter);
 // app.route('/connections', connectionRouter);
 app.route('/crypto', cryptoRouter);
 app.route('/i18n', i18nRouter);
-
+app.route('/core', coreRouter);
 const { websocket } = engine.handler();
 
 if (isDevelopment) {

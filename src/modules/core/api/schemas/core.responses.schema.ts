@@ -1,0 +1,10 @@
+import { z } from '@hono/zod-openapi';
+
+export const appVersionSchema = z.object({
+  id: z.number().int().positive(),
+  version: z.string().min(1),
+  codename: z.string().nullable(),
+  isSupported: z.boolean(),
+});
+
+export const supportedVersionsResponseSchema = z.array(appVersionSchema);
