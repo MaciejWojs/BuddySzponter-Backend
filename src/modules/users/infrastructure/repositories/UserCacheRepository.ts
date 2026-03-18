@@ -17,6 +17,7 @@ type CachedUserPayload = {
   roleName: string;
   isBanned: boolean;
   isDeleted: boolean;
+  avatar: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -184,6 +185,7 @@ export class UserCacheRepository implements IUserRepository {
       roleName: user.role.name,
       isBanned: user.isBanned,
       isDeleted: user.isDeleted,
+      avatar: user.avatar,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     } satisfies CachedUserPayload);
@@ -200,6 +202,7 @@ export class UserCacheRepository implements IUserRepository {
       new UserRole(new RoleId(parsed.roleId), new RoleName(parsed.roleName)),
       parsed.isBanned,
       parsed.isDeleted,
+      parsed.avatar,
       new Date(parsed.createdAt),
       new Date(parsed.updatedAt),
     );

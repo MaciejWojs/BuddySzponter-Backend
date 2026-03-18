@@ -11,6 +11,7 @@ export class User {
     readonly role: UserRole,
     readonly isBanned: boolean,
     readonly isDeleted: boolean,
+    readonly avatar: string | null,
     readonly createdAt: Date,
     readonly updatedAt: Date,
   ) {}
@@ -23,6 +24,7 @@ export class User {
       changes.role ?? this.role,
       changes.isBanned ?? this.isBanned,
       changes.isDeleted ?? this.isDeleted,
+      changes.avatar ?? this.avatar,
       changes.createdAt ?? this.createdAt,
       new Date(),
     );
@@ -53,5 +55,9 @@ export class User {
 
   isAdmin(): boolean {
     return this.role.name === 'ADMIN';
+  }
+
+  updateAvatar(avatar: string): User {
+    return this.copy({ avatar });
   }
 }

@@ -58,6 +58,7 @@ export class UserRepository implements IUserRepository {
       new UserRole(new RoleId(result.roleId), new RoleName(result.roleName)),
       result.isBanned,
       result.isDeleted,
+      result.avatar,
       result.createdAt,
       result.updatedAt,
     );
@@ -75,6 +76,7 @@ export class UserRepository implements IUserRepository {
         nickname: user.nickname.value,
         isBanned: user.isBanned,
         isDeleted: user.isDeleted,
+        avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: new Date(),
         roleId: user.role.id,
