@@ -8,3 +8,13 @@ export const appVersionSchema = z.object({
 });
 
 export const supportedVersionsResponseSchema = z.array(appVersionSchema);
+
+export const coreLocalePayloadResponseSchema = z
+  .record(z.string(), z.unknown())
+  .openapi({
+    description: 'Key-value map of translation strings',
+  });
+
+export const coreLocaleNotFoundResponseSchema = z.object({
+  message: z.string(),
+});
