@@ -8,4 +8,15 @@ export interface IAuthSessionDao {
   create(data: CreateAuthSession): Promise<AuthSessionDbRecord | null>;
   deleteById(id: string): Promise<boolean>;
   save(record: AuthSessionDbRecord): Promise<AuthSessionDbRecord>;
+
+  findAllByUserId(userId: number): Promise<AuthSessionDbRecord[]>;
+  findAllByDeviceId(deviceId: string): Promise<AuthSessionDbRecord[]>;
+  findAllByUserIdAndDeviceId(
+    userId: number,
+    deviceId: string,
+  ): Promise<AuthSessionDbRecord[]>;
+  findAllActiveByUserId(userId: number): Promise<AuthSessionDbRecord[]>;
+
+  deleteRevokedSessionsByUserId(userId: number): Promise<number>;
+  deleteExpiredSessionsByUserId(userId: number): Promise<number>;
 }

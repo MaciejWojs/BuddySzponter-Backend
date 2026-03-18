@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, gt, lt } from 'drizzle-orm';
 
 import { BaseDao } from '@/infrastucture/db/base.dao';
 import * as schema from '@/infrastucture/db/schema';
@@ -61,5 +61,77 @@ export class DrizzleAuthSessionDAO
       throw new Error(`Failed to update AuthSession with id ${record.id}`);
     }
     return updatedSession;
+  }
+
+  async findAllByUserId(userId: number): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .where(eq(schema.authSessionsTable.userId, userId));
+
+    return sessions;
+  }
+
+  async findAllByDeviceId(deviceId: string): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .where(eq(schema.authSessionsTable.deviceId, deviceId));
+
+    return sessions;
+  }
+  async findAllByUserIdAndDeviceId(
+    userId: number,
+    deviceId: string,
+  ): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .where(
+        and(
+          eq(schema.authSessionsTable.userId, userId),
+          eq(schema.authSessionsTable.deviceId, deviceId),
+        ),
+      );
+    return sessions;
+  }
+
+  async findAllActiveByUserId(userId: number): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .where(
+        and(
+          eq(schema.authSessionsTable.userId, userId),
+          eq(schema.authSessionsTable.revoked, false),
+          gt(schema.authSessionsTable.expiresAt, new Date()),
+        ),
+      );
+    return sessions;
+  }
+
+  async deleteRevokedSessionsByUserId(userId: number): Promise<number> {
+    const deleteResult = await this.database
+      .delete(schema.authSessionsTable)
+      .where(
+        and(
+          eq(schema.authSessionsTable.userId, userId),
+          eq(schema.authSessionsTable.revoked, true),
+        ),
+      );
+
+    return deleteResult;
+  }
+  async deleteExpiredSessionsByUserId(userId: number): Promise<number> {
+    const deleteResult = await this.database
+      .delete(schema.authSessionsTable)
+      .where(
+        and(
+          eq(schema.authSessionsTable.userId, userId),
+          lt(schema.authSessionsTable.expiresAt, new Date()),
+        ),
+      );
+
+    return deleteResult;
   }
 }
