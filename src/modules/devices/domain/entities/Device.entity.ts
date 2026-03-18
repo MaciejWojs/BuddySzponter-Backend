@@ -1,11 +1,9 @@
 import { DeviceUUID, UserId } from '@/shared/value-objects';
 
 import {
-  DeviceBrowser,
   DeviceFingerprint,
   DeviceName,
   DeviceOS,
-  DeviceType,
 } from '../value-objects';
 
 export class Device {
@@ -14,9 +12,7 @@ export class Device {
     readonly userId: UserId | null,
     readonly fingerprint: DeviceFingerprint,
     readonly name: DeviceName,
-    readonly type: DeviceType,
     readonly os: DeviceOS,
-    readonly browser: DeviceBrowser,
     readonly createdAt: Date,
   ) {}
   private copy(changes: Partial<Device>): Device {
@@ -25,9 +21,7 @@ export class Device {
       changes.userId ?? this.userId,
       changes.fingerprint ?? this.fingerprint,
       changes.name ?? this.name,
-      changes.type ?? this.type,
       changes.os ?? this.os,
-      changes.browser ?? this.browser,
       changes.createdAt ?? this.createdAt,
     );
   }

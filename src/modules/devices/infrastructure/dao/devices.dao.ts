@@ -48,29 +48,11 @@ export class DrizzleDevicesDao
     return devices;
   }
 
-  async findByDeviceType(deviceType: string): Promise<DeviceDbRecord[]> {
-    const devices = await this.database
-      .select()
-      .from(devicesTable)
-      .where(eq(devicesTable.deviceType, deviceType));
-
-    return devices;
-  }
-
   async findByOs(os: string): Promise<DeviceDbRecord[]> {
     const devices = await this.database
       .select()
       .from(devicesTable)
       .where(eq(devicesTable.os, os));
-
-    return devices;
-  }
-
-  async findByBrowser(browser: string): Promise<DeviceDbRecord[]> {
-    const devices = await this.database
-      .select()
-      .from(devicesTable)
-      .where(eq(devicesTable.browser, browser));
 
     return devices;
   }
