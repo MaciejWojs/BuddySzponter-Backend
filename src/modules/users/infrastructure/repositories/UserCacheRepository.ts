@@ -1,5 +1,6 @@
 import { APP_CONFIG } from '@/config/appConfig';
 import type { client } from '@/infrastucture/cache/client';
+import logger from '@/infrastucture/logger';
 import { UserId } from '@/shared/value-objects';
 
 import { User } from '../../domain/entities/User.entity';
@@ -10,6 +11,7 @@ import { RoleName } from '../../domain/value-objects/RoleName.vo';
 import { UserRole } from '../../domain/value-objects/userRole.vo';
 
 type CachedUserPayload = {
+  id: number | null;
   email: string;
   nickname: string;
   password: string;
@@ -28,8 +30,12 @@ export class UserCacheRepository implements IUserRepository {
     protected readonly cacheClient: typeof client,
   ) {}
 
-  async createUser(user: Omit<User, 'id'>): Promise<User> {
+  async createUser(user: User): Promise<User> {
     const createdUser = await this.repository.createUser(user);
+
+    logger.warn(
+      `User created with email: ${createdUser.email.value}, ID: ${createdUser.id?.value}`,
+    );
 
     if (!this.cacheClient.connected) {
       console.warn('Cache client is not connected. Skipping cache write.');
@@ -39,7 +45,10 @@ export class UserCacheRepository implements IUserRepository {
     const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${user.email.value}`;
 
     try {
-      const cacheValue = this.serializeUser(user);
+      const cacheValue = this.serializeUser(createdUser);
+
+      logger.info(`Caching new user: ${cacheValue}`);
+
       await this.cacheClient.setex(
         cacheKey,
         APP_CONFIG.cache.ttl.user,
@@ -176,8 +185,9 @@ export class UserCacheRepository implements IUserRepository {
     return true;
   }
 
-  private serializeUser(user: Omit<User, 'id'> | User): string {
+  private serializeUser(user: User): string {
     return JSON.stringify({
+      id: user.id?.value || null,
       email: user.email.value,
       nickname: user.nickname.value,
       password: user.password.value,
@@ -195,7 +205,7 @@ export class UserCacheRepository implements IUserRepository {
     const parsed = JSON.parse(value) as CachedUserPayload;
 
     return new User(
-      null,
+      parsed.id ? new UserId(parsed.id) : null,
       new Email(parsed.email),
       new UserNickname(parsed.nickname),
       Password.fromHash(parsed.password),

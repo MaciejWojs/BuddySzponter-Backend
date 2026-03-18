@@ -1,21 +1,25 @@
-import { password } from 'bun';
+import { randomBytes } from 'crypto';
 
-export class AuthSessionRefreshTokenHash {
-  private constructor(private readonly hash: string) {}
+export class AuthSessionRefreshToken {
+  private constructor(private readonly token: string) {}
 
-  static async create(
-    plainTextToken: string,
-  ): Promise<AuthSessionRefreshTokenHash> {
-    const hash = await password.hash(plainTextToken, {
-      algorithm: 'argon2id',
-    });
-    return new AuthSessionRefreshTokenHash(hash);
+  static async create(byteLength = 32): Promise<AuthSessionRefreshToken> {
+    const buffer = randomBytes(byteLength);
+    const token = buffer.toString('hex');
+    return new AuthSessionRefreshToken(token);
   }
 
   get value(): string {
-    return this.hash;
+    return this.token;
   }
-  async verify(hasd: string): Promise<boolean> {
-    return await password.verify(hasd, this.hash);
+
+  static fromExisting(token: string): AuthSessionRefreshToken {
+    return new AuthSessionRefreshToken(token);
+  }
+
+  verify(raw: string): boolean {
+    const bufA = Buffer.from(this.token);
+    const bufB = Buffer.from(raw);
+    return crypto.timingSafeEqual(bufA, bufB);
   }
 }

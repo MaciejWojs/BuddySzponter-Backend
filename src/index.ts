@@ -8,6 +8,7 @@ import usersRouter from '@modules/users/api/users.routes';
 import { Scalar } from '@scalar/hono-api-reference';
 import { encryptPayloadBody } from '@shared/api/middleware/encrypt-body-payload';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
+import { ENV } from '@shared/types/honoENV';
 import { showRoutes } from 'hono/dev';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
@@ -19,15 +20,16 @@ import { configProvider } from './config/configProvider';
 import { initCache } from './infrastucture/cache/client';
 import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
+import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
+import { injectJwtPayload } from './shared/api/middleware/injectJwtPayload';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
-import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
-import { ENV } from '@shared/types/honoENV';
 
 const app = new OpenAPIHono<ENV>({ defaultHook }).basePath('/api/v1');
 
 app.use(honoLogger());
 app.use('*', injectIpAddress);
+app.use('*', injectJwtPayload);
 app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
 app.use('*', extendEncryptionKeyTTL);

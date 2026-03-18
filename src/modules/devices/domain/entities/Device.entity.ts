@@ -1,10 +1,6 @@
 import { DeviceUUID, UserId } from '@/shared/value-objects';
 
-import {
-  DeviceFingerprint,
-  DeviceName,
-  DeviceOS,
-} from '../value-objects';
+import { DeviceFingerprint, DeviceName, DeviceOS } from '../value-objects';
 
 export class Device {
   constructor(
@@ -27,5 +23,12 @@ export class Device {
   }
   updateName(name: DeviceName): Device {
     return this.copy({ name });
+  }
+
+  changeUser(userId: UserId): Device {
+    if (!this.userId) {
+      return this.copy({ userId });
+    }
+    throw new Error('Cannot change user for a device that is already assigned');
   }
 }

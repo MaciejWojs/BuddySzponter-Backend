@@ -8,6 +8,7 @@ export const registerPayloadSchema = z.object({
 
 export const loginPayloadSchema = z.object({
   message: z.string(),
+  accessToken: z.string(),
 });
 
 export const refreshPayloadSchema = z.object({
