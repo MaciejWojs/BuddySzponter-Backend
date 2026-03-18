@@ -23,6 +23,7 @@ export const usersTable = pgTable('users', {
   email: varchar({ length: 255 }).notNull().unique(),
   nickname: varchar({ length: 100 }).notNull(),
   password: varchar({ length: 255 }).notNull(),
+  avatar: varchar({ length: 255 }),
 
   isBanned: boolean().default(false).notNull(),
   isDeleted: boolean().default(false).notNull(),
@@ -40,6 +41,7 @@ export const authSessionsTable = pgTable('auth_sessions', {
     .notNull()
     .references(() => devicesTable.id, { onDelete: 'cascade' }),
 
+  tokenVersion: integer().default(1).notNull(),
   refreshTokenHash: varchar({ length: 255 }).notNull(),
 
   ipAddress: inet().notNull(),
@@ -58,10 +60,7 @@ export const devicesTable = pgTable('devices', {
   fingerprint: varchar({ length: 255 }).notNull(),
 
   name: varchar({ length: 255 }),
-
-  deviceType: varchar({ length: 50 }).notNull(), // mobile / desktop / tablet
   os: varchar({ length: 100 }),
-  browser: varchar({ length: 100 }),
 
   createdAt: timestamp().defaultNow().notNull(),
   lastUsedAt: timestamp(),
@@ -93,4 +92,5 @@ export const appVersionTable = pgTable('app_version', {
   version: varchar({ length: 50 }).notNull().unique(),
   codename: varchar({ length: 100 }),
   isSupported: boolean().default(true).notNull(),
+  langHash: varchar({ length: 255 }),
 });
