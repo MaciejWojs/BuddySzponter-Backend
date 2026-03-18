@@ -6,20 +6,17 @@ export const en = {
     button: 'Sign in',
     loading: 'Loading...',
     passwordStrength: 'Password Strength',
-
-    passwordError: {
-      minLength: 'Password must be at least 8 characters',
-      required: 'Password is required',
-      weak: 'Password is too weak',
-    },
-
     emailError: {
       required: 'Email is required',
       invalid: 'Please enter a valid email address',
       maxLength: 'Email is too long',
     },
+    passwordError: {
+      minLength: 'Password must be at least 8 characters',
+      required: 'Password is required',
+      weak: 'Password is too weak',
+    },
   },
-
   validation: {
     invalidEmail: 'Please enter a valid email address',
     passwordTooShort: 'Password must be at least 6 characters',
@@ -32,7 +29,6 @@ export const en = {
     passwordRequiresSpecialCharacter:
       'Password must contain a special character',
   },
-
   hostForm: {
     title: 'Share Control',
     description:
@@ -41,13 +37,19 @@ export const en = {
     sessionPassword: 'Password',
     timeToJoin: 'Time left:',
   },
-
   alert: {
     success: 'Success',
     error: 'Error',
     warning: 'Warning',
     info: 'Information',
     copy: 'Copied',
+  },
+  languageSwitcher: {
+    en: 'English',
+    pl: 'Polish',
+    es: 'Spanish',
+    67: 'Szponterski',
+    choice: 'Choose language',
   },
 } as const;
 

@@ -6,20 +6,17 @@ export const pl = {
     button: 'Zaloguj się',
     loading: 'Ładowanie...',
     passwordStrength: 'Siła hasła',
-
-    passwordError: {
-      minLength: 'Hasło jest za krótkie',
-      required: 'Hasło jest wymagane',
-      weak: 'Hasło jest zbyt słabe',
-    },
-
     emailError: {
       invalid: 'Wprowadź prawidłowy adres e-mail',
       maxLength: 'Adres e-mail jest za długi',
       required: 'Adres e-mail jest wymagany',
     },
+    passwordError: {
+      minLength: 'Hasło jest za krótkie',
+      required: 'Hasło jest wymagane',
+      weak: 'Hasło jest zbyt słabe',
+    },
   },
-
   validation: {
     invalidEmail: 'Podaj prawidłowy adres e-mail',
     passwordTooShort: 'Hasło musi mieć co najmniej 6 znaków',
@@ -31,7 +28,6 @@ export const pl = {
     passwordRequiresDigit: 'Hasło musi zawierać cyfrę',
     passwordRequiresSpecialCharacter: 'Hasło musi zawierać znak specjalny',
   },
-
   hostForm: {
     title: 'Oddaj kontrolę',
     description:
@@ -40,13 +36,19 @@ export const pl = {
     sessionPassword: 'Hasło',
     timeToJoin: 'Pozostało:',
   },
-
   alert: {
     success: 'Sukces',
     error: 'Błąd',
     warning: 'Ostrzeżenie',
     info: 'Informacja',
     copy: 'Skopiowano',
+  },
+  languageSwitcher: {
+    en: 'Angielski',
+    pl: 'Polski',
+    es: 'Hiszpański',
+    67: 'Szponterski',
+    choice: 'Wybierz język',
   },
 } as const;
 
