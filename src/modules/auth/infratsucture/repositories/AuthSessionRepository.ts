@@ -1,11 +1,14 @@
+import { AuthSessionMapper } from '@/shared/mappers/AuthSessionMapper';
+import { UserId } from '@/shared/value-objects';
+
 import { AuthSession } from '../../domain/entities/AuthSession.entity';
-import { IAuthSessionDao } from '../dao/IAuthSessionDao';
 import { IAuthSessionRepository } from '../../domain/repositories/IAuthSessionRepository';
 import { AuthSessionUUID } from '../../domain/value-objects';
-import { AuthSessionMapper } from '@/shared/mappers/AuthSessionMapper';
+import { IAuthSessionDao } from '../dao/IAuthSessionDao';
 
 export class AuthSessionRepository implements IAuthSessionRepository {
   constructor(protected readonly dao: IAuthSessionDao) {}
+
   async createSession(authSession: AuthSession): Promise<AuthSession> {
     const createdSession = await this.dao.create(
       AuthSessionMapper.toPersistence(authSession),
@@ -20,29 +23,41 @@ export class AuthSessionRepository implements IAuthSessionRepository {
 
   async findSessionById(id: AuthSessionUUID): Promise<AuthSession | null> {
     const sessionRecord = await this.dao.findById(id.value);
-    if (!sessionRecord) {
-      return null;
-    }
-
-    return AuthSessionMapper.toDomain(sessionRecord);
+    return sessionRecord ? AuthSessionMapper.toDomain(sessionRecord) : null;
   }
 
   async deleteSession(id: AuthSessionUUID): Promise<boolean> {
-    const success = await this.dao.deleteById(id.value);
-    if (!success) {
-      throw new Error('Failed to delete AuthSession');
-    }
+    return this.dao.deleteById(id.value);
+  }
+
+  async save(authSession: AuthSession): Promise<boolean> {
+    await this.dao.save(AuthSessionMapper.toPersistence(authSession));
     return true;
   }
 
-  async revokeSession(authSession: AuthSession): Promise<boolean> {
-    const session = authSession.revoke();
-    const success = await this.dao.save(
-      AuthSessionMapper.toPersistence(session),
+  async findAllSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByUserId(userId.value);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessionsByDeviceId(deviceId: string): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByDeviceId(deviceId);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessionsByUserIdAndDeviceId(
+    userId: UserId,
+    deviceId: string,
+  ): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByUserIdAndDeviceId(
+      userId.value,
+      deviceId,
     );
-    if (!success) {
-      throw new Error('Failed to revoke AuthSession');
-    }
-    return true;
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllActiveSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllActiveByUserId(userId.value);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
   }
 }
