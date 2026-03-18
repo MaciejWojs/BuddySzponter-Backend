@@ -1,3 +1,4 @@
+import { DrizzleCoreDao } from '@modules/core/infrastructure/dao/core.dao';
 import { DrizzleDevicesDao } from '@modules/devices/infrastructure/dao/devices.dao';
 import { DrizzleRoleDao } from '@modules/roles/infrastructure/dao/roles.dao';
 import { DrizzleUserDao } from '@modules/users/infrastructure/dao/user.dao';
@@ -19,5 +20,9 @@ export class DbDaoFactory {
 
   connectionDao() {
     return new DrizzleConnectionDao();
+  }
+
+  coreDao() {
+    return new DrizzleCoreDao();
   }
 }

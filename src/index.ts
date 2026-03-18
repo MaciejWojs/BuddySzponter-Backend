@@ -2,6 +2,7 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import authRouter from '@modules/auth/api/auth.routes';
+import coreRouter from '@modules/core/api/core.routes';
 // import connectionRouter from '@modules/connection/api/connection.routes';
 import cryptoRouter from '@modules/crypto/api/crypto.routes';
 import i18nRouter from '@modules/i18n/api/i18n.routes';
@@ -80,7 +81,7 @@ app.route('/users', usersRouter);
 // app.route('/connections', connectionRouter);
 app.route('/crypto', cryptoRouter);
 app.route('/i18n', i18nRouter);
-
+app.route('/core', coreRouter);
 const { websocket } = engine.handler();
 
 if (isDevelopment) {
