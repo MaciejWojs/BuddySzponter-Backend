@@ -1,7 +1,8 @@
+import { randomBytes } from 'crypto';
 export class ConnectionCode {
   static readonly LENGTH = 8;
 
-  constructor(private code: string) {
+  constructor(private code: string = randomBytes(4).toString('hex')) {
     if (code.trim().length === 0) {
       throw new Error('Connection code cannot be empty');
     }

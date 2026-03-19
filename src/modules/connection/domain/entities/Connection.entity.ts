@@ -40,4 +40,7 @@ export class Connection {
       startedAt: new Date(),
     });
   }
+  updateCode(newCode: ConnectionCode = new ConnectionCode()): Connection {
+    return this.copy({ code: newCode });
+  }
 }

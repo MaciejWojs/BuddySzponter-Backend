@@ -18,8 +18,6 @@ export class ConnectionRepository implements IConnectionRepository {
       throw new Error('Connection cannot have a guest to be pending.');
     }
 
-    connection = connection.updateStatus(ConnectionStatus.PENDING);
-
     const payload = {
       status: connection.status.value,
       hostIpAddress: connection.host.ipAddress.value,
@@ -36,8 +34,10 @@ export class ConnectionRepository implements IConnectionRepository {
     } catch {
       throw new Error('Failed to serialize connection data.');
     }
+
     const key = `connection_code:${connection.code.value}`;
     const result = await client.setnx(key, payloadData);
+
     if (result !== 1) {
       throw new Error('Connection code already exists. Please try again.');
     }
