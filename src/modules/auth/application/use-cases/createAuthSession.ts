@@ -47,9 +47,13 @@ export class CreateAuthSession {
     }
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    const { raw, hashed: refreshToken } = AuthSessionRefreshToken.create();
+    const sessionId = new AuthSessionUUID();
+    const { raw, hashed: refreshToken } = await AuthSessionRefreshToken.create({
+      sessionId: sessionId.value,
+      userId: command.userId.value,
+    });
     const session = new AuthSession(
-      new AuthSessionUUID(),
+      sessionId,
       command.userId,
       command.deviceId,
       command.ipAddress,

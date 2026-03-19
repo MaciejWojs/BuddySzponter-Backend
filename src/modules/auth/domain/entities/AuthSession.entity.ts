@@ -32,7 +32,10 @@ export class AuthSession {
   }
 
   async rotateRefreshToken(): Promise<{ token: AuthSession; raw: string }> {
-    const newToken = await AuthSessionRefreshToken.create();
+    const newToken = await AuthSessionRefreshToken.create({
+      sessionId: this.id.value,
+      userId: this.userId.value,
+    });
     return {
       token: this.copy({ refreshToken: newToken.hashed }),
       raw: newToken.raw,
