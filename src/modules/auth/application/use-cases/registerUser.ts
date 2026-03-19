@@ -40,6 +40,7 @@ export class RegisterUser {
       userRole,
       false,
       false,
+      null,
       new Date(),
       new Date(),
     );

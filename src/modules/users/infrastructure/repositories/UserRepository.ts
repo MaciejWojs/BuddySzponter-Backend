@@ -13,7 +13,7 @@ import { IUserDAO } from '../dao/IUserDAO';
 export class UserRepository implements IUserRepository {
   constructor(protected readonly dao: IUserDAO) {}
 
-  async createUser(user: Omit<User, 'id'>): Promise<User> {
+  async createUser(user: User): Promise<User> {
     const userExists = await this.dao.findByEmail(user.email.value);
     if (userExists) {
       throw new UserAlreadyExistWithEmailError(user.email);
@@ -58,6 +58,7 @@ export class UserRepository implements IUserRepository {
       new UserRole(new RoleId(result.roleId), new RoleName(result.roleName)),
       result.isBanned,
       result.isDeleted,
+      result.avatar,
       result.createdAt,
       result.updatedAt,
     );
@@ -75,6 +76,7 @@ export class UserRepository implements IUserRepository {
         nickname: user.nickname.value,
         isBanned: user.isBanned,
         isDeleted: user.isDeleted,
+        avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: new Date(),
         roleId: user.role.id,

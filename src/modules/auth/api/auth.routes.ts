@@ -1,16 +1,27 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
+import { setCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
-import { StatusCodes } from 'http-status-codes';
+import { sign } from 'hono/jwt';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { configProvider } from '@/config/configProvider';
+import { client } from '@/infrastucture/cache/client';
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { InvalidEmailAddress } from '@/modules/users/domain/errors/InvalidEmailAddress';
 import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
+import { UserCacheRepository } from '@/modules/users/infrastructure/repositories/UserCacheRepository';
 import { UserRepository } from '@/modules/users/infrastructure/repositories/UserRepository';
 import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 
+import { RepositoryFactory } from '../../../infrastucture/factories/RepositoryFactory';
+import { CreateUserDevice as CreateOrFindUserDevice } from '../../users/application/use-case/createUserDevice';
+import { CreateAuthSession } from '../application/use-cases/createAuthSession';
+import { LoginUser } from '../application/use-cases/loginUser';
 import { RegisterUser } from '../application/use-cases/registerUser';
+import { AuthSessionRefreshToken } from '../domain/value-objects';
 import {
   loginRoute,
   logoutRoute,
@@ -18,7 +29,6 @@ import {
   refreshRoute,
   registerRoute,
 } from './auth.openapi';
-
 const authRouter = new OpenAPIHono({ defaultHook });
 
 authRouter.openapi(registerRoute, async (c) => {
@@ -29,7 +39,8 @@ authRouter.openapi(registerRoute, async (c) => {
   const userDao = daoFactory.db.userDao();
   const roleDao = daoFactory.db.roleDao();
   const userRepository = new UserRepository(userDao);
-  const registerUser = new RegisterUser(userRepository, roleDao);
+  const userCacheRepository = new UserCacheRepository(userRepository, client);
+  const registerUser = new RegisterUser(userCacheRepository, roleDao);
 
   try {
     await registerUser.execute(data);
@@ -83,13 +94,97 @@ authRouter.openapi(registerRoute, async (c) => {
   return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.openapi(loginRoute, (c) => {
-  const payload = {
-    message: 'User logged in successfully',
-  };
+authRouter.openapi(loginRoute, async (c) => {
+  const data = c.req.valid('json');
 
-  // Here you would handle the logic for logging in a user, such as validating credentials and generating a token.
-  return c.json(payload, StatusCodes.OK);
+  const ipAddress = c.get('client-ip') ?? null;
+
+  if (!ipAddress) {
+    logger.warn(`Login attempt without IP address ${c.req.path}`);
+    throw new HTTPException(StatusCodes.BAD_REQUEST, {
+      message: 'Unable to determine client IP address',
+    });
+  }
+
+  const repositoryFactory = new RepositoryFactory();
+  const userCacheRepository = repositoryFactory.userCacheRepository();
+  const deviceRepository = repositoryFactory.deviceRepository();
+  const authSessionRepository = repositoryFactory.authSessionRepository();
+  const loginUser = new LoginUser(userCacheRepository);
+  const createOrFindUserDevice = new CreateOrFindUserDevice(deviceRepository);
+  const createAuthSession = new CreateAuthSession(authSessionRepository);
+  try {
+    const user = await loginUser.execute(data);
+
+    if (!user.id) {
+      logger.error(`User ${user.email.value} has no ID after successful login`);
+      throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      });
+    }
+
+    const device = await createOrFindUserDevice.execute(
+      data.fingerprint,
+      user.id.value,
+      data.name,
+      data.os,
+    );
+
+    const token = await AuthSessionRefreshToken.create();
+
+    const authSession = await createAuthSession.execute({
+      userId: user.id,
+      deviceId: device.id,
+      refreshToken: token,
+      userAgent: c.req.header('User-Agent') ?? 'Unknown',
+      ipAddress: ipAddress,
+    });
+
+    setCookie(c, 'refreshToken', authSession.refreshToken.value, {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
+      // sameSite: 'Strict',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    const accessToken = await sign(
+      {
+        sub: user.id.value,
+        role: user.role.name,
+        sessionId: authSession.id.value,
+        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
+      },
+      configProvider.get('JWT_ACCESS_SECRET'),
+    );
+
+    return c.json(
+      {
+        message: 'User logged in successfully',
+        accessToken,
+      },
+      StatusCodes.OK,
+    );
+  } catch (err) {
+    if (err instanceof InvalidEmailAddress) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: 'ValidationError',
+        cause: [
+          {
+            field: 'email',
+            error: err.message,
+          },
+        ],
+      });
+    }
+    if (err instanceof Error) {
+      throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+        message: err.message || 'Invalid credentials',
+      });
+    }
+    throw new HTTPException(StatusCodes.BAD_REQUEST, {
+      message: 'An unexpected error occurred during login',
+    });
+  }
 });
 
 authRouter.openapi(refreshRoute, (c) => {

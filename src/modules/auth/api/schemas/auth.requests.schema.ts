@@ -20,6 +20,9 @@ export const registerBodySchema = z
 export const loginBodySchema = z.object({
   email: z.email(),
   password: z.string().min(8),
+  fingerprint: z.string().min(1),
+  os: z.string().optional(),
+  name: z.string().optional(),
 });
 
 export const refreshSchema = z.object({

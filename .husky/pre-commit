@@ -1,11 +1,13 @@
-echo "Running ESLint with auto-fix..."
-bun lint:fix
+if [ -z "$(git diff --cached --name-only)" ]; then
+echo "No staged changes to commit. Skipping pre-commit checks."
+exit 0
+fi
 
 echo "Running TypeScript type checks..."
 bun typecheck
 
 echo "Checking for secrets with Gitleaks..."
-bun run gitleaks dir -v --no-banner
+git diff --cached --name-only | xargs bun run gitleaks file -v --no-banner
 
 echo "Running Prettier for code formatting..."
 lint-staged

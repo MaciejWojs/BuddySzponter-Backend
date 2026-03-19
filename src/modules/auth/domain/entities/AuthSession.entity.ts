@@ -1,6 +1,6 @@
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
-import { AuthSessionRefreshTokenHash, AuthSessionUUID } from '../value-objects';
+import { AuthSessionRefreshToken, AuthSessionUUID } from '../value-objects';
 
 export class AuthSession {
   constructor(
@@ -8,7 +8,7 @@ export class AuthSession {
     readonly userId: UserId,
     readonly deviceId: DeviceUUID,
     readonly ipAddress: IpAddress,
-    readonly refreshTokenHash: AuthSessionRefreshTokenHash,
+    readonly refreshToken: AuthSessionRefreshToken,
     readonly userAgent: string,
     readonly revoked: boolean,
     readonly createdAt: Date,
@@ -20,7 +20,7 @@ export class AuthSession {
       changes.userId ?? this.userId,
       changes.deviceId ?? this.deviceId,
       changes.ipAddress ?? this.ipAddress,
-      changes.refreshTokenHash ?? this.refreshTokenHash,
+      changes.refreshToken ?? this.refreshToken,
       changes.userAgent ?? this.userAgent,
       changes.revoked ?? this.revoked,
       changes.createdAt ?? this.createdAt,

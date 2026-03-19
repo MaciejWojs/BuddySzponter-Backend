@@ -29,6 +29,7 @@ export class UserMapper {
         ),
         userDbRecord.isBanned,
         userDbRecord.isDeleted,
+        userDbRecord.avatar,
         userDbRecord.createdAt,
         userDbRecord.updatedAt,
       );
@@ -57,6 +58,7 @@ export class UserMapper {
       roleId: user.role.id,
       isBanned: user.isBanned,
       isDeleted: user.isDeleted,
+      avatar: user.avatar,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
