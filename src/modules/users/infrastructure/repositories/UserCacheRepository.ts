@@ -63,8 +63,8 @@ export class UserCacheRepository implements IUserRepository {
           String(createdUser.email.value),
         );
       }
-    } catch {
-      throw new Error('Failed to serialize user for caching');
+    } catch (err) {
+      logger.error('Failed to serialize user for caching', err);
     }
 
     return createdUser;
