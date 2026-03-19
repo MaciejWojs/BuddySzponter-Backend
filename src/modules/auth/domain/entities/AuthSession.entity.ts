@@ -27,7 +27,13 @@ export class AuthSession {
       changes.expiresAt ?? this.expiresAt,
     );
   }
+
   revoke(): AuthSession {
     return this.copy({ revoked: true });
+  }
+
+  async rotateRefreshToken(): Promise<AuthSession> {
+    const newToken = await AuthSessionRefreshToken.create();
+    return this.copy({ refreshToken: newToken });
   }
 }
