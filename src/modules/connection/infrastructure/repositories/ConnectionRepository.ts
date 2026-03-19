@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { client } from '@/infrastucture/cache/client';
 import { ConnectionMapper } from '@/shared/mappers/connectionMapper';
 
@@ -6,7 +7,6 @@ import { IConnectionRepository } from '../../domain/repositories/IConnectionRepo
 import { ConnectionCode, ConnectionStatus } from '../../domain/value-objects';
 
 export class ConnectionRepository implements IConnectionRepository {
-  static readonly CONNECTION_TTL_DURATION_SEC = 120; // 2 minutes
   async createPendingConnection(connection: Connection): Promise<Connection> {
     if (!client.connected) {
       throw new Error(
@@ -36,23 +36,23 @@ export class ConnectionRepository implements IConnectionRepository {
       throw new Error('Failed to serialize connection data.');
     }
 
-    const key = `connection_code:${connection.code.value}`;
+    const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${connection.code.value}`;
     const result = await client.setnx(key, payloadData);
 
     if (result !== 1) {
-      throw new Error('Connection code already exists. Please try again.');
+      throw new Error(APP_CONFIG.connection.errors.codeAlreadyExists);
     }
     const ttlResult = await client.expire(
       key,
-      ConnectionRepository.CONNECTION_TTL_DURATION_SEC,
+      APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
     );
     if (ttlResult !== 1) {
       await client.del(key);
       throw new Error('Failed to set connection expiration. Please try again.');
     }
     const lookupResult = await client.setex(
-      `connection_UUID:${connection.id.value}`,
-      ConnectionRepository.CONNECTION_TTL_DURATION_SEC,
+      `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connection.id.value}`,
+      APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
       connection.code.value,
     );
     if (lookupResult !== 'OK') {
@@ -67,7 +67,7 @@ export class ConnectionRepository implements IConnectionRepository {
         'Cache client is not connected. Cannot retrieve connection.',
       );
     }
-    const key = `connection_code:${code.value}`;
+    const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${code.value}`;
     const connectionDataRaw = await client.get(key);
     if (!connectionDataRaw) {
       return null;
@@ -86,7 +86,9 @@ export class ConnectionRepository implements IConnectionRepository {
         'Cache client is not connected. Cannot retrieve connections.',
       );
     }
-    const keys = await client.keys('connection_code:*');
+    const keys = await client.keys(
+      `${APP_CONFIG.connection.cache.keys.codePrefix}*`,
+    );
     const connections: Connection[] = [];
     for (const key of keys) {
       const connectionDataRaw = await client.get(key);
@@ -111,7 +113,7 @@ export class ConnectionRepository implements IConnectionRepository {
         'Cache client is not connected. Cannot update connection.',
       );
     }
-    const key = `connection_code:${connection.code.value}`;
+    const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${connection.code.value}`;
     const existingDataRaw = await client.get(key);
     if (!existingDataRaw) {
       return false; // Connection does not exist
@@ -153,7 +155,7 @@ export class ConnectionRepository implements IConnectionRepository {
         'Cache client is not connected. Cannot delete connection.',
       );
     }
-    const key = `connection_UUID:${id}`;
+    const key = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
     const delResult = await client.del(key);
     return delResult > 0;
   }

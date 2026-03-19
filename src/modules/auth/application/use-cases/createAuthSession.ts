@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
 import { AuthSession } from '../../domain/entities/AuthSession.entity';
@@ -36,7 +37,7 @@ export class CreateAuthSession {
       command.userId,
     );
 
-    if (sessions.length >= 5) {
+    if (sessions.length >= APP_CONFIG.auth.session.maxActivePerUser) {
       const oldestSession = sessions.reduce((oldest, current) =>
         current.createdAt < oldest.createdAt ? current : oldest,
       );
@@ -44,7 +45,9 @@ export class CreateAuthSession {
       await this.repo.save(revokedOldestSession);
     }
 
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const expiresAt = new Date(
+      Date.now() + APP_CONFIG.auth.session.expiresInMs,
+    );
     const session = new AuthSession(
       new AuthSessionUUID(),
       command.userId,

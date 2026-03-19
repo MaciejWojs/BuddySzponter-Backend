@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import { Password } from '@/modules/users/domain/value-objects';
 import { ConnectionUUID } from '@/shared/value-objects';
@@ -16,7 +17,7 @@ export interface CreateConnectionCommand {
 
 export class CreateConnection {
   constructor(private readonly repo: IConnectionRepository) {}
-  static MAX_RETRIES = 5;
+
   async execute(input: CreateConnectionCommand): Promise<Connection> {
     const password = await Password.create(input.password);
 
@@ -27,7 +28,7 @@ export class CreateConnection {
       input.device.fingerprint,
     );
 
-    let retries = CreateConnection.MAX_RETRIES;
+    let retries = APP_CONFIG.connection.retries.createPendingMax;
 
     while (retries-- > 0) {
       const connection = new Connection(
@@ -45,7 +46,7 @@ export class CreateConnection {
       } catch (error) {
         if (
           error instanceof Error &&
-          error.message.includes('Connection code already exists')
+          error.message.includes(APP_CONFIG.connection.errors.codeAlreadyExists)
         ) {
           continue;
         }
@@ -54,6 +55,6 @@ export class CreateConnection {
       }
     }
 
-    throw new Error('Failed to create connection after max retries');
+    throw new Error(APP_CONFIG.connection.errors.failedAfterMaxRetries);
   }
 }

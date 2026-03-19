@@ -4,6 +4,7 @@ import { getConnInfo } from 'hono/bun';
 import { HTTPException } from 'hono/http-exception';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { client } from '@/infrastucture/cache/client';
 import { Password } from '@/modules/users/domain/value-objects';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
@@ -80,7 +81,7 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
   do {
     code = randomBytes(4).toString('hex'); // 4 bytes -> 8 hex characters
     const result = await client.setnx(
-      `connection_code:${code}`,
+      `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`,
       JSON.stringify({
         status: 'pending',
         HostIpAddress: ipA.value,
@@ -92,10 +93,15 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
     );
 
     if (result === 1) {
-      const ttlResult = await client.expire(`connection_code:${code}`, 120);
+      const ttlResult = await client.expire(
+        `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`,
+        APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
+      );
       if (ttlResult !== 1) {
         try {
-          await client.del(`connection_code:${code}`);
+          await client.del(
+            `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`,
+          );
         } catch {
           throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Failed to clean up invalid connection code',
@@ -104,20 +110,26 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
         continue; // Retry if setting TTL failed
       }
 
-      expiresAt = new Date(Date.now() + 120 * 1000);
+      expiresAt = new Date(
+        Date.now() + APP_CONFIG.connection.cache.ttl.pendingCodeSeconds * 1000,
+      );
       try {
         const attemptsSetResult = await client.setex(
-          `connection_attempts:${code}`,
-          120,
+          `${APP_CONFIG.connection.cache.keys.attemptsPrefix}${code}`,
+          APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
           '0',
         );
 
         if (attemptsSetResult !== 'OK') {
-          await client.del(`connection_code:${code}`);
+          await client.del(
+            `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`,
+          );
           continue;
         }
       } catch {
-        await client.del(`connection_code:${code}`);
+        await client.del(
+          `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`,
+        );
         continue;
       }
 
@@ -126,7 +138,7 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
   } while (!keyGenerationSuccess);
 
   if (!expiresAt) {
-    await client.del(`connection_code:${code}`);
+    await client.del(`${APP_CONFIG.connection.cache.keys.codePrefix}${code}`);
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
       message: 'Failed to generate connection code',
     });
@@ -143,8 +155,8 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
   const data = c.req.valid('json');
   const connectionCode = data.connectionCode;
 
-  const key = `connection_code:${connectionCode}`;
-  const attemptsKey = `connection_attempts:${connectionCode}`;
+  const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${connectionCode}`;
+  const attemptsKey = `${APP_CONFIG.connection.cache.keys.attemptsPrefix}${connectionCode}`;
 
   if (!client.connected) {
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -178,7 +190,7 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
     });
   }
 
-  if (attempts > 5) {
+  if (attempts > APP_CONFIG.connection.retries.joinAttemptsLimit) {
     throw new HTTPException(StatusCodes.TOO_MANY_REQUESTS, {
       message: 'Too many attempts',
     });
