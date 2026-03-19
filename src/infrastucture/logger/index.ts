@@ -59,7 +59,8 @@ const extendedLogger = Object.assign(logger, {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onlyDev: (message: string, ...meta: any[]) => {
     if (isDevelopment) {
-      logger.debug(message, ...meta);
+      const preparedMessage = `[DEV-only] ${message}`;
+      logger.debug(preparedMessage, ...meta);
     }
   },
 });
