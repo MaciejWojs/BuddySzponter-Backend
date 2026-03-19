@@ -19,7 +19,31 @@ export class CreateAuthSession {
   constructor(protected readonly repo: IAuthSessionRepository) {}
 
   async execute(command: CreateAuthSessionCommand): Promise<AuthSession> {
-    //TODO: Check if user has too many active sessions [5] and revoke oldest if needed
+    const existingSessionsWithDevice =
+      await this.repo.findAllSessionsByUserIdAndDeviceId(
+        command.userId,
+        command.deviceId.value,
+      );
+
+    await Promise.all(
+      existingSessionsWithDevice.map((session) => {
+        session.revoke();
+        return this.repo.save(session);
+      }),
+    );
+
+    const sessions = await this.repo.findAllActiveSessionsByUserId(
+      command.userId,
+    );
+
+    if (sessions.length >= 5) {
+      const oldestSession = sessions.reduce((oldest, current) =>
+        current.createdAt < oldest.createdAt ? current : oldest,
+      );
+      oldestSession.revoke();
+      await this.repo.save(oldestSession);
+    }
+
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
     const session = new AuthSession(
       new AuthSessionUUID(),
