@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 
 export class AuthSessionRefreshToken {
   private constructor(private readonly token: string) {}
@@ -18,8 +18,13 @@ export class AuthSessionRefreshToken {
   }
 
   verify(raw: string): boolean {
-    const bufA = Buffer.from(this.token);
-    const bufB = Buffer.from(raw);
-    return crypto.timingSafeEqual(bufA, bufB);
+    const bufA = Buffer.from(this.token, 'hex');
+    const bufB = Buffer.from(raw, 'hex');
+
+    if (bufA.length !== bufB.length) {
+      return false;
+    }
+
+    return timingSafeEqual(bufA, bufB);
   }
 }
