@@ -13,6 +13,7 @@ export const loginPayloadSchema = z.object({
 
 export const refreshPayloadSchema = z.object({
   message: z.string(),
+  accessToken: z.jwt(),
 });
 
 export const logoutPayloadSchema = z.object({

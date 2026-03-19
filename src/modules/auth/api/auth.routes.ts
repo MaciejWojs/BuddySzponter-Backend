@@ -113,7 +113,10 @@ authRouter.openapi(loginRoute, async (c) => {
   const authSessionRepository = repositoryFactory.authSessionRepository();
   const loginUser = new LoginUser(userCacheRepository);
   const createOrFindUserDevice = new CreateOrFindUserDevice(deviceRepository);
-  const createAuthSession = new CreateAuthSession(authSessionRepository);
+  const createAuthSession = new CreateAuthSession(
+    authSessionRepository,
+    userCacheRepository,
+  );
   try {
     const user = await loginUser.execute(data);
 
@@ -199,6 +202,7 @@ authRouter.openapi(refreshRoute, async (c) => {
     const repositoryFactory = new RepositoryFactory();
     const refreshToken = new RefreshAuthSession(
       repositoryFactory.authSessionRepository(),
+      repositoryFactory.userCacheRepository(),
     );
     const refreshedData = {
       sessionId: tokenPayload.sessionId,
@@ -206,12 +210,27 @@ authRouter.openapi(refreshRoute, async (c) => {
     };
     const newData = await refreshToken.execute(refreshedData);
 
+    const accessToken = await sign(
+      {
+        sub: tokenPayload.userId,
+        role: newData.user.role.name,
+        sessionId: tokenPayload.sessionId,
+        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
+      },
+      configProvider.get('JWT_ACCESS_SECRET'),
+    );
+
     setCookie(c, 'refreshToken', newData.rawToken, {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
       maxAge: 60 * 60 * 24 * 7,
     });
+    const payload = {
+      message: 'Authentication token refreshed successfully',
+      accessToken,
+    };
+    return c.json(payload, StatusCodes.OK);
   } catch (err) {
     logger.warn(
       `Failed to decode refresh token: ${err instanceof Error ? err.message : String(err)}`,
@@ -220,13 +239,6 @@ authRouter.openapi(refreshRoute, async (c) => {
       message: 'Invalid refresh token',
     });
   }
-
-  const payload = {
-    message: 'Token refreshed successfully',
-  };
-
-  // Here you would handle the logic for refreshing a user's authentication token, such as validating the refresh token and generating a new access token.
-  return c.json(payload, StatusCodes.OK);
 });
 
 authRouter.openapi(logoutRoute, (c) => {

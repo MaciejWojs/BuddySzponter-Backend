@@ -1,3 +1,4 @@
+import { IUserRepository } from '@/modules/users/domain/repositories/IUserRepository';
 import { AuthSessionWithRawToken } from '@/shared/types/AuthSessionWithRawToken';
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
@@ -16,7 +17,10 @@ export interface CreateAuthSessionCommand {
 }
 
 export class CreateAuthSession {
-  constructor(protected readonly repo: IAuthSessionRepository) {}
+  constructor(
+    protected readonly repo: IAuthSessionRepository,
+    protected readonly userRepository: IUserRepository,
+  ) {}
 
   async execute(
     command: CreateAuthSessionCommand,
@@ -64,9 +68,14 @@ export class CreateAuthSession {
       expiresAt,
     );
     const createdSession = await this.repo.createSession(session);
+    const user = await this.userRepository.findById(command.userId);
+    if (!user) {
+      throw new Error('User not found for the given session');
+    }
     const finalData: AuthSessionWithRawToken = {
       session: createdSession,
       rawToken: raw,
+      user: user,
     };
     return finalData;
   }
