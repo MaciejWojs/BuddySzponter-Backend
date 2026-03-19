@@ -41,7 +41,6 @@ export const authSessionsTable = pgTable('auth_sessions', {
     .notNull()
     .references(() => devicesTable.id, { onDelete: 'cascade' }),
 
-  tokenVersion: integer().default(1).notNull(),
   refreshTokenHash: varchar({ length: 255 }).notNull(),
 
   ipAddress: inet().notNull(),

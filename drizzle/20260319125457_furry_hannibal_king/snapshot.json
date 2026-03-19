@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "77c2d486-2d8f-4cbd-b3cf-d81e1dbc88ef",
+  "id": "e44bf055-5e54-4e71-86dd-b7b8c2be26cc",
   "prevIds": [
     "91aeca1d-4343-4823-81ab-fe66086d04c8"
   ],
@@ -151,19 +151,6 @@
       "generated": null,
       "identity": null,
       "name": "deviceId",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "auth_sessions"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "1",
-      "generated": null,
-      "identity": null,
-      "name": "tokenVersion",
       "entityType": "columns",
       "schema": "public",
       "table": "auth_sessions"

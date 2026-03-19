@@ -19,7 +19,6 @@ export class AuthSessionMapper {
       record.revoked,
       record.createdAt,
       record.expiresAt,
-      record.tokenVersion,
     );
   }
 
@@ -34,7 +33,6 @@ export class AuthSessionMapper {
       revoked: authSession.revoked,
       createdAt: authSession.createdAt,
       expiresAt: authSession.expiresAt,
-      tokenVersion: authSession.tokenVersion,
     };
   }
 }

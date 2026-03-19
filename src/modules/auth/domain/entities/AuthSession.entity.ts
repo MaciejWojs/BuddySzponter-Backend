@@ -13,7 +13,6 @@ export class AuthSession {
     readonly revoked: boolean,
     readonly createdAt: Date,
     readonly expiresAt: Date,
-    readonly tokenVersion: number = 0,
   ) {}
   private copy(changes: Partial<AuthSession>): AuthSession {
     return new AuthSession(
@@ -26,7 +25,6 @@ export class AuthSession {
       changes.revoked ?? this.revoked,
       changes.createdAt ?? this.createdAt,
       changes.expiresAt ?? this.expiresAt,
-      changes.tokenVersion ?? this.tokenVersion,
     );
   }
   revoke(): AuthSession {
