@@ -1,3 +1,4 @@
+import { AuthSessionWithRawToken } from '@/shared/types/AuthSessionWithRawToken';
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
 import { AuthSession } from '../../domain/entities/AuthSession.entity';
@@ -11,14 +12,15 @@ export interface CreateAuthSessionCommand {
   userId: UserId;
   deviceId: DeviceUUID;
   ipAddress: IpAddress;
-  refreshToken: AuthSessionRefreshToken;
   userAgent: string;
 }
 
 export class CreateAuthSession {
   constructor(protected readonly repo: IAuthSessionRepository) {}
 
-  async execute(command: CreateAuthSessionCommand): Promise<AuthSession> {
+  async execute(
+    command: CreateAuthSessionCommand,
+  ): Promise<AuthSessionWithRawToken> {
     const existingSessionsWithDevice =
       await this.repo.findAllSessionsByUserIdAndDeviceId(
         command.userId,
@@ -45,18 +47,23 @@ export class CreateAuthSession {
     }
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const { raw, hashed: refreshToken } = AuthSessionRefreshToken.create();
     const session = new AuthSession(
       new AuthSessionUUID(),
       command.userId,
       command.deviceId,
       command.ipAddress,
-      command.refreshToken,
+      refreshToken,
       command.userAgent,
       false,
       new Date(),
       expiresAt,
     );
-
-    return await this.repo.createSession(session);
+    const createdSession = await this.repo.createSession(session);
+    const finalData: AuthSessionWithRawToken = {
+      session: createdSession,
+      rawToken: raw,
+    };
+    return finalData;
   }
 }

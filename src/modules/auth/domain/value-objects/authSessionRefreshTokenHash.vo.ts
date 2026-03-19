@@ -1,32 +1,43 @@
-import { randomBytes, timingSafeEqual } from 'crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 
 import { APP_CONFIG } from '@/config/appConfig';
 
 export class AuthSessionRefreshToken {
-  private constructor(private readonly token: string) {}
+  private constructor(private readonly hashedToken: string) {}
 
-  static async create(): Promise<AuthSessionRefreshToken> {
-    const buffer = randomBytes(APP_CONFIG.crypto.refreshTokenBytes);
-    const token = buffer.toString('hex');
-    return new AuthSessionRefreshToken(token);
+  static create(): {
+    raw: string;
+    hashed: AuthSessionRefreshToken;
+  } {
+    const raw = randomBytes(APP_CONFIG.crypto.refreshTokenBytes).toString(
+      'hex',
+    );
+
+    const hash = createHash('sha256').update(raw).digest('hex');
+
+    return {
+      raw,
+      hashed: new AuthSessionRefreshToken(hash),
+    };
+  }
+
+  static fromHash(hash: string): AuthSessionRefreshToken {
+    return new AuthSessionRefreshToken(hash);
   }
 
   get value(): string {
-    return this.token;
-  }
-
-  static fromExisting(token: string): AuthSessionRefreshToken {
-    return new AuthSessionRefreshToken(token);
+    return this.hashedToken;
   }
 
   verify(raw: string): boolean {
-    const bufA = Buffer.from(this.token, 'hex');
-    const bufB = Buffer.from(raw, 'hex');
+    const hash = createHash('sha256').update(raw).digest();
 
-    if (bufA.length !== bufB.length) {
+    const stored = Buffer.from(this.hashedToken, 'hex');
+
+    if (hash.length !== stored.length) {
       return false;
     }
 
-    return timingSafeEqual(bufA, bufB);
+    return timingSafeEqual(hash, stored);
   }
 }

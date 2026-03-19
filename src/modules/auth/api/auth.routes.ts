@@ -21,7 +21,6 @@ import { CreateUserDevice as CreateOrFindUserDevice } from '../../users/applicat
 import { CreateAuthSession } from '../application/use-cases/createAuthSession';
 import { LoginUser } from '../application/use-cases/loginUser';
 import { RegisterUser } from '../application/use-cases/registerUser';
-import { AuthSessionRefreshToken } from '../domain/value-objects';
 import {
   loginRoute,
   logoutRoute,
@@ -130,17 +129,15 @@ authRouter.openapi(loginRoute, async (c) => {
       data.os,
     );
 
-    const token = await AuthSessionRefreshToken.create();
+    const { session: authSession, rawToken: refreshToken } =
+      await createAuthSession.execute({
+        userId: user.id,
+        deviceId: device.id,
+        userAgent: c.req.header('User-Agent') ?? 'Unknown',
+        ipAddress: ipAddress,
+      });
 
-    const authSession = await createAuthSession.execute({
-      userId: user.id,
-      deviceId: device.id,
-      refreshToken: token,
-      userAgent: c.req.header('User-Agent') ?? 'Unknown',
-      ipAddress: ipAddress,
-    });
-
-    setCookie(c, 'refreshToken', authSession.refreshToken.value, {
+    setCookie(c, 'refreshToken', refreshToken, {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',

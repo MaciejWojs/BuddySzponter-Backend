@@ -27,13 +27,15 @@ export class AuthSession {
       changes.expiresAt ?? this.expiresAt,
     );
   }
-
   revoke(): AuthSession {
     return this.copy({ revoked: true });
   }
 
-  async rotateRefreshToken(): Promise<AuthSession> {
+  async rotateRefreshToken(): Promise<{ token: AuthSession; raw: string }> {
     const newToken = await AuthSessionRefreshToken.create();
-    return this.copy({ refreshToken: newToken });
+    return {
+      token: this.copy({ refreshToken: newToken.hashed }),
+      raw: newToken.raw,
+    };
   }
 }
