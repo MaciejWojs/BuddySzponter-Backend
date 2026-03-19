@@ -185,6 +185,11 @@ authRouter.openapi(loginRoute, async (c) => {
 });
 
 authRouter.openapi(refreshRoute, (c) => {
+  const data = c.req.valid('cookie');
+
+  logger.onlyDev(
+    `Received refresh token request with data: ${data.refreshToken}`,
+  );
   const payload = {
     message: 'Token refreshed successfully',
   };

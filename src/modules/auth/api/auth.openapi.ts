@@ -86,13 +86,7 @@ export const refreshRoute = createRoute({
   tags: ['Auth'],
   summary: 'Refresh authentication token',
   request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: refreshSchema,
-        },
-      },
-    },
+    cookies: refreshSchema,
   },
   responses: {
     200: {
