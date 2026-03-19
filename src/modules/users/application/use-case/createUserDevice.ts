@@ -23,7 +23,9 @@ export class CreateUserDevice {
     if (existingDevices.length > 0) {
       try {
         if (!existingDevices[0]!.userId) {
-          await existingDevices[0]!.changeUser(new UserId(userId));
+          existingDevices[0] = existingDevices[0]!.changeUser(
+            new UserId(userId),
+          );
           await this.deviceRepository.save(existingDevices[0]!);
         }
       } catch (error) {

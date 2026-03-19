@@ -13,7 +13,7 @@ import { IUserDAO } from '../dao/IUserDAO';
 export class UserRepository implements IUserRepository {
   constructor(protected readonly dao: IUserDAO) {}
 
-  async createUser(user: Omit<User, 'id'>): Promise<User> {
+  async createUser(user: User): Promise<User> {
     const userExists = await this.dao.findByEmail(user.email.value);
     if (userExists) {
       throw new UserAlreadyExistWithEmailError(user.email);
