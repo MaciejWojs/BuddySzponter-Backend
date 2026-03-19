@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-import { APP_CONFIG } from '@/config/appConfig';
-
-// Hex string length is double the byte length
-const refreshTokenLength = APP_CONFIG.crypto.refreshTokenBytes * 2;
-
 export const registerBodySchema = z
   .object({
     nickname: z.string().min(3).max(20),
@@ -31,11 +26,11 @@ export const loginBodySchema = z.object({
 });
 
 export const refreshSchema = z.object({
-  refreshToken: z.string().length(refreshTokenLength),
+  refreshToken: z.string(),
 });
 
 export const logoutSchema = z.object({
-  refreshToken: z.string().length(refreshTokenLength),
+  refreshToken: z.string(),
 });
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;
