@@ -112,27 +112,30 @@ export class DrizzleAuthSessionDAO
   }
 
   async deleteRevokedSessionsByUserId(userId: number): Promise<number> {
-    const deleteResult = await this.database
+    const deletedSessions = await this.database
       .delete(schema.authSessionsTable)
       .where(
         and(
           eq(schema.authSessionsTable.userId, userId),
           eq(schema.authSessionsTable.revoked, true),
         ),
-      );
+      )
+      .returning();
 
-    return deleteResult;
+    return deletedSessions.length;
   }
+
   async deleteExpiredSessionsByUserId(userId: number): Promise<number> {
-    const deleteResult = await this.database
+    const deletedSessions = await this.database
       .delete(schema.authSessionsTable)
       .where(
         and(
           eq(schema.authSessionsTable.userId, userId),
           lt(schema.authSessionsTable.expiresAt, new Date()),
         ),
-      );
+      )
+      .returning();
 
-    return deleteResult;
+    return deletedSessions.length;
   }
 }
