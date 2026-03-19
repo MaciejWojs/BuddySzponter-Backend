@@ -20,7 +20,9 @@ import { RepositoryFactory } from '../../../infrastucture/factories/RepositoryFa
 import { CreateUserDevice as CreateOrFindUserDevice } from '../../users/application/use-case/createUserDevice';
 import { CreateAuthSession } from '../application/use-cases/createAuthSession';
 import { LoginUser } from '../application/use-cases/loginUser';
+import { RefreshAuthSession } from '../application/use-cases/refreshAuthSession';
 import { RegisterUser } from '../application/use-cases/registerUser';
+import { AuthSessionRefreshToken } from '../domain/value-objects';
 import {
   loginRoute,
   logoutRoute,
@@ -184,12 +186,41 @@ authRouter.openapi(loginRoute, async (c) => {
   }
 });
 
-authRouter.openapi(refreshRoute, (c) => {
+authRouter.openapi(refreshRoute, async (c) => {
   const data = c.req.valid('cookie');
+  try {
+    const tokenPayload = await AuthSessionRefreshToken.decode(
+      data.refreshToken,
+    );
 
-  logger.onlyDev(
-    `Received refresh token request with data: ${data.refreshToken}`,
-  );
+    logger.onlyDev(
+      `Decoded refresh token payload: ${JSON.stringify(tokenPayload)}`,
+    );
+    const repositoryFactory = new RepositoryFactory();
+    const refreshToken = new RefreshAuthSession(
+      repositoryFactory.authSessionRepository(),
+    );
+    const refreshedData = {
+      sessionId: tokenPayload.sessionId,
+      refreshToken: data.refreshToken,
+    };
+    const newData = await refreshToken.execute(refreshedData);
+
+    setCookie(c, 'refreshToken', newData.rawToken, {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
+      // sameSite: 'Strict',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  } catch (err) {
+    logger.warn(
+      `Failed to decode refresh token: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Invalid refresh token',
+    });
+  }
+
   const payload = {
     message: 'Token refreshed successfully',
   };
