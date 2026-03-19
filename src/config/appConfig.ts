@@ -16,7 +16,7 @@ export const APP_CONFIG = {
     keys: {
       /** Prefix for ECDH session keys: `handshake:<sessionId>` */
       handshakePrefix: 'handshake:',
-      /** Prefix for cached user records: `user:<id>` */
+      /** Prefix for cached user records keyed by email: `user:<email>` */
       userPrefix: 'user:',
       /** `user:id:<userId>` -> email mapping to allow cache lookups by user ID */
       userIdPrefix: 'user:id:',

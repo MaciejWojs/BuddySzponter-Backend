@@ -27,8 +27,8 @@ export class CreateAuthSession {
 
     await Promise.all(
       existingSessionsWithDevice.map((session) => {
-        session.revoke();
-        return this.repo.save(session);
+        const revokedSession = session.revoke();
+        return this.repo.save(revokedSession);
       }),
     );
 
@@ -40,8 +40,8 @@ export class CreateAuthSession {
       const oldestSession = sessions.reduce((oldest, current) =>
         current.createdAt < oldest.createdAt ? current : oldest,
       );
-      oldestSession.revoke();
-      await this.repo.save(oldestSession);
+      const revokedOldestSession = oldestSession.revoke();
+      await this.repo.save(revokedOldestSession);
     }
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days

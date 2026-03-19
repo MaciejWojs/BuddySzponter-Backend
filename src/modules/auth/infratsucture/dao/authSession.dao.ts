@@ -42,11 +42,12 @@ export class DrizzleAuthSessionDAO
     return createdSession ?? null;
   }
   override async deleteById(id: string): Promise<boolean> {
-    const deleteResult = await this.database
+    const deletedSessions = await this.database
       .delete(schema.authSessionsTable)
-      .where(eq(schema.authSessionsTable.id, id));
+      .where(eq(schema.authSessionsTable.id, id))
+      .returning();
 
-    return deleteResult > 0;
+    return deletedSessions.length > 0;
   }
   override async save(
     record: AuthSessionDbRecord,
