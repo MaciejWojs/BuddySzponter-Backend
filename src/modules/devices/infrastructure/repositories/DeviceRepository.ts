@@ -1,11 +1,10 @@
+import { DeviceMapper } from '@/shared/mappers/deviceMapper';
 import { DeviceUUID, UserId } from '@/shared/value-objects';
+
 import { Device } from '../../domain/entities/Device.entity';
 import { IDevicesRepository } from '../../domain/repositories/IDeviceRepository';
-import {
-  DeviceFingerprint,
-} from '../../domain/value-objects';
+import { DeviceFingerprint } from '../../domain/value-objects';
 import { IDevicesDAO } from '../dao/IDevicesDao';
-import { DeviceMapper } from '@/shared/mappers/DeviceMapper';
 
 export class DeviceRepository implements IDevicesRepository {
   constructor(protected readonly dao: IDevicesDAO) {}

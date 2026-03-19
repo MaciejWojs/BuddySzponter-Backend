@@ -5,6 +5,7 @@ import {
   DeviceOS,
 } from '@/modules/devices/domain/value-objects';
 import { DeviceDbRecord } from '@/modules/devices/infrastructure/dao/IDevicesDao';
+
 import { DeviceUUID, UserId } from '../value-objects';
 
 export class DeviceMapper {
