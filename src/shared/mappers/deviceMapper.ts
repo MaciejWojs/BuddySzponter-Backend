@@ -28,6 +28,7 @@ export class DeviceMapper {
       name: device.name.value,
       os: device.os.value,
       createdAt: device.createdAt,
+      //TODO: add lastUsedAt to device entity and set it here
       lastUsedAt: null,
     };
   }
