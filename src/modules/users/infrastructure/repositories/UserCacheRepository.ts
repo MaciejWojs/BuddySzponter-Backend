@@ -128,12 +128,14 @@ export class UserCacheRepository implements IUserRepository {
           APP_CONFIG.cache.ttl.user,
           cacheValue,
         );
-        const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${userFromDb.id?.value}`;
-        await this.cacheClient.setex(
-          emailIdKey,
-          APP_CONFIG.cache.ttl.user,
-          String(userFromDb.email.value),
-        );
+        if (userFromDb.id) {
+          const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${userFromDb.id.value}`;
+          await this.cacheClient.setex(
+            emailIdKey,
+            APP_CONFIG.cache.ttl.user,
+            String(userFromDb.email.value),
+          );
+        }
       } catch (err) {
         console.warn('Failed to serialize user for caching', err);
       }
