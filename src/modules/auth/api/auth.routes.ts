@@ -151,6 +151,7 @@ authRouter.openapi(loginRoute, async (c) => {
       {
         sub: user.id.value,
         role: user.role.name,
+        sessionId: authSession.id.value,
         exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
       },
       configProvider.get('JWT_ACCESS_SECRET'),

@@ -14,11 +14,16 @@ export const injectJwtPayload = createMiddleware<ENV>(async (c, next) => {
         configProvider.get('JWT_ACCESS_SECRET'),
         'HS256',
       );
-      const { sub: userId, role } = decodedPayload as {
+      const {
+        sub: userId,
+        role,
+        sessionId,
+      } = decodedPayload as {
         sub: number;
         role: string;
+        sessionId: string;
       };
-      c.set('jwt-payload', { userId, role });
+      c.set('jwt-payload', { userId, role, sessionId });
     } catch {
       c.set('jwt-payload', null);
     }
