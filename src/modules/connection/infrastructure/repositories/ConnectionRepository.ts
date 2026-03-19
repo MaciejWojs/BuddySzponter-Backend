@@ -27,6 +27,7 @@ export class ConnectionRepository implements IConnectionRepository {
       code: connection.code.value,
       connectionUUID: connection.id.value,
       hostFingerprint: connection.host.fingerprint.value,
+      joinAttempts: connection.joinAttempts,
     };
     let payloadData;
     try {
@@ -135,6 +136,7 @@ export class ConnectionRepository implements IConnectionRepository {
       guestDeviceId: connection.guest?.deviceId?.value ?? null,
       guestId: connection.guest?.userId?.value ?? null,
       guestFingerprint: connection.guest?.fingerprint.value ?? null,
+      joinAttempts: connection.joinAttempts,
     };
     let payloadData;
     try {
