@@ -47,7 +47,7 @@ export const pl = {
     en: 'Angielski',
     pl: 'Polski',
     es: 'Hiszpański',
-    67: 'Szponterski',
+    plX67: 'Szponterski',
     choice: 'Wybierz język',
   },
 } as const;
