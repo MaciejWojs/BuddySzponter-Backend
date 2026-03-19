@@ -142,7 +142,7 @@ authRouter.openapi(loginRoute, async (c) => {
 
     setCookie(c, 'refreshToken', authSession.refreshToken.value, {
       httpOnly: true,
-      secure: configProvider.get('DEVELOPMENT'),
+      secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
       maxAge: 60 * 60 * 24 * 7,
     });
