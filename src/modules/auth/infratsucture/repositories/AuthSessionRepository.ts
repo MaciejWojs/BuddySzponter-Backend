@@ -1,4 +1,4 @@
-import { AuthSessionMapper } from '@/shared/mappers/AuthSessionMapper';
+import { AuthSessionMapper } from '@/shared/mappers/authSessionMapper';
 import { UserId } from '@/shared/value-objects';
 
 import { AuthSession } from '../../domain/entities/AuthSession.entity';
