@@ -33,6 +33,8 @@ export const APP_CONFIG = {
   crypto: {
     /** ECDH named curve used for key-exchange. */
     ecdhCurve: 'prime256v1',
+    /** Byte length of the random refresh token used in auth sessions. */
+    refreshTokenBytes: 32,
   },
 
   headers: {

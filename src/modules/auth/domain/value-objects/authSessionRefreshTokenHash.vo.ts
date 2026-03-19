@@ -1,10 +1,12 @@
 import { randomBytes, timingSafeEqual } from 'crypto';
 
+import { APP_CONFIG } from '@/config/appConfig';
+
 export class AuthSessionRefreshToken {
   private constructor(private readonly token: string) {}
 
-  static async create(byteLength = 32): Promise<AuthSessionRefreshToken> {
-    const buffer = randomBytes(byteLength);
+  static async create(): Promise<AuthSessionRefreshToken> {
+    const buffer = randomBytes(APP_CONFIG.crypto.refreshTokenBytes);
     const token = buffer.toString('hex');
     return new AuthSessionRefreshToken(token);
   }
