@@ -1,8 +1,16 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { internalServerErrorResponse } from '@/shared/api/openapi/error.openapi';
+import {
+  internalServerErrorResponse,
+  unprocessableEntityResponse,
+} from '@/shared/api/openapi/error.openapi';
 
-import { supportedVersionsResponseSchema } from './schemas/core.responses.schema';
+import { coreLocaleQuerySchema } from './schemas/core.requests.schema';
+import {
+  coreLocaleNotFoundResponseSchema,
+  coreLocalePayloadResponseSchema,
+  supportedVersionsResponseSchema,
+} from './schemas/core.responses.schema';
 
 export const getSupportedVersionsRoute = createRoute({
   method: 'get',
@@ -19,6 +27,38 @@ export const getSupportedVersionsRoute = createRoute({
         },
       },
     },
+    ...internalServerErrorResponse,
+  },
+});
+
+export const getCoreLocaleRoute = createRoute({
+  method: 'get',
+  path: '/locale',
+  tags: ['Core'],
+  summary: 'Get locale translations',
+  description:
+    'Returns translation payload for selected language. Used by the frontend to set the application language.',
+  request: {
+    query: coreLocaleQuerySchema,
+  },
+  responses: {
+    200: {
+      description: 'Translation payload for requested language',
+      content: {
+        'application/json': {
+          schema: coreLocalePayloadResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: 'Language not found',
+      content: {
+        'application/json': {
+          schema: coreLocaleNotFoundResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
   },
 });

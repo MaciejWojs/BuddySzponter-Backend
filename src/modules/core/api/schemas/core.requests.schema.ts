@@ -2,7 +2,7 @@ import { z } from '@hono/zod-openapi';
 
 import { supportedLocales } from '@/shared/locales';
 
-export const getLocaleQuerySchema = z.object({
+export const coreLocaleQuerySchema = z.object({
   lang: z.enum(supportedLocales).openapi({
     param: {
       name: 'lang',
