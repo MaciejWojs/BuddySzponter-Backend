@@ -18,11 +18,7 @@ export class JoinConnection {
     if (!connection) {
       throw new Error('Connection not found');
     }
-    if (connection.joinAttempts > 3) {
-      throw new Error('Maximum join attempts exceeded');
-    }
-
-    const doPasswordMatch = await connection.password.verify(input.password);
+    const doPasswordMatch = await connection.comparePassword(input.password);
     if (!doPasswordMatch) {
       throw new Error('Invalid password');
     }

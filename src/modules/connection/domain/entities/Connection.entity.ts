@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { Password } from '@/modules/users/domain/value-objects';
 import { ConnectionUUID } from '@/shared/value-objects';
 
@@ -37,7 +38,7 @@ export class Connection {
 
   joinConnection(guest: ConnectionParticipant): Connection {
     const updatedJoinAttempts = this.joinAttempts + 1;
-    if (updatedJoinAttempts > 3) {
+    if (updatedJoinAttempts > APP_CONFIG.connection.retries.joinAttemptsLimit) {
       throw new Error('Maximum join attempts exceeded');
     }
     if (this.guest) {
