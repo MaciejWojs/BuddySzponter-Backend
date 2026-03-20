@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 export const userIdParamSchema = z.object({
-  id: z.number().positive().min(1),
+  // TODO HONO AND ZOD-OPENAPI casuing issues with number params, needs to be string for now
+  id: z.string(),
 });
 export const getUsersPaginatedQuerySchema = z.object({
   offset: z.number().min(0).default(0),
@@ -28,7 +29,12 @@ export const postUserAvatarRequestSchema = z.object({
   //       ['image/png', 'image/jpeg', 'image/webp'],
   //       'Avatar must be PNG, JPEG, or WEBP',
   //     ),
-  avatar: z.string().min(1, 'Avatar cannot be empty'),
+  file: z.any().openapi({
+    // type: 'string',
+    format: 'binary',
+    description: 'Image file(max 10MB)',
+  }),
+  // avatar: z.string().min(1, 'Avatar cannot be empty'),
 });
 
 export type UserIdParam = z.infer<typeof userIdParamSchema>;

@@ -102,7 +102,13 @@ export const postUserAvatarRequestRoute = createRoute({
     params: userIdParamSchema,
     body: {
       content: {
-        'multipart/form-data': {
+        'image/png': {
+          schema: postUserAvatarRequestSchema,
+        },
+        'image/jpeg': {
+          schema: postUserAvatarRequestSchema,
+        },
+        'image/webp': {
           schema: postUserAvatarRequestSchema,
         },
       },
