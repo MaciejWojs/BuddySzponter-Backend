@@ -22,6 +22,21 @@ export class DrizzleCoreDao
     return rows[0] ?? null;
   }
 
+  async findByVersion(version: string): Promise<AppVersionDbRecord | null> {
+    const rows = await this.database
+      .select()
+      .from(appVersionTable)
+      .where(eq(appVersionTable.version, version))
+      .limit(1);
+
+    return rows[0] ?? null;
+  }
+
+  async findLangHashByVersion(version: string): Promise<string | null> {
+    const row = await this.findByVersion(version);
+    return row?.langHash ?? null;
+  }
+
   async findSupportedVersions(): Promise<AppVersionDbRecord[]> {
     return this.database
       .select()
@@ -63,5 +78,18 @@ export class DrizzleCoreDao
     }
 
     return updated;
+  }
+
+  async updateLangHashByVersion(
+    version: string,
+    langHash: string,
+  ): Promise<boolean> {
+    const updated = await this.database
+      .update(appVersionTable)
+      .set({ langHash })
+      .where(eq(appVersionTable.version, version))
+      .returning({ id: appVersionTable.id });
+
+    return updated.length > 0;
   }
 }

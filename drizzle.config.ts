@@ -5,6 +5,9 @@ export default defineConfig({
   out: './drizzle',
   schema: './src/infrastucture/db/schema.ts',
   dialect: 'postgresql',
+  migrations: {
+    schema: 'public',
+  },
   dbCredentials: {
     url: env.DATABASE_URL!,
   },

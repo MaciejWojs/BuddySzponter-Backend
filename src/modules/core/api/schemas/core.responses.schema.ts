@@ -18,3 +18,12 @@ export const coreLocalePayloadResponseSchema = z
 export const coreLocaleNotFoundResponseSchema = z.object({
   message: z.string(),
 });
+
+export const uploadLocaleResponseSchema = z.object({
+  message: z.any(),
+  hash: z.string(),
+  lang: z.string(),
+  version: z.string(),
+});
+
+export const createAppVersionResponseSchema = appVersionSchema;
