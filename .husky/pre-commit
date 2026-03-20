@@ -3,11 +3,11 @@ echo "No staged changes to commit. Skipping pre-commit checks."
 exit 0
 fi
 
-echo "Running TypeScript type checks..."
-bun typecheck
+echo "Running Prettier for code formatting..."
+lint-staged
 
 echo "Checking for secrets with Gitleaks..."
 git diff --cached --name-only | xargs bun run gitleaks file -v --no-banner
 
-echo "Running Prettier for code formatting..."
-lint-staged
+echo "Running TypeScript type checks..."
+bun typecheck

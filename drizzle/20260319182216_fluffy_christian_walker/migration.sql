@@ -1,0 +1,1 @@
+ALTER TABLE "auth_sessions" ADD CONSTRAINT "auth_sessions_refreshTokenHash_key" UNIQUE("refreshTokenHash");

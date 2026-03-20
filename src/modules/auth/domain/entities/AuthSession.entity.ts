@@ -30,4 +30,15 @@ export class AuthSession {
   revoke(): AuthSession {
     return this.copy({ revoked: true });
   }
+
+  async rotateRefreshToken(): Promise<{ token: AuthSession; raw: string }> {
+    const newToken = await AuthSessionRefreshToken.create({
+      sessionId: this.id.value,
+      userId: this.userId.value,
+    });
+    return {
+      token: this.copy({ refreshToken: newToken.hashed }),
+      raw: newToken.raw,
+    };
+  }
 }
