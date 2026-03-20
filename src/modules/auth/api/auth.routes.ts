@@ -6,6 +6,7 @@ import { HTTPException } from 'hono/http-exception';
 import { sign } from 'hono/jwt';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
@@ -146,7 +147,7 @@ authRouter.openapi(loginRoute, async (c) => {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds,
     });
 
     const accessToken = await sign(
@@ -154,7 +155,9 @@ authRouter.openapi(loginRoute, async (c) => {
         sub: user.id.value,
         role: user.role.name,
         sessionId: authSession.id.value,
-        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
+        exp:
+          Math.floor(Date.now() / 1000) +
+          APP_CONFIG.auth.tokens.accessTokenTtlSeconds,
       },
       configProvider.get('JWT_ACCESS_SECRET'),
     );

@@ -45,6 +45,7 @@ export class ConnectionMapper {
       Password.fromHash(raw.password),
       raw.startedAt ? new Date(raw.startedAt) : null,
       ConnectionStatus.fromString(raw.status),
+      raw.joinAttempts ?? 0,
     );
   }
   // TODO TRY CATCH ON THROWABLE METHODS/CONSTRUCTORS

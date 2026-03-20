@@ -2,8 +2,8 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import authRouter from '@modules/auth/api/auth.routes';
+import connectionRouter from '@modules/connection/api/connection.routes';
 import coreRouter from '@modules/core/api/core.routes';
-// import connectionRouter from '@modules/connection/api/connection.routes';
 import cryptoRouter from '@modules/crypto/api/crypto.routes';
 import usersRouter from '@modules/users/api/users.routes';
 import { Scalar } from '@scalar/hono-api-reference';
@@ -82,7 +82,7 @@ app.get('/', (c) =>
 );
 app.route('/auth', authRouter);
 app.route('/users', usersRouter);
-// app.route('/connections', connectionRouter);
+app.route('/connections', connectionRouter);
 app.route('/crypto', cryptoRouter);
 app.route('/core', coreRouter);
 const { websocket } = engine.handler();

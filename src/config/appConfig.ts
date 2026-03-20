@@ -40,6 +40,48 @@ export const APP_CONFIG = {
     sessionId: 'X-session-id',
   },
 
+  connection: {
+    retries: {
+      /** Maximum retries when generating a unique connection code. */
+      createPendingMax: 5,
+      /** Maximum allowed failed join attempts per connection code. */
+      joinAttemptsLimit: 5,
+    },
+    cache: {
+      keys: {
+        /** Prefix for pending connection payload: `connection_code:<code>` */
+        codePrefix: 'connection_code:',
+        /** Prefix for UUID -> code lookup: `connection_UUID:<connectionId>` */
+        uuidPrefix: 'connection_UUID:',
+        /** Prefix for failed join attempts counter: `connection_attempts:<code>` */
+        attemptsPrefix: 'connection_attempts:',
+      },
+      ttl: {
+        /** Pending connection code lifetime (2 minutes). */
+        pendingCodeSeconds: 120,
+      },
+    },
+    errors: {
+      codeAlreadyExists: 'Connection code already exists. Please try again.',
+      failedAfterMaxRetries: 'Failed to create connection after max retries',
+    },
+  },
+
+  auth: {
+    tokens: {
+      /** Access token lifetime (15 minutes). */
+      accessTokenTtlSeconds: 15 * 60,
+      /** Refresh token cookie max age (7 days). */
+      refreshCookieMaxAgeSeconds: 7 * 24 * 60 * 60,
+    },
+    session: {
+      /** Maximum active sessions per user. */
+      maxActivePerUser: 5,
+      /** Auth session expiration (7 days). */
+      expiresInMs: 7 * 24 * 60 * 60 * 1000,
+    },
+  },
+
   /** Paths excluded from payload encryption/decryption middleware. */
   excludedPaths: [
     '/crypto/handshake',
