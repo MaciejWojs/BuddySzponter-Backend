@@ -15,6 +15,7 @@
         "email-validator": "^2.0.4",
         "hono": "^4.12.8",
         "http-status-codes": "^2.3.0",
+        "imgkit": "^2.2.0",
         "socket.io": "^4.8.3",
         "winston": "^3.19.0",
         "zod": "^4.3.6",
@@ -504,6 +505,22 @@
     "ieee754": ["ieee754@1.2.1", "", {}, "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="],
 
     "ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
+
+    "imgkit": ["imgkit@2.2.0", "", { "optionalDependencies": { "imgkit-darwin-arm64": "2.2.0", "imgkit-darwin-x64": "2.2.0", "imgkit-linux-arm64-gnu": "2.2.0", "imgkit-linux-x64-gnu": "2.2.0", "imgkit-linux-x64-musl": "2.2.0", "imgkit-windows-arm64": "2.2.0", "imgkit-windows-x64": "2.2.0" }, "bin": { "imgkit-build": "dist/bin/imgkit-build.js" } }, "sha512-OHsHURf3F5opSyseel1UZjmFyaZdbjtxhZazQm6WFk9K5EWrRAUXJtU/UsV4SpZCZHCyVW311Bqo95laf7LEcg=="],
+
+    "imgkit-darwin-arm64": ["imgkit-darwin-arm64@2.2.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-6zZT8o1n8TuyTBqFX5AO1t0PDEc6aAOH6CWs9SknJzy7RczkUZhGp85h2U8+meGh1Kh1xhov6ZHQdKm5fYxVdQ=="],
+
+    "imgkit-darwin-x64": ["imgkit-darwin-x64@2.2.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-nBW4X3Q4eox1YQqhxJlnHNl2d5xh587FC4SAzn9u5owSO4zSqMNU+JrIKPp4cNX4Q8v0RCOMNhbGGyU5d7fonA=="],
+
+    "imgkit-linux-arm64-gnu": ["imgkit-linux-arm64-gnu@2.2.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-8HzVKmQEgNlMbJ68vvRtn3EejaQdOEfw2YngFzssJyTurdlJMK4tSKQEgIbCzWFCBERJ0CmGb8ntnFY3pT9Eiw=="],
+
+    "imgkit-linux-x64-gnu": ["imgkit-linux-x64-gnu@2.2.0", "", { "os": "linux", "cpu": "x64" }, "sha512-id9WblcCs2DddFQjG3WHWx7JcHkKmq3VcebsBJSuyYypsrZJfQfsO0mtqoDS/2K5OvXkVitJlBt/VaAdM6Fo/Q=="],
+
+    "imgkit-linux-x64-musl": ["imgkit-linux-x64-musl@2.2.0", "", { "os": "linux", "cpu": "x64" }, "sha512-UJL0Ce/NuGhSO8zcE5SWHG+m8p/EDaiwIpiDCYyb6ElViIJKFKXyF/TdpKrEiTPY7kuwZcya8pAeRbNtRGbB/Q=="],
+
+    "imgkit-windows-arm64": ["imgkit-windows-arm64@2.2.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-fqa9rtgPdCtyXahr0XRAPWBCsaFrS9KePQthwUma5yr3DBK7XpFNiCOxM5QtEtiAKu6Ait5ku7GYuGPPfOcu7Q=="],
+
+    "imgkit-windows-x64": ["imgkit-windows-x64@2.2.0", "", { "os": "win32", "cpu": "x64" }, "sha512-nAn3OF5Zne6ogy3nLO+eDQteyS1TdMooRdVtZgLKssAFSgQTTO4uqDBhndkBAp0337rWb2/eHb7AH2qNg+hQnQ=="],
 
     "import-fresh": ["import-fresh@3.3.1", "", { "dependencies": { "parent-module": "^1.0.0", "resolve-from": "^4.0.0" } }, "sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ=="],
 
