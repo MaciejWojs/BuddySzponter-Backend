@@ -55,4 +55,14 @@ console.warn = wrapConsole('warn');
 console.error = wrapConsole('error');
 console.debug = wrapConsole('debug');
 
-export default logger;
+const extendedLogger = Object.assign(logger, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onlyDev: (message: string, ...meta: any[]) => {
+    if (isDevelopment) {
+      const preparedMessage = `[DEV-only] ${message}`;
+      logger.debug(preparedMessage, ...meta);
+    }
+  },
+});
+
+export default extendedLogger;

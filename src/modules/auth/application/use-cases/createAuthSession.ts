@@ -1,4 +1,5 @@
-import { APP_CONFIG } from '@/config/appConfig';
+import { IUserRepository } from '@/modules/users/domain/repositories/IUserRepository';
+import { AuthSessionWithRawToken } from '@/shared/types/AuthSessionWithRawToken';
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';
 
 import { AuthSession } from '../../domain/entities/AuthSession.entity';
@@ -12,14 +13,18 @@ export interface CreateAuthSessionCommand {
   userId: UserId;
   deviceId: DeviceUUID;
   ipAddress: IpAddress;
-  refreshToken: AuthSessionRefreshToken;
   userAgent: string;
 }
 
 export class CreateAuthSession {
-  constructor(protected readonly repo: IAuthSessionRepository) {}
+  constructor(
+    protected readonly repo: IAuthSessionRepository,
+    protected readonly userRepository: IUserRepository,
+  ) {}
 
-  async execute(command: CreateAuthSessionCommand): Promise<AuthSession> {
+  async execute(
+    command: CreateAuthSessionCommand,
+  ): Promise<AuthSessionWithRawToken> {
     const existingSessionsWithDevice =
       await this.repo.findAllSessionsByUserIdAndDeviceId(
         command.userId,
@@ -45,21 +50,33 @@ export class CreateAuthSession {
       await this.repo.save(revokedOldestSession);
     }
 
-    const expiresAt = new Date(
-      Date.now() + APP_CONFIG.auth.session.expiresInMs,
-    );
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const sessionId = new AuthSessionUUID();
+    const { raw, hashed: refreshToken } = await AuthSessionRefreshToken.create({
+      sessionId: sessionId.value,
+      userId: command.userId.value,
+    });
     const session = new AuthSession(
-      new AuthSessionUUID(),
+      sessionId,
       command.userId,
       command.deviceId,
       command.ipAddress,
-      command.refreshToken,
+      refreshToken,
       command.userAgent,
       false,
       new Date(),
       expiresAt,
     );
-
-    return await this.repo.createSession(session);
+    const createdSession = await this.repo.createSession(session);
+    const user = await this.userRepository.findById(command.userId);
+    if (!user) {
+      throw new Error('User not found for the given session');
+    }
+    const finalData: AuthSessionWithRawToken = {
+      session: createdSession,
+      rawToken: raw,
+      user: user,
+    };
+    return finalData;
   }
 }

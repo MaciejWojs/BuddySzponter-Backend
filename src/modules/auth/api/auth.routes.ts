@@ -21,6 +21,7 @@ import { RepositoryFactory } from '../../../infrastucture/factories/RepositoryFa
 import { CreateUserDevice as CreateOrFindUserDevice } from '../../users/application/use-case/createUserDevice';
 import { CreateAuthSession } from '../application/use-cases/createAuthSession';
 import { LoginUser } from '../application/use-cases/loginUser';
+import { RefreshAuthSession } from '../application/use-cases/refreshAuthSession';
 import { RegisterUser } from '../application/use-cases/registerUser';
 import { AuthSessionRefreshToken } from '../domain/value-objects';
 import {
@@ -113,7 +114,10 @@ authRouter.openapi(loginRoute, async (c) => {
   const authSessionRepository = repositoryFactory.authSessionRepository();
   const loginUser = new LoginUser(userCacheRepository);
   const createOrFindUserDevice = new CreateOrFindUserDevice(deviceRepository);
-  const createAuthSession = new CreateAuthSession(authSessionRepository);
+  const createAuthSession = new CreateAuthSession(
+    authSessionRepository,
+    userCacheRepository,
+  );
   try {
     const user = await loginUser.execute(data);
 
@@ -131,17 +135,15 @@ authRouter.openapi(loginRoute, async (c) => {
       data.os,
     );
 
-    const token = await AuthSessionRefreshToken.create();
+    const { session: authSession, rawToken: refreshToken } =
+      await createAuthSession.execute({
+        userId: user.id,
+        deviceId: device.id,
+        userAgent: c.req.header('User-Agent') ?? 'Unknown',
+        ipAddress: ipAddress,
+      });
 
-    const authSession = await createAuthSession.execute({
-      userId: user.id,
-      deviceId: device.id,
-      refreshToken: token,
-      userAgent: c.req.header('User-Agent') ?? 'Unknown',
-      ipAddress: ipAddress,
-    });
-
-    setCookie(c, 'refreshToken', authSession.refreshToken.value, {
+    setCookie(c, 'refreshToken', refreshToken, {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
@@ -190,13 +192,56 @@ authRouter.openapi(loginRoute, async (c) => {
   }
 });
 
-authRouter.openapi(refreshRoute, (c) => {
-  const payload = {
-    message: 'Token refreshed successfully',
-  };
+authRouter.openapi(refreshRoute, async (c) => {
+  const data = c.req.valid('cookie');
+  try {
+    const tokenPayload = await AuthSessionRefreshToken.decode(
+      data.refreshToken,
+    );
 
-  // Here you would handle the logic for refreshing a user's authentication token, such as validating the refresh token and generating a new access token.
-  return c.json(payload, StatusCodes.OK);
+    logger.onlyDev(
+      `Decoded refresh token payload: ${JSON.stringify(tokenPayload)}`,
+    );
+    const repositoryFactory = new RepositoryFactory();
+    const refreshToken = new RefreshAuthSession(
+      repositoryFactory.authSessionRepository(),
+      repositoryFactory.userCacheRepository(),
+    );
+    const refreshedData = {
+      sessionId: tokenPayload.sessionId,
+      refreshToken: data.refreshToken,
+    };
+    const newData = await refreshToken.execute(refreshedData);
+
+    const accessToken = await sign(
+      {
+        sub: tokenPayload.userId,
+        role: newData.user.role.name,
+        sessionId: tokenPayload.sessionId,
+        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
+      },
+      configProvider.get('JWT_ACCESS_SECRET'),
+    );
+
+    setCookie(c, 'refreshToken', newData.rawToken, {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
+      // sameSite: 'Strict',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+    const payload = {
+      message: 'Authentication token refreshed successfully',
+      accessToken,
+    };
+    return c.json(payload, StatusCodes.OK);
+  } catch (err) {
+    logger.warn(
+      `Failed to decode refresh token: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Invalid refresh token',
+    });
+  }
 });
 
 authRouter.openapi(logoutRoute, (c) => {

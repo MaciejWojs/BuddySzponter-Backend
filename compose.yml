@@ -43,6 +43,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       VALKEY_URL: valkey://default:${VALKEY_PASSWORD}@cache:6379/0
+      MINIO_ENDPOINT: http://simple-storage:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       SALT: ${SALT}
       PEPPER: ${PEPPER}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}

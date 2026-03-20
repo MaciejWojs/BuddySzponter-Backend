@@ -47,8 +47,6 @@ export class UserCacheRepository implements IUserRepository {
     try {
       const cacheValue = this.serializeUser(createdUser);
 
-      logger.info(`Caching new user: ${cacheValue}`);
-
       await this.cacheClient.setex(
         cacheKey,
         APP_CONFIG.cache.ttl.user,

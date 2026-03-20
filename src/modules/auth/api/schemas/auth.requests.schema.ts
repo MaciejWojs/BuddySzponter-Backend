@@ -26,11 +26,11 @@ export const loginBodySchema = z.object({
 });
 
 export const refreshSchema = z.object({
-  refreshToken: z.string(),
+  refreshToken: z.jwt(),
 });
 
 export const logoutSchema = z.object({
-  refreshToken: z.string(),
+  refreshToken: z.jwt(),
 });
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;

@@ -14,7 +14,7 @@ export class AuthSessionMapper {
       new UserId(record.userId),
       new DeviceUUID(record.deviceId),
       new IpAddress(record.ipAddress),
-      AuthSessionRefreshToken.fromExisting(record.refreshTokenHash),
+      AuthSessionRefreshToken.fromHash(record.refreshTokenHash),
       record.userAgent,
       record.revoked,
       record.createdAt,
