@@ -1,9 +1,8 @@
 import { APP_CONFIG } from '@/config/appConfig';
 import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import { Password } from '@/modules/users/domain/value-objects';
-import { ConnectionUUID } from '@/shared/value-objects';
+import { ConnectionUUID, IpAddress } from '@/shared/value-objects';
 
-import { IpAddress } from '../../../../shared/value-objects/IpAddress.vo';
 import { Connection } from '../../domain/entities/Connection.entity';
 import { ConnectionParticipant } from '../../domain/entities/ConnectionParticipant.entity';
 import {

@@ -156,8 +156,17 @@ export class ConnectionRepository implements IConnectionRepository {
         'Cache client is not connected. Cannot delete connection.',
       );
     }
-    const key = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
-    const delResult = await client.del(key);
+    const uuidKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
+    const code = await client.get(uuidKey);
+
+    if (code) {
+      const codeKey = `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`;
+      const attemptsKey = `${APP_CONFIG.connection.cache.keys.attemptsPrefix}${code}`;
+      const delResult = await client.del(uuidKey, codeKey, attemptsKey);
+      return delResult > 0;
+    }
+
+    const delResult = await client.del(uuidKey);
     return delResult > 0;
   }
 }

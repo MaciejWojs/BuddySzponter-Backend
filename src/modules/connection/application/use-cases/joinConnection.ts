@@ -1,9 +1,11 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import { IpAddress } from '@/shared/value-objects';
 
 import { Connection } from '../../domain/entities/Connection.entity';
 import { ConnectionParticipant } from '../../domain/entities/ConnectionParticipant.entity';
 import {
+  ConnectionJoinAttemptsExceededError,
   ConnectionNotFoundError,
   InvalidConnectionPasswordError,
 } from '../../domain/error/ConnectionBusinessErrors';
@@ -22,6 +24,12 @@ export class JoinConnection {
     const connection = await this.repo.findByCode(input.code);
     if (!connection) {
       throw new ConnectionNotFoundError();
+    }
+    if (
+      connection.joinAttempts >= APP_CONFIG.connection.retries.joinAttemptsLimit
+    ) {
+      await this.repo.deleteConnection(connection.id.value);
+      throw new ConnectionJoinAttemptsExceededError();
     }
     const doPasswordMatch = await connection.comparePassword(input.password);
     if (!doPasswordMatch) {
