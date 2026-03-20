@@ -6,6 +6,10 @@ import { ConnectionUUID } from '@/shared/value-objects';
 import { IpAddress } from '../../../../shared/value-objects/IpAddress.vo';
 import { Connection } from '../../domain/entities/Connection.entity';
 import { ConnectionParticipant } from '../../domain/entities/ConnectionParticipant.entity';
+import {
+  ConnectionCodeAlreadyExistsError,
+  ConnectionCreateRetriesExceededError,
+} from '../../domain/error/ConnectionBusinessErrors';
 import { IConnectionRepository } from '../../domain/repositories/IConnectionRepository';
 import { ConnectionCode, ConnectionStatus } from '../../domain/value-objects';
 
@@ -44,10 +48,7 @@ export class CreateConnection {
       try {
         return await this.repo.createPendingConnection(connection);
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message.includes(APP_CONFIG.connection.errors.codeAlreadyExists)
-        ) {
+        if (error instanceof ConnectionCodeAlreadyExistsError) {
           continue;
         }
 
@@ -55,6 +56,6 @@ export class CreateConnection {
       }
     }
 
-    throw new Error(APP_CONFIG.connection.errors.failedAfterMaxRetries);
+    throw new ConnectionCreateRetriesExceededError();
   }
 }

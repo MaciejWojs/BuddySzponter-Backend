@@ -3,6 +3,7 @@ import { client } from '@/infrastucture/cache/client';
 import { ConnectionMapper } from '@/shared/mappers/connectionMapper';
 
 import { Connection } from '../../domain/entities/Connection.entity';
+import { ConnectionCodeAlreadyExistsError } from '../../domain/error/ConnectionBusinessErrors';
 import { IConnectionRepository } from '../../domain/repositories/IConnectionRepository';
 import { ConnectionCode, ConnectionStatus } from '../../domain/value-objects';
 
@@ -40,7 +41,7 @@ export class ConnectionRepository implements IConnectionRepository {
     const result = await client.setnx(key, payloadData);
 
     if (result !== 1) {
-      throw new Error(APP_CONFIG.connection.errors.codeAlreadyExists);
+      throw new ConnectionCodeAlreadyExistsError();
     }
     const ttlResult = await client.expire(
       key,

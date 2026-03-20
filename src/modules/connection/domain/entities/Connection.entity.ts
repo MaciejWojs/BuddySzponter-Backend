@@ -2,6 +2,11 @@ import { APP_CONFIG } from '@/config/appConfig';
 import { Password } from '@/modules/users/domain/value-objects';
 import { ConnectionUUID } from '@/shared/value-objects';
 
+import {
+  ConnectionAlreadyOccupiedError,
+  ConnectionJoinAttemptsExceededError,
+  ConnectionNotJoinableError,
+} from '../error/ConnectionBusinessErrors';
 import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 import { ConnectionParticipant } from './ConnectionParticipant.entity';
 
@@ -39,17 +44,17 @@ export class Connection {
   joinConnection(guest: ConnectionParticipant): Connection {
     const updatedJoinAttempts = this.joinAttempts + 1;
     if (updatedJoinAttempts > APP_CONFIG.connection.retries.joinAttemptsLimit) {
-      throw new Error('Maximum join attempts exceeded');
+      throw new ConnectionJoinAttemptsExceededError();
     }
     if (this.guest) {
-      throw new Error('Connection is already occupied by a guest');
+      throw new ConnectionAlreadyOccupiedError();
     }
     //? Optional: Prevent host from joining as guest
     // if(this.host.userId?.value === guest.userId?.value) {
     //   throw new Error('Host cannot join their own connection as a guest');
     // }
     if (this.status !== ConnectionStatus.PENDING) {
-      throw new Error('Connection is not joinable');
+      throw new ConnectionNotJoinableError();
     }
     return this.copy({
       guest,
