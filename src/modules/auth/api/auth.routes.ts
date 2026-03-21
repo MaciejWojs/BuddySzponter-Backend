@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
-import { setCookie } from 'hono/cookie';
+import { deleteCookie, setCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
 import { sign } from 'hono/jwt';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
@@ -21,6 +21,7 @@ import { RepositoryFactory } from '../../../infrastucture/factories/RepositoryFa
 import { CreateUserDevice as CreateOrFindUserDevice } from '../../users/application/use-case/createUserDevice';
 import { CreateAuthSession } from '../application/use-cases/createAuthSession';
 import { LoginUser } from '../application/use-cases/loginUser';
+import { LogoutUser } from '../application/use-cases/logoutUser';
 import { RefreshAuthSession } from '../application/use-cases/refreshAuthSession';
 import { RegisterUser } from '../application/use-cases/registerUser';
 import { AuthSessionRefreshToken } from '../domain/value-objects';
@@ -244,16 +245,42 @@ authRouter.openapi(refreshRoute, async (c) => {
   }
 });
 
-authRouter.openapi(logoutRoute, (c) => {
-  const payload = {
-    message: 'User logged out successfully',
-  };
+authRouter.openapi(logoutRoute, async (c) => {
+  const data = c.req.valid('cookie');
+  const repositoryFactory = new RepositoryFactory();
+  const authSessionRepository = repositoryFactory.authSessionRepository();
+  const logout = new LogoutUser(authSessionRepository);
+  try {
+    const tokenPayload = await AuthSessionRefreshToken.decode(
+      data.refreshToken,
+    );
 
-  // Here you would handle the logic for logging out a user, such as invalidating a token or clearing session data.
-  return c.json(payload, StatusCodes.OK);
+    await logout.execute(tokenPayload.sessionId);
+  } catch (err) {
+    logger.warn(
+      `Failed to decode refresh token during logout: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  } finally {
+    const result = deleteCookie(c, 'refreshToken', {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
+      // sameSite: 'Strict',
+    });
+    if (!result) {
+      logger.onlyDev(
+        'Failed to delete refresh token cookie during logout - cookie not found. Should never happen, validation should have failed if cookie was missing.',
+      );
+    }
+  }
+  return c.json(
+    {
+      message: 'User logged out successfully',
+    },
+    200,
+  );
 });
 
-authRouter.openapi(meRoute, (c) => {
+authRouter.openapi(meRoute, async (c) => {
   const payload = {
     message: 'Authenticated user information retrieved successfully',
   };
