@@ -127,6 +127,10 @@ export const createAppVersionRoute = createRoute({
       },
     },
     ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+  },
+});
+
 export const getSupportedLocalesRoute = createRoute({
   method: 'get',
   path: '/languages',
