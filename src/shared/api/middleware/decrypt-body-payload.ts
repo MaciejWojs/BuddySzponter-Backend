@@ -87,16 +87,14 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   const raw = await req.text();
   let data;
   if (!raw || raw.trim() === '') {
-    await next();
-    return;
+    return next();
   }
 
   try {
     data = await JSON.parse(raw);
     if (!data || Object.keys(data).length === 0) {
       // Allow empty JSON bodies to pass through without decryption
-      await next();
-      return;
+      return next();
     }
   } catch {
     return c.json(
