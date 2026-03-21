@@ -3,10 +3,11 @@ import { Hono } from 'hono';
 import { crop, toPng } from 'imgkit';
 
 import { photosClient } from '@/infrastucture/s3/client';
+import { isAdmin } from '@/shared/api/middleware/isAdmin';
 
 const usersRouter = new Hono();
 
-usersRouter.get('/', (c) => {
+usersRouter.get('/', isAdmin, (c) => {
   return c.json({ message: 'Users endpoint' });
 });
 
