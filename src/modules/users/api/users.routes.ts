@@ -3,7 +3,6 @@ import { randomBytes } from 'crypto';
 import { crop, toPng } from 'imgkit';
 
 import { photosClient } from '@/infrastucture/s3/client';
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 import { ENV } from '@/shared/types/honoENV';
 
