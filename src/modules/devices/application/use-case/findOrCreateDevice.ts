@@ -1,10 +1,11 @@
 import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import { IDevicesRepository } from '@/modules/devices/domain/repositories/IDeviceRepository';
-import { CreateUserDevice } from '../../../users/application/use-case/createUserDevice';
-import { DeviceFingerprint } from '@/modules/devices/domain/value-objects/DeviceFingerprint.vo';
-import { DeviceOS } from '@/modules/devices/domain/value-objects/DeviceOS.vo';
+import { DeviceFingerprint } from '@/modules/devices/domain/value-objects';
 import { DeviceName } from '@/modules/devices/domain/value-objects/DeviceName.vo';
-import { DeviceUUID } from '@/shared/value-objects/DeviceUUID.vo';
+import { DeviceOS } from '@/modules/devices/domain/value-objects/DeviceOS.vo';
+import { DeviceUUID } from '@/shared/value-objects';
+
+import { CreateUserDevice } from '../../../users/application/use-case/createUserDevice';
 
 export class FindOrCreateDevice {
   constructor(private readonly deviceRepository: IDevicesRepository) {}

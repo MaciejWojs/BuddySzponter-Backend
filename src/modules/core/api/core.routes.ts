@@ -1,5 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
+import { type SupportedLocale,supportedLocales } from '@shared/locales';
 import { StatusCodes } from 'http-status-codes';
 
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
@@ -15,6 +16,7 @@ import {
   getCoreLocaleRoute,
   getSupportedVersionsRoute,
   uploadLocaleRoute,
+  getSupportedLocalesRoute,
 } from './core.openapi';
 
 const coreRouter = new OpenAPIHono({ defaultHook });
@@ -143,6 +145,8 @@ coreRouter.openapi(uploadLocaleRoute, async (c) => {
     },
     StatusCodes.OK,
   );
+coreRouter.openapi(getSupportedLocalesRoute, (c) => {
+  return c.json([...supportedLocales], StatusCodes.OK);
 });
 
 export default coreRouter;

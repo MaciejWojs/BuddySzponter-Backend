@@ -12,4 +12,5 @@ export type ConnectionPrimitive = {
   hostFingerprint: string;
   guestFingerprint: string | null;
   startedAt: string | null;
+  joinAttempts?: number;
 };

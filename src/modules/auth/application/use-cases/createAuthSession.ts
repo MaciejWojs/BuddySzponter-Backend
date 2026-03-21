@@ -42,7 +42,7 @@ export class CreateAuthSession {
       command.userId,
     );
 
-    if (sessions.length >= 5) {
+    if (sessions.length >= APP_CONFIG.auth.session.maxActivePerUser) {
       const oldestSession = sessions.reduce((oldest, current) =>
         current.createdAt < oldest.createdAt ? current : oldest,
       );

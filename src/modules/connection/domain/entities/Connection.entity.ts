@@ -1,6 +1,12 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { Password } from '@/modules/users/domain/value-objects';
 import { ConnectionUUID } from '@/shared/value-objects';
 
+import {
+  ConnectionAlreadyOccupiedError,
+  ConnectionJoinAttemptsExceededError,
+  ConnectionNotJoinableError,
+} from '../error/ConnectionBusinessErrors';
 import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 import { ConnectionParticipant } from './ConnectionParticipant.entity';
 
@@ -13,6 +19,7 @@ export class Connection {
     readonly password: Password,
     readonly startedAt: Date | null,
     readonly status: ConnectionStatus = ConnectionStatus.INACTIVE,
+    readonly joinAttempts: number = 0,
   ) {}
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
@@ -23,6 +30,7 @@ export class Connection {
       changes.password ?? this.password,
       changes.startedAt ?? this.startedAt,
       changes.status ?? this.status,
+      changes.joinAttempts ?? this.joinAttempts,
     );
   }
   async comparePassword(password: string): Promise<boolean> {
@@ -34,10 +42,28 @@ export class Connection {
   }
 
   joinConnection(guest: ConnectionParticipant): Connection {
+    const updatedJoinAttempts = this.joinAttempts + 1;
+    if (updatedJoinAttempts > APP_CONFIG.connection.retries.joinAttemptsLimit) {
+      throw new ConnectionJoinAttemptsExceededError();
+    }
+    if (this.guest) {
+      throw new ConnectionAlreadyOccupiedError();
+    }
+    //? Optional: Prevent host from joining as guest
+    // if(this.host.userId?.value === guest.userId?.value) {
+    //   throw new Error('Host cannot join their own connection as a guest');
+    // }
+    if (this.status !== ConnectionStatus.PENDING) {
+      throw new ConnectionNotJoinableError();
+    }
     return this.copy({
       guest,
       status: ConnectionStatus.ACTIVE,
       startedAt: new Date(),
+      joinAttempts: updatedJoinAttempts,
     });
+  }
+  updateCode(newCode: ConnectionCode = new ConnectionCode()): Connection {
+    return this.copy({ code: newCode });
   }
 }

@@ -14,6 +14,7 @@ import {
   coreLocaleNotFoundResponseSchema,
   coreLocalePayloadResponseSchema,
   createAppVersionResponseSchema,
+  supportedLocalesResponseSchema,
   supportedVersionsResponseSchema,
   uploadLocaleResponseSchema,
 } from './schemas/core.responses.schema';
@@ -126,6 +127,21 @@ export const createAppVersionRoute = createRoute({
       },
     },
     ...unprocessableEntityResponse,
+export const getSupportedLocalesRoute = createRoute({
+  method: 'get',
+  path: '/languages',
+  tags: ['Core'],
+  summary: 'Get available languages',
+  description: 'Returns all language codes available in the application.',
+  responses: {
+    200: {
+      description: 'List of available language codes',
+      content: {
+        'application/json': {
+          schema: supportedLocalesResponseSchema,
+        },
+      },
+    },
     ...internalServerErrorResponse,
   },
 });

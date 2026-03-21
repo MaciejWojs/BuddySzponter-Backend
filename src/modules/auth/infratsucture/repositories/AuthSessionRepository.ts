@@ -1,3 +1,5 @@
+import logger from '@logger';
+
 import { AuthSessionMapper } from '@/shared/mappers/authSessionMapper';
 import { UserId } from '@/shared/value-objects';
 
@@ -31,8 +33,16 @@ export class AuthSessionRepository implements IAuthSessionRepository {
   }
 
   async save(authSession: AuthSession): Promise<boolean> {
-    await this.dao.save(AuthSessionMapper.toPersistence(authSession));
-    return true;
+    try {
+      await this.dao.save(AuthSessionMapper.toPersistence(authSession));
+      return true;
+    } catch (error) {
+      logger.onlyDev(
+        `Failed to save AuthSession with id ${authSession.id.value}:`,
+        error,
+      );
+      return false;
+    }
   }
 
   async findAllSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
