@@ -15,7 +15,6 @@ import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
 import { StatusCodes } from 'http-status-codes';
 
-import { version } from '../package.json';
 import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
 import { initCache } from './infrastucture/cache/client';
@@ -23,12 +22,11 @@ import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
 import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
 import { injectJwtPayload } from './shared/api/middleware/injectJwtPayload';
+import { validateAccessJWT } from './shared/api/middleware/validate-access-jwt';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
-import { validateAccessJWT } from './shared/api/middleware/validate-access-jwt';
 
 const app = new OpenAPIHono<ENV>({ defaultHook }).basePath('/api/v1');
-
 
 app.use(honoLogger());
 app.use('*', injectIpAddress);
@@ -116,13 +114,14 @@ if (isDevelopment) {
   app.doc('/docs', (c) => ({
     openapi: '3.0.0',
     info: {
-      version: version,
-      title: 'My API',
+      version: APP_CONFIG.basic.version,
+      title: APP_CONFIG.api.title,
+      description: APP_CONFIG.api.description,
     },
     servers: [
       {
         url: new URL(c.req.url).origin,
-        description: 'Current environment',
+        description: 'development server',
       },
     ],
   }));
