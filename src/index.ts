@@ -125,7 +125,15 @@ if (isDevelopment) {
       },
     ],
   }));
-  app.get('/docs/scalar', Scalar({ url: '/api/v1/docs' }));
+  app.get(
+    '/docs/scalar',
+    Scalar({
+      url: '/api/v1/docs',
+      layout: 'classic',
+      defaultOpenAllTags: true,
+      theme: 'bluePlanet',
+    }),
+  );
   app.get('/docs/ui', swaggerUI({ url: '/api/v1/docs' }));
   showRoutes(app);
 }
