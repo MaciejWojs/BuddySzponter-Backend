@@ -248,8 +248,8 @@ authRouter.openapi(refreshRoute, async (c) => {
 authRouter.openapi(logoutRoute, async (c) => {
   const data = c.req.valid('cookie');
   const repositoryFactory = new RepositoryFactory();
-  const authSeessionRepository = repositoryFactory.authSessionRepository();
-  const logout = new LogoutUser(authSeessionRepository);
+  const authSessionRepository = repositoryFactory.authSessionRepository();
+  const logout = new LogoutUser(authSessionRepository);
   try {
     const tokenPayload = await AuthSessionRefreshToken.decode(
       data.refreshToken,
