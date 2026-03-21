@@ -25,12 +25,15 @@ import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
 import { injectJwtPayload } from './shared/api/middleware/injectJwtPayload';
 import { defaultErrorResponseSchema } from './shared/api/schemas/error.schema';
 import { getEngine, initSocket } from './socket';
+import { validateAccessJWT } from './shared/api/middleware/validate-access-jwt';
 
 const app = new OpenAPIHono<ENV>({ defaultHook }).basePath('/api/v1');
+
 
 app.use(honoLogger());
 app.use('*', injectIpAddress);
 app.use('*', injectJwtPayload);
+app.use('*', validateAccessJWT);
 app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
 app.use('*', extendEncryptionKeyTTL);
