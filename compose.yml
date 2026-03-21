@@ -97,6 +97,8 @@ services:
 
       mc mb simplestorage/photos || true; mc anonymous set download simplestorage/photos || true;
 
+      mc mb simplestorage/locales || true; mc anonymous set download simplestorage/locales || true;
+
       echo '✅ Buckets initialized.'; sleep 2s; wait "
 
 networks:

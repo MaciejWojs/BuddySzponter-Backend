@@ -5,12 +5,18 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { coreLocaleQuerySchema } from './schemas/core.requests.schema';
+import {
+  coreLocaleQuerySchema,
+  createAppVersionRequestSchema,
+  uploadLocaleFormSchema,
+} from './schemas/core.requests.schema';
 import {
   coreLocaleNotFoundResponseSchema,
   coreLocalePayloadResponseSchema,
+  createAppVersionResponseSchema,
   supportedLocalesResponseSchema,
   supportedVersionsResponseSchema,
+  uploadLocaleResponseSchema,
 } from './schemas/core.responses.schema';
 
 export const getSupportedVersionsRoute = createRoute({
@@ -56,6 +62,67 @@ export const getCoreLocaleRoute = createRoute({
       content: {
         'application/json': {
           schema: coreLocaleNotFoundResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+  },
+});
+
+export const uploadLocaleRoute = createRoute({
+  method: 'post',
+  path: '/upload-locale',
+  tags: ['Core'],
+  summary: 'Upload locale JSON file',
+  description:
+    'Uploads locale JSON file to MinIO, calculates SHA-256 hash and updates langHash for selected app version.',
+  request: {
+    body: {
+      required: true,
+      content: {
+        'multipart/form-data': {
+          schema: uploadLocaleFormSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Locale uploaded successfully',
+      content: {
+        'application/json': {
+          schema: uploadLocaleResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+  },
+});
+
+export const createAppVersionRoute = createRoute({
+  method: 'post',
+  path: '/versions',
+  tags: ['Core'],
+  summary: 'Create app version',
+  description: 'Creates a new application version entry.',
+  request: {
+    body: {
+      required: true,
+      content: {
+        'multipart/form-data': {
+          schema: createAppVersionRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'App version created',
+      content: {
+        'application/json': {
+          schema: createAppVersionResponseSchema,
         },
       },
     },
