@@ -244,7 +244,7 @@ authRouter.openapi(refreshRoute, async (c) => {
   }
 });
 
-authRouter.openapi(logoutRoute, (c) => {
+authRouter.openapi(logoutRoute, async (c) => {
   const payload = {
     message: 'User logged out successfully',
   };
@@ -253,7 +253,7 @@ authRouter.openapi(logoutRoute, (c) => {
   return c.json(payload, StatusCodes.OK);
 });
 
-authRouter.openapi(meRoute, (c) => {
+authRouter.openapi(meRoute, async (c) => {
   const payload = {
     message: 'Authenticated user information retrieved successfully',
   };
