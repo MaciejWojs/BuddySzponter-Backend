@@ -9,8 +9,7 @@ import {
 
 import {
   loginBodySchema,
-  logoutSchema,
-  refreshSchema,
+  refreshTokenCookieSchema,
   registerBodySchema,
 } from './schemas/auth.requests.schema';
 import {
@@ -86,7 +85,7 @@ export const refreshRoute = createRoute({
   tags: ['Auth'],
   summary: 'Refresh authentication token',
   request: {
-    cookies: refreshSchema,
+    cookies: refreshTokenCookieSchema,
   },
   responses: {
     200: {
@@ -109,14 +108,10 @@ export const logoutRoute = createRoute({
   path: '/logout',
   tags: ['Auth'],
   summary: 'Log out a user',
+  description:
+    'Logs out the user by revoking the refresh token and clearing the cookie.',
   request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: logoutSchema,
-        },
-      },
-    },
+    cookies: refreshTokenCookieSchema,
   },
   responses: {
     200: {
