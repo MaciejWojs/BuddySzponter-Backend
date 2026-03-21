@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 
+import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -67,6 +68,7 @@ export const getUsersPaginatedRoute = createRoute({
 export const updateUserRoute = createRoute({
   method: 'patch',
   path: '/:id',
+  middleware: [isAdmin],
   tags: ['User'],
   summary: 'Update user by ID',
   request: {
