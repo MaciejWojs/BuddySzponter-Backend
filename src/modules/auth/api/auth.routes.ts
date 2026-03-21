@@ -256,27 +256,11 @@ authRouter.openapi(logoutRoute, async (c) => {
     );
 
     await logout.execute(tokenPayload.sessionId);
-
-    const result = deleteCookie(c, 'refreshToken', {
-      httpOnly: true,
-      secure: !configProvider.get('DEVELOPMENT'),
-      // sameSite: 'Strict',
-    });
-    if (!result) {
-      logger.onlyDev(
-        'Failed to delete refresh token cookie during logout - cookie not found',
-      );
-    }
-    return c.json(
-      {
-        message: 'User logged out successfully',
-      },
-      200,
-    );
   } catch (err) {
     logger.warn(
       `Failed to decode refresh token during logout: ${err instanceof Error ? err.message : String(err)}`,
     );
+  } finally {
     const result = deleteCookie(c, 'refreshToken', {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
@@ -284,16 +268,16 @@ authRouter.openapi(logoutRoute, async (c) => {
     });
     if (!result) {
       logger.onlyDev(
-        'Failed to delete refresh token cookie during logout - cookie not found',
+        'Failed to delete refresh token cookie during logout - cookie not found. Should never happen, validation should have failed if cookie was missing.',
       );
     }
-    return c.json(
-      {
-        message: 'User logged out successfully',
-      },
-      200,
-    );
   }
+  return c.json(
+    {
+      message: 'User logged out successfully',
+    },
+    200,
+  );
 });
 
 authRouter.openapi(meRoute, async (c) => {

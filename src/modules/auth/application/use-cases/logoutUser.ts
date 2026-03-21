@@ -9,10 +9,14 @@ export class LogoutUser {
 
     const session = await this.repo.findSessionById(sessionUUID);
     if (!session) {
-      throw new Error('Session not found');
+      // If the session doesn't exist, we can consider the user already logged out
+      return;
     }
 
     const revokedSession = session.revoke();
-    await this.repo.save(revokedSession);
+    const saveSucceeded = await this.repo.save(revokedSession);
+    if (!saveSucceeded) {
+      throw new Error('Failed to persist revoked session');
+    }
   }
 }
