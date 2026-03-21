@@ -2,10 +2,22 @@ import { z } from 'zod';
 
 export const registerBodySchema = z
   .object({
-    nickname: z.string().min(3).max(20),
-    email: z.email(),
-    password: z.string().min(8),
-    passwordConfirm: z.string().min(8),
+    nickname: z.string().min(3).max(20).openapi({
+      description: 'Nickname of the user, must be between 3 and 20 characters',
+      example: 'john_doe',
+    }),
+    email: z.email().openapi({
+      description: 'Email address of the user',
+      example: 'john.doe@example.com',
+    }),
+    password: z.string().min(8).openapi({
+      description: 'Password of the user, must be at least 8 characters',
+      example: 'SecurePassword123#',
+    }),
+    passwordConfirm: z.string().min(8).openapi({
+      description: 'Confirmation of the user password',
+      example: 'SecurePassword123#',
+    }),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.passwordConfirm) {
@@ -18,15 +30,32 @@ export const registerBodySchema = z
   });
 
 export const loginBodySchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-  fingerprint: z.string().min(1),
-  os: z.string().optional(),
-  name: z.string().optional(),
+  email: z.email().openapi({
+    description: 'Email address of the user',
+    example: 'john.doe@example.com',
+  }),
+  password: z.string().min(8).openapi({
+    description: 'Password of the user, must be at least 8 characters',
+    example: 'SecurePassword123#',
+  }),
+  fingerprint: z.string().min(1).openapi({
+    description: 'Fingerprint of the user',
+    example: 'unique-device-fingerprint',
+  }),
+  os: z.string().optional().openapi({
+    description: 'Operating system of the user',
+    example: 'Windows 10',
+  }),
+  name: z.string().optional().openapi({
+    description: 'Name of the user',
+    example: "John's Laptop",
+  }),
 });
 
 export const refreshTokenCookieSchema = z.object({
-  refreshToken: z.jwt(),
+  refreshToken: z.jwt().openapi({
+    description: 'Refresh token for the user',
+  }),
 });
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;
