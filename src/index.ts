@@ -91,6 +91,28 @@ app.route('/core', coreRouter);
 const { websocket } = engine.handler();
 
 if (isDevelopment) {
+  app.openAPIRegistry.registerComponent(
+    'securitySchemes',
+    'AuthorizationBearer',
+    {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      in: 'header',
+    },
+  );
+
+  app.openAPIRegistry.registerComponent(
+    'securitySchemes',
+    'RefreshTokenCookie',
+    {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'refreshToken',
+      bearerFormat: 'JWT',
+    },
+  );
+
   app.doc('/docs', (c) => ({
     openapi: '3.0.0',
     info: {

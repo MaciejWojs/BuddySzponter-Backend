@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '@/config/appConfig';
 import { IUserRepository } from '@/modules/users/domain/repositories/IUserRepository';
 import { AuthSessionWithRawToken } from '@/shared/types/AuthSessionWithRawToken';
 import { DeviceUUID, IpAddress, UserId } from '@/shared/value-objects';

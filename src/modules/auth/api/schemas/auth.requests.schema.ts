@@ -25,15 +25,10 @@ export const loginBodySchema = z.object({
   name: z.string().optional(),
 });
 
-export const refreshSchema = z.object({
-  refreshToken: z.jwt(),
-});
-
-export const logoutSchema = z.object({
+export const refreshTokenCookieSchema = z.object({
   refreshToken: z.jwt(),
 });
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
-export type RefreshInput = z.infer<typeof refreshSchema>;
-export type LogoutInput = z.infer<typeof logoutSchema>;
+export type RefreshInput = z.infer<typeof refreshTokenCookieSchema>;

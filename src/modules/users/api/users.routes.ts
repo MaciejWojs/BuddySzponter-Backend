@@ -1,35 +1,43 @@
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { randomBytes } from 'crypto';
-import { Hono } from 'hono';
 import { crop, toPng } from 'imgkit';
 
 import { photosClient } from '@/infrastucture/s3/client';
 import { isAdmin } from '@/shared/api/middleware/isAdmin';
+import { defaultHook } from '@/shared/api/openapi/defaultHook';
+import { ENV } from '@/shared/types/honoENV';
 
-const usersRouter = new Hono();
+import {
+  deleteUserRoute,
+  postUserAvatarRequestRoute,
+  updateUserRoute,
+} from './user.openapi';
 
-usersRouter.get('/', isAdmin, (c) => {
-  return c.json({ message: 'Users endpoint' });
-});
+const usersRouter = new OpenAPIHono<ENV>({ defaultHook });
 
-usersRouter.get('/:id', (c) => {
-  const { id } = c.req.param();
-  // Here you would handle the logic for retrieving a user by their ID, such as querying a database.
-  return c.json({ message: `User with ID ${id} retrieved successfully` });
-});
+// usersRouter.openapi(getUsersPaginatedRoute, (c) => {
+//   return c.json({ message: 'Users endpoint' });
+// });
 
-usersRouter.patch('/:id', (c) => {
+// usersRouter.openapi(getUserByIdRoute, (c) => {
+//   const { id } = c.req.param();
+//   // Here you would handle the logic for retrieving a user by their ID, such as querying a database.
+//   return c.json({ message: `User with ID ${id} retrieved successfully` });
+// });
+
+usersRouter.openapi(updateUserRoute, (c) => {
   const { id } = c.req.param();
   // Here you would handle the logic for updating a user by their ID, such as validating input and modifying user data.
-  return c.json({ message: `User with ID ${id} updated successfully` });
+  return c.json({ message: `User with ID ${id} updated successfully` }, 200);
 });
 
-usersRouter.delete('/:id', (c) => {
+usersRouter.openapi(deleteUserRoute, (c) => {
   const { id } = c.req.param();
   // Here you would handle the logic for deleting a user by their ID, such as validating the ID and removing user data.
-  return c.json({ message: `User with ID ${id} deleted successfully` });
+  return c.json({ message: `User with ID ${id} deleted successfully` }, 200);
 });
 
-usersRouter.post('/upload-avatar', async (c) => {
+usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
   const data = await c.req.parseBody();
   const sizes = [320, 640, 1024];
   for (const key in data) {
@@ -56,11 +64,11 @@ usersRouter.post('/upload-avatar', async (c) => {
         })(),
       );
       await Promise.all(tasks);
-      return c.json({ message: photosClient.file(name) });
+      return c.json({ message: 'Avatar uploaded successfully' }, 200);
     }
   }
   // Here you would handle the logic for uploading a user's avatar, such as processing the file and storing it in an object storage service.
-  return c.json({ message: 'Avatar uploaded successfully' });
+  return c.json({ message: 'Avatar uploaded successfully' }, 200);
 });
 
 export default usersRouter;
