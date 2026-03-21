@@ -84,9 +84,15 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   }
 
   // Attempt to parse JSON body
+  const raw = await req.text();
   let data;
+  if (!raw || raw.trim() === '') {
+    await next();
+    return;
+  }
+
   try {
-    data = await req.json();
+    data = await JSON.parse(raw);
     if (!data || Object.keys(data).length === 0) {
       // Allow empty JSON bodies to pass through without decryption
       await next();
