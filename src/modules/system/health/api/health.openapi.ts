@@ -1,8 +1,14 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { internalServerErrorResponse } from '@/shared/api/openapi/error.openapi';
+import {
+  internalServerErrorResponse,
+  serviceUnavailableErrorResponse,
+} from '@/shared/api/openapi/error.openapi';
 
-import { healthPayloadResponseSchema } from './schemas/health.responses.schema';
+import {
+  deepHealthResponseSchema,
+  healthPayloadResponseSchema,
+} from './schemas/health.responses.schema';
 
 export const healthRoute = createRoute({
   method: 'get',
@@ -20,5 +26,25 @@ export const healthRoute = createRoute({
       },
     },
     ...internalServerErrorResponse,
+  },
+});
+
+export const deepHealthRoute = createRoute({
+  method: 'get',
+  path: '/deep',
+  tags: ['System Health'],
+  summary: 'Deep health check endpoint',
+  description: 'Returns detailed health status for each service.',
+  responses: {
+    200: {
+      description: 'Service is healthy',
+      content: {
+        'application/json': {
+          schema: deepHealthResponseSchema,
+        },
+      },
+    },
+    ...internalServerErrorResponse,
+    ...serviceUnavailableErrorResponse,
   },
 });
