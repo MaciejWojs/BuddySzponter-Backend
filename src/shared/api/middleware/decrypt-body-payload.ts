@@ -87,6 +87,11 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   let data;
   try {
     data = await req.json();
+    if (!data || Object.keys(data).length === 0) {
+      // Allow empty JSON bodies to pass through without decryption
+      await next();
+      return;
+    }
   } catch {
     return c.json(
       { message: 'Invalid JSON request body' },
