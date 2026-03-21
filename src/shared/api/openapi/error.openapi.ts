@@ -1,6 +1,7 @@
 import {
   decryptionErrorResponseSchema,
   internalServerErrorResponseSchema,
+  serviceUnavailableErrorResponseSchema,
   unauthorizedErrorResponseSchema,
   validationErrorResponseSchema,
 } from '@shared/api/schemas/error.schema';
@@ -44,6 +45,17 @@ export const unauthorizedErrorResponse = {
     content: {
       'application/json': {
         schema: unauthorizedErrorResponseSchema,
+      },
+    },
+  },
+};
+
+export const serviceUnavailableErrorResponse = {
+  503: {
+    description: 'Service Unavailable',
+    content: {
+      'application/json': {
+        schema: serviceUnavailableErrorResponseSchema,
       },
     },
   },

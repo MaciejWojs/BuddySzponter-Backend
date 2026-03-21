@@ -4,6 +4,13 @@
  * Environment-specific values (secrets, feature flags, URLs) belong in env.ts / configProvider.
  */
 export const APP_CONFIG = {
+    basic: {
+    /** Application version, injected from package.json during build. */
+    version: '1.0.0',
+    /** Application name, used in logs and health check responses. */
+    appName: 'BuddySzponter-Backend',
+  },
+
   server: {
     /** HTTP port the Bun server listens on. */
     port: 3000,
