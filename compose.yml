@@ -149,6 +149,14 @@ services:
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter
+    command:
+      - --nginx.scrape-uri=http://waf:8080/nginx_status
+    ports:
+      - "9113:9113"
+    networks:
+      - backend
 networks:
   backend:
     driver: bridge
