@@ -83,8 +83,8 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
     );
   }
 
-  // Attempt to parse JSON body
-  const raw = await req.text();
+  // Read from a cloned Request so bypass paths do not consume the original body stream
+  const raw = await req.raw.clone().text();
   let data;
   if (!raw || raw.trim() === '') {
     return next();
