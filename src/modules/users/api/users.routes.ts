@@ -49,7 +49,7 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
         const buffer = Buffer.from(temp);
         const cropped = await crop(buffer, { width: size });
         const result = await toPng(cropped);
-        const newName = `${name}_${size}.png`;
+        const newName = `${name}/${size}.png`;
         photosClient.write(newName, result);
       });
       tasks.push(
@@ -58,12 +58,13 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
           const temp = await t.arrayBuffer();
           const buffer = Buffer.from(temp);
           const result = await toPng(buffer);
-          const newName = `${name}_original.png`;
+          const newName = `${name}/original.png`;
           photosClient.write(newName, result);
         })(),
       );
       await Promise.all(tasks);
-      return c.json({ message: 'Avatar uploaded successfully' }, 200);
+      // console.log('Uploaded files:', uploadedFiles);
+      return c.json({ message: `Avatar uploaded successfully.` }, 200);
     }
   }
   // Here you would handle the logic for uploading a user's avatar, such as processing the file and storing it in an object storage service.
