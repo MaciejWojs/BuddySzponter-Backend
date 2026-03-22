@@ -104,5 +104,6 @@ export const APP_CONFIG = {
     '/docs/ui',
     '/system/health',
     '/system/health/deep',
+    '/system/metrics',
   ] as const,
 } as const;

@@ -126,6 +126,28 @@ services:
 
       echo '✅ Buckets initialized.'; sleep 2s; wait "
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: BS-Prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: BS-Grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
 networks:
   backend:
     driver: bridge

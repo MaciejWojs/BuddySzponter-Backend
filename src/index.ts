@@ -18,6 +18,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
+import { registerMetrics } from './core/infrastucture/metrics';
 import { initCache } from './infrastucture/cache/client';
 import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
@@ -36,6 +37,7 @@ app.use('*', validateAccessJWT);
 app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
 app.use('*', extendEncryptionKeyTTL);
+app.use('*', registerMetrics);
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();
