@@ -102,5 +102,7 @@ export const APP_CONFIG = {
     '/docs',
     '/docs/scalar',
     '/docs/ui',
+    '/system/health',
+    '/system/health/deep',
   ] as const,
 } as const;

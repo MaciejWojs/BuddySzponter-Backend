@@ -14,6 +14,7 @@ FROM oven/bun:1.3.11-alpine
 
 WORKDIR /app
 
+RUN apk add --no-cache curl  
 COPY --from=builder /BS/.dist /app/.dist
 COPY --from=builder /BS/package.json /app/
 # COPY --from=builder /BS/prisma /app/prisma
