@@ -3,6 +3,12 @@ services:
     image: owasp/modsecurity-crs:nginx-alpine
     container_name: BS-WAF
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      start_period: 2s
+      retries: 3
     ports:
       - '80:80'
       - '443:443'
@@ -22,6 +28,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - backend
       # volumes:
@@ -37,6 +49,12 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/v1/system/health']
+      start_period: 3s
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       - db
       - cache
@@ -64,6 +82,12 @@ services:
     command: valkey-server --requirepass ${VALKEY_PASSWORD} --loglevel verbose
     ports:
       - '6379:6379'
+    healthcheck:
+      test: ['CMD-SHELL', 'valkey-cli --no-auth-warning -a "$$VALKEY_PASSWORD" -h 127.0.0.1 ping | grep -q PONG']
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - backend
 
@@ -81,6 +105,7 @@ services:
       test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
+      start_period: 2s
       retries: 3
     networks:
       - backend

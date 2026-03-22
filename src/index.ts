@@ -18,6 +18,7 @@ import { StatusCodes } from 'http-status-codes';
 import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
 import { initCache } from './infrastucture/cache/client';
+import systemRouter from './modules/system/api/system.routes';
 import { decryptBodyPayload } from './shared/api/middleware/decrypt-body-payload';
 import { extendEncryptionKeyTTL } from './shared/api/middleware/extendEncryptionKeyTTL';
 import { injectIpAddress } from './shared/api/middleware/injectIpAddress';
@@ -86,6 +87,7 @@ app.route('/users', usersRouter);
 app.route('/connections', connectionRouter);
 app.route('/crypto', cryptoRouter);
 app.route('/core', coreRouter);
+app.route('/system', systemRouter);
 const { websocket } = engine.handler();
 
 if (isDevelopment) {
