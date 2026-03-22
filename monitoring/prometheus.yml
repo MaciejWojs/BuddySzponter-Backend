@@ -6,3 +6,8 @@ scrape_configs:
     metrics_path: /api/v1/system/metrics
     static_configs:
       - targets: ["app:3000"]
+  - job_name: "minio"
+    metrics_path: /minio/metrics/v3
+    scheme: http
+    static_configs:
+      - targets: ["simple-storage:9000"]
