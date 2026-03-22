@@ -18,7 +18,7 @@ export const getUserResponseSchema = z.object({
     example: 'john_doe',
   }),
   avatar: z.string().nullable().openapi({
-    description: 'Random generated avatar identifier fot avatar',
+    description: 'Random generated avatar identifier for avatar',
     example: 'a1b2c3d4e5f6g7h8i9j0',
   }),
   isBanned: z.boolean().openapi({
