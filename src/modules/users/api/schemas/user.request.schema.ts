@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const userIdParamSchema = z.object({
-  // TODO HONO AND ZOD-OPENAPI casuing issues with number params, needs to be string for now
+  // TODO HONO AND ZOD-OPENAPI causing issues with number params, needs to be string for now
   id: z.string().openapi({
     description: 'User ID',
     type: 'integer',
