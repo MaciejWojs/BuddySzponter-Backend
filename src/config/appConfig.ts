@@ -4,11 +4,18 @@
  * Environment-specific values (secrets, feature flags, URLs) belong in env.ts / configProvider.
  */
 export const APP_CONFIG = {
-    basic: {
+  basic: {
     /** Application version, injected from package.json during build. */
     version: '1.0.0',
     /** Application name, used in logs and health check responses. */
     appName: 'BuddySzponter-Backend',
+  },
+
+  api: {
+    /** API title and description for OpenAPI documentation. */
+    title: 'Buddy Szponter API',
+    /** API description for OpenAPI documentation. */
+    description: 'API documentation for the Buddy Szponter backend',
   },
 
   server: {

@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
 export const userIdParamSchema = z.object({
-  // TODO HONO AND ZOD-OPENAPI casuing issues with number params, needs to be string for now
-  id: z.string(),
+  // TODO HONO AND ZOD-OPENAPI causing issues with number params, needs to be string for now
+  id: z.string().openapi({
+    description: 'User ID',
+    type: 'integer',
+    example: '123',
+  }),
 });
 export const getUsersPaginatedQuerySchema = z.object({
   offset: z.number().min(0).default(0),
@@ -11,11 +15,26 @@ export const getUsersPaginatedQuerySchema = z.object({
 
 export const patchUserRequestSchema = z
   .object({
-    nickname: z.string().min(3).max(100),
-    email: z.email(),
-    password: z.string().min(8),
-    isBanned: z.boolean(),
-    isDeleted: z.boolean(),
+    nickname: z.string().min(3).max(100).openapi({
+      description: 'User nickname, must be between 3 and 100 characters',
+      example: 'john_doe_new',
+    }),
+    email: z.email().openapi({
+      description: 'User email address, must be a valid email format',
+      example: 'john.doe.new@example.com',
+    }),
+    password: z.string().min(8).openapi({
+      description: 'User password, must be at least 8 characters',
+      example: 'SecurePassword123#',
+    }),
+    isBanned: z.boolean().openapi({
+      description: 'Indicates if the user is banned',
+      example: false,
+    }),
+    isDeleted: z.boolean().openapi({
+      description: 'Indicates if the user is deleted',
+      example: false,
+    }),
   })
   .partial();
 

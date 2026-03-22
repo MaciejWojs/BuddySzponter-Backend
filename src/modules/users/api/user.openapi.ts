@@ -48,6 +48,11 @@ export const getUsersPaginatedRoute = createRoute({
   path: '/',
   tags: ['User'],
   summary: 'Get users paginated',
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   request: {
     query: getUsersPaginatedQuerySchema,
   },
@@ -71,6 +76,11 @@ export const updateUserRoute = createRoute({
   middleware: [isAdmin],
   tags: ['User'],
   summary: 'Update user by ID',
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   request: {
     params: userIdParamSchema,
     body: {
@@ -99,6 +109,11 @@ export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
   path: '/:id/avatar',
   tags: ['User'],
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   summary: 'Post user avatar request',
   request: {
     params: userIdParamSchema,
@@ -134,6 +149,11 @@ export const deleteUserRoute = createRoute({
   method: 'delete',
   path: '/:id',
   tags: ['User'],
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   summary: 'Delete user by ID',
   request: {
     params: userIdParamSchema,

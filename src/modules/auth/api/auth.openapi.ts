@@ -84,6 +84,11 @@ export const refreshRoute = createRoute({
   path: '/refresh',
   tags: ['Auth'],
   summary: 'Refresh authentication token',
+  security: [
+    {
+      RefreshTokenCookie: [],
+    },
+  ],
   request: {
     cookies: refreshTokenCookieSchema,
   },
@@ -108,6 +113,11 @@ export const logoutRoute = createRoute({
   path: '/logout',
   tags: ['Auth'],
   summary: 'Log out a user',
+  security: [
+    {
+      RefreshTokenCookie: [],
+    },
+  ],
   description:
     'Logs out the user by revoking the refresh token and clearing the cookie.',
   request: {
@@ -134,6 +144,11 @@ export const meRoute = createRoute({
   path: '/me',
   tags: ['Auth'],
   summary: 'Get authenticated user info',
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   responses: {
     200: {
       description: 'Authenticated user information retrieved successfully',

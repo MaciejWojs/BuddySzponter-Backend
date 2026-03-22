@@ -8,12 +8,16 @@ export const registerPayloadSchema = z.object({
 
 export const loginPayloadSchema = z.object({
   message: z.string(),
-  accessToken: z.jwt(),
+  accessToken: z.jwt().openapi({
+    description: 'JWT access token, valid for 15 minutes',
+  }),
 });
 
 export const refreshPayloadSchema = z.object({
   message: z.string(),
-  accessToken: z.jwt(),
+  accessToken: z.jwt().openapi({
+    description: 'JWT access token, valid for 15 minutes',
+  }),
 });
 
 export const logoutPayloadSchema = z.object({
