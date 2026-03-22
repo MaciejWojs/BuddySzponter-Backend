@@ -6,6 +6,9 @@ scrape_configs:
     metrics_path: /api/v1/system/metrics
     static_configs:
       - targets: ["app:3000"]
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
   - job_name: "nginx-waf"
     static_configs:
       - targets: ["nginx-exporter:9113"]
