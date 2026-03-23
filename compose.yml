@@ -167,6 +167,8 @@ services:
     image: nginx/nginx-prometheus-exporter
     command:
       - --nginx.scrape-uri=http://waf:8080/nginx_status
+    depends_on:
+      - prometheus
     ports:
       - "9113:9113"
     networks:
@@ -177,10 +179,14 @@ services:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
     ports:
       - "9187:9187"
+    depends_on:
+      - prometheus
     networks:
       - backend
   redis-exporter:
     image: oliver006/redis_exporter
+    depends_on:
+      - prometheus
     environment:
       REDIS_ADDR: "cache:6379"
       REDIS_PASSWORD: ${VALKEY_PASSWORD}
