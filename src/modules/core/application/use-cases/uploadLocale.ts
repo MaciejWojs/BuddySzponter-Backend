@@ -1,8 +1,7 @@
-import { createHash } from 'crypto';
-
 import { localesClient } from '@/infrastucture/s3/client';
 
 import { ICoreRepository } from '../../domain/repositories/ICoreRepository';
+import { Version } from '../../domain/value-objects/version.vo';
 
 export interface UploadLocaleInput {
   buffer: Buffer;
@@ -21,35 +20,21 @@ export class UploadLocale {
   constructor(private readonly coreRepository: ICoreRepository) {}
 
   async execute(input: UploadLocaleInput): Promise<UploadLocaleResult> {
-    const hash = createHash('sha256').update(input.buffer).digest('hex');
+    const safeVersion = new Version(input.version);
 
-    const safeVersion = input.version.trim();
-    if (!/^\d+\.\d+\.\d+$/.test(safeVersion)) {
-      throw new Error('Invalid version format. Expected x.y.z');
-    }
-
-    const versionExists = await this.coreRepository.hasVersion(safeVersion);
+    const versionExists = await this.coreRepository.findByVersion(safeVersion);
     if (!versionExists) {
       throw new Error(`App version '${safeVersion}' not found`);
     }
 
-    const objectName = `${safeVersion}/${input.lang}/${hash}.json`;
+    const objectName = `${versionExists.version.value}/${input.lang}/${versionExists.langHash}.json`;
 
     await localesClient.write(objectName, input.buffer);
 
-    const updated = await this.coreRepository.updateLangHashByVersion(
-      safeVersion,
-      hash,
-    );
-
-    if (!updated) {
-      throw new Error(`App version '${safeVersion}' not found`);
-    }
-
     return {
-      hash,
+      hash: versionExists.langHash,
       fileUrl: localesClient.file(objectName),
-      version: safeVersion,
+      version: safeVersion.value,
       lang: input.lang,
     };
   }

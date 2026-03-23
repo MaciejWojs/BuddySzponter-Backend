@@ -69,7 +69,7 @@ export const createAppVersionRequestSchema = z.object({
     description: 'Optional app codename',
     example: 'alpha',
   }),
-  isSupported: multipartBooleanSchema.optional().openapi({
+  isSupported: multipartBooleanSchema.openapi({
     description: 'Whether this version is supported',
     example: true,
   }),

@@ -28,8 +28,12 @@ coreRouter.openapi(getSupportedVersionsRoute, async (c) => {
   const getSupportedVersions = new GetSupportedVersions(coreRepository);
 
   const versions = await getSupportedVersions.execute();
-
-  return c.json(versions, StatusCodes.OK);
+  const responseData = versions.map((v) => ({
+    version: v.version.value,
+    codename: v.codename,
+    isSupported: v.isSupported,
+  }));
+  return c.json(responseData, StatusCodes.OK);
 });
 
 coreRouter.openapi(createAppVersionRoute, async (c) => {
@@ -42,7 +46,12 @@ coreRouter.openapi(createAppVersionRoute, async (c) => {
 
   try {
     const created = await createAppVersion.execute(data);
-    return c.json(created, StatusCodes.CREATED);
+    const responseData = {
+      version: created.version.value,
+      codename: created.codename,
+      isSupported: created.isSupported,
+    };
+    return c.json(responseData, StatusCodes.CREATED);
   } catch (error) {
     if (error instanceof Error && error.message.includes('already exists')) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {

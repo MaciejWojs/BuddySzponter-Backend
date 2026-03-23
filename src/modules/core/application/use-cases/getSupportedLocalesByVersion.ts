@@ -2,6 +2,7 @@ import { localesClient } from '@/infrastucture/s3/client';
 import { supportedLocales } from '@/shared/locales';
 
 import { ICoreRepository } from '../../domain/repositories/ICoreRepository';
+import { Version } from '../../domain/value-objects/version.vo';
 
 export class GetSupportedLocalesByVersion {
   constructor(private readonly coreRepository: ICoreRepository) {}
@@ -9,7 +10,9 @@ export class GetSupportedLocalesByVersion {
   async execute(version: string): Promise<(typeof supportedLocales)[number][]> {
     const safeVersion = version.trim();
 
-    const exists = await this.coreRepository.hasVersion(safeVersion);
+    const versionVO = new Version(safeVersion);
+
+    const exists = await this.coreRepository.findByVersion(versionVO);
     if (!exists) {
       throw new Error(`App version '${safeVersion}' not found`);
     }
