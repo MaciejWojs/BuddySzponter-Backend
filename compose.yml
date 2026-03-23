@@ -71,6 +71,7 @@ services:
       DEVELOPMENT: ${DEVELOPMENT} # true or false
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_ENCRYPTED: ${PAYLOAD_ENCRYPTED} # true or false
+      MONITORING_ENABLED: ${MONITORING_ENABLED:-false} # true or false (default to false if not set)
 
   cache:
     image: valkey/valkey:9-alpine3.22
