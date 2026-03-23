@@ -134,7 +134,7 @@ export const createAppVersionRoute = createRoute({
 
 export const getSupportedLocalesRoute = createRoute({
   method: 'get',
-  path: '/languages/{version}',
+  path: '/languages/:version',
   tags: ['Core'],
   summary: 'Get available languages by app version',
   request: {
