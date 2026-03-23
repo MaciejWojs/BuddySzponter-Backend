@@ -189,6 +189,7 @@ services:
     image: oliver006/redis_exporter
     depends_on:
       - prometheus
+      - cache
     environment:
       REDIS_ADDR: "cache:6379"
       REDIS_PASSWORD: ${VALKEY_PASSWORD}
