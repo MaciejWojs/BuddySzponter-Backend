@@ -130,6 +130,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: BS-Prometheus
+    profiles:
+      - "monitoring"
     restart: unless-stopped
     command: >
       --web.enable-admin-api
@@ -143,6 +145,8 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: BS-Grafana
+    profiles:
+      - "monitoring"
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -167,6 +171,8 @@ services:
     image: nginx/nginx-prometheus-exporter
     command:
       - --nginx.scrape-uri=http://waf:8080/nginx_status
+    profiles:
+      - "monitoring"
     depends_on:
       - prometheus
       - waf
@@ -182,6 +188,8 @@ services:
       - "9187:9187"
     depends_on:
       - prometheus
+    profiles:
+      - "monitoring"
       - db
     networks:
       - backend
@@ -190,6 +198,8 @@ services:
     depends_on:
       - prometheus
       - cache
+    profiles:
+      - "monitoring"
     environment:
       REDIS_ADDR: "cache:6379"
       REDIS_PASSWORD: ${VALKEY_PASSWORD}
