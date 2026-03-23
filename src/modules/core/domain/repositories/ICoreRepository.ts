@@ -1,13 +1,11 @@
 import { AppVersion } from '../entities/AppVersion.entity';
+import { AppVersionUUID } from '../value-objects/appVersionUUID.vo';
+import { Version } from '../value-objects/version.vo';
 
 export interface ICoreRepository {
   getSupportedVersions(): Promise<AppVersion[]>;
-  createVersion(data: {
-    version: string;
-    codename: string | null;
-    isSupported: boolean;
-  }): Promise<AppVersion>;
-  hasVersion(version: string): Promise<boolean>;
+  createVersion(version: AppVersion): Promise<AppVersion>;
+  findByVersion(version: Version): Promise<AppVersion | null>;
+  findById(id: AppVersionUUID): Promise<AppVersion | null>;
   getLangHashByVersion(version: string): Promise<string | null>;
-  updateLangHashByVersion(version: string, hash: string): Promise<boolean>;
 }

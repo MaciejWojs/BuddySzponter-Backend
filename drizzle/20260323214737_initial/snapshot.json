@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "91aeca1d-4343-4823-81ab-fe66086d04c8",
+  "id": "dae4cdbc-f435-4768-b4e3-83ee099bd749",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -43,22 +43,13 @@
       "schema": "public"
     },
     {
-      "type": "integer",
+      "type": "uuid",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "gen_random_uuid()",
       "generated": null,
-      "identity": {
-        "type": "always",
-        "name": "app_version_id_seq",
-        "increment": "1",
-        "startWith": "1",
-        "minValue": "1",
-        "maxValue": "2147483647",
-        "cache": 1,
-        "cycle": false
-      },
+      "identity": null,
       "name": "id",
       "entityType": "columns",
       "schema": "public",
@@ -99,6 +90,19 @@
       "generated": null,
       "identity": null,
       "name": "isSupported",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "app_version"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "langHash",
       "entityType": "columns",
       "schema": "public",
       "table": "app_version"
@@ -416,19 +420,6 @@
       "table": "devices"
     },
     {
-      "type": "varchar(50)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "deviceType",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "devices"
-    },
-    {
       "type": "varchar(100)",
       "typeSchema": null,
       "notNull": false,
@@ -437,19 +428,6 @@
       "generated": null,
       "identity": null,
       "name": "os",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "devices"
-    },
-    {
-      "type": "varchar(100)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "browser",
       "entityType": "columns",
       "schema": "public",
       "table": "devices"
@@ -598,6 +576,19 @@
       "generated": null,
       "identity": null,
       "name": "password",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "avatar",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -859,6 +850,17 @@
       "name": "app_version_version_key",
       "schema": "public",
       "table": "app_version",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "refreshTokenHash"
+      ],
+      "nullsNotDistinct": false,
+      "name": "auth_sessions_refreshTokenHash_key",
+      "schema": "public",
+      "table": "auth_sessions",
       "entityType": "uniques"
     },
     {

@@ -5,14 +5,14 @@ import { eq } from 'drizzle-orm';
 import { AppVersionDbRecord, CreateAppVersion, ICoreDao } from './ICoreDao';
 
 export class DrizzleCoreDao
-  extends BaseDao<AppVersionDbRecord, CreateAppVersion, number>
+  extends BaseDao<AppVersionDbRecord, CreateAppVersion>
   implements ICoreDao
 {
   constructor() {
     super();
   }
 
-  override async findById(id: number): Promise<AppVersionDbRecord | null> {
+  override async findById(id: string): Promise<AppVersionDbRecord | null> {
     const rows = await this.database
       .select()
       .from(appVersionTable)
@@ -55,7 +55,7 @@ export class DrizzleCoreDao
     return created ?? null;
   }
 
-  override async deleteById(id: number): Promise<boolean> {
+  override async deleteById(id: string): Promise<boolean> {
     const deleted = await this.database
       .delete(appVersionTable)
       .where(eq(appVersionTable.id, id))

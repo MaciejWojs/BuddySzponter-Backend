@@ -25,7 +25,7 @@ export const localeCodeSchema = z
     example: 'it',
   });
 
-export const appVersionSemverSchema = z
+export const appVersionServerSchema = z
   .string()
   .regex(/^\d+\.\d+\.\d+$/, 'Version must be in x.y.z format')
   .openapi({
@@ -42,7 +42,7 @@ export const coreLocaleQuerySchema = z.object({
     description: 'Language code',
     example: 'pl',
   }),
-  version: appVersionSemverSchema.openapi({
+  version: appVersionServerSchema.openapi({
     param: {
       name: 'version',
       in: 'query',
@@ -52,13 +52,24 @@ export const coreLocaleQuerySchema = z.object({
   }),
 });
 
+export const supportedLocalesByVersionParamsSchema = z.object({
+  version: appVersionServerSchema.openapi({
+    param: {
+      name: 'version',
+      in: 'path',
+    },
+    description: 'Application version in x.y.z format',
+    example: '1.0.0',
+  }),
+});
+
 export const createAppVersionRequestSchema = z.object({
-  version: appVersionSemverSchema,
+  version: appVersionServerSchema,
   codename: z.string().min(1).nullable().optional().openapi({
     description: 'Optional app codename',
     example: 'alpha',
   }),
-  isSupported: multipartBooleanSchema.optional().openapi({
+  isSupported: multipartBooleanSchema.openapi({
     description: 'Whether this version is supported',
     example: true,
   }),
@@ -71,5 +82,5 @@ export const uploadLocaleFormSchema = z.object({
     description: 'Locale JSON file (max 10MB)',
   }),
   lang: localeCodeSchema,
-  version: appVersionSemverSchema,
+  version: appVersionServerSchema,
 });

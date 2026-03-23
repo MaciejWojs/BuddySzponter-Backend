@@ -1,5 +1,4 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { supportedLocales } from '@shared/locales';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
@@ -8,6 +7,7 @@ import { defaultHook } from '@/shared/api/openapi/defaultHook';
 
 import { CreateAppVersion } from '../application/use-cases/createAppVersion';
 import { GetLocale } from '../application/use-cases/getLocale';
+import { GetSupportedLocalesByVersion } from '../application/use-cases/getSupportedLocalesByVersion';
 import { GetSupportedVersions } from '../application/use-cases/getSupportedVersions';
 import { UploadLocale } from '../application/use-cases/uploadLocale';
 import { CoreRepository } from '../infrastructure/repositories/CoreRepository';
@@ -28,8 +28,12 @@ coreRouter.openapi(getSupportedVersionsRoute, async (c) => {
   const getSupportedVersions = new GetSupportedVersions(coreRepository);
 
   const versions = await getSupportedVersions.execute();
-
-  return c.json(versions, StatusCodes.OK);
+  const responseData = versions.map((v) => ({
+    version: v.version.value,
+    codename: v.codename,
+    isSupported: v.isSupported,
+  }));
+  return c.json(responseData, StatusCodes.OK);
 });
 
 coreRouter.openapi(createAppVersionRoute, async (c) => {
@@ -42,7 +46,12 @@ coreRouter.openapi(createAppVersionRoute, async (c) => {
 
   try {
     const created = await createAppVersion.execute(data);
-    return c.json(created, StatusCodes.CREATED);
+    const responseData = {
+      version: created.version.value,
+      codename: created.codename,
+      isSupported: created.isSupported,
+    };
+    return c.json(responseData, StatusCodes.CREATED);
   } catch (error) {
     if (error instanceof Error && error.message.includes('already exists')) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
@@ -147,8 +156,27 @@ coreRouter.openapi(uploadLocaleRoute, async (c) => {
   );
 });
 
-coreRouter.openapi(getSupportedLocalesRoute, (c) => {
-  return c.json([...supportedLocales], StatusCodes.OK);
+coreRouter.openapi(getSupportedLocalesRoute, async (c) => {
+  const { version } = c.req.valid('param');
+
+  const daoFactory = new DaoFactory();
+  const coreDao = daoFactory.db.coreDao();
+  const coreRepository = new CoreRepository(coreDao);
+  const getSupportedLocalesByVersion = new GetSupportedLocalesByVersion(
+    coreRepository,
+  );
+
+  try {
+    const languages = await getSupportedLocalesByVersion.execute(version);
+    return c.json(languages, StatusCodes.OK);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('not found')) {
+      throw new HTTPException(StatusCodes.NOT_FOUND, {
+        message: error.message,
+      });
+    }
+    throw error;
+  }
 });
 
 export default coreRouter;
