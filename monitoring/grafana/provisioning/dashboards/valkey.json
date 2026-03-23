@@ -1,0 +1,164 @@
+{
+  "title": "Redis + Process Overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "tags": ["redis", "overview", "valkey", "cache"],
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Redis UP",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "redis_up",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Connected Clients",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "redis_connected_clients",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Commands/sec",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "rate(redis_commands_processed_total[1m])",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Usage (Process)",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total[1m])",
+          "legendFormat": "CPU",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Usage",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "RSS",
+          "refId": "A"
+        },
+        {
+          "expr": "redis_memory_used_bytes",
+          "legendFormat": "Redis Used",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Network IO",
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "rate(process_network_receive_bytes_total[1m])",
+          "legendFormat": "RX",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(process_network_transmit_bytes_total[1m])",
+          "legendFormat": "TX",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis Network",
+      "gridPos": { "x": 12, "y": 10, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "rate(redis_net_input_bytes_total[1m])",
+          "legendFormat": "Input",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(redis_net_output_bytes_total[1m])",
+          "legendFormat": "Output",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Command Latency (p50/p99)",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "redis_latency_percentiles_usec{quantile=\"50\"}",
+          "legendFormat": "{{cmd}} p50",
+          "refId": "A"
+        },
+        {
+          "expr": "redis_latency_percentiles_usec{quantile=\"99\"}",
+          "legendFormat": "{{cmd}} p99",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "rate(redis_total_error_replies[1m])",
+          "legendFormat": "Errors",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(redis_rejected_connections_total[1m])",
+          "legendFormat": "Rejected",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Connections",
+      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "rate(redis_connections_received_total[1m])",
+          "legendFormat": "New connections",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fragmentation Ratio",
+      "gridPos": { "x": 12, "y": 22, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "redis_mem_fragmentation_ratio",
+          "legendFormat": "Fragmentation",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
