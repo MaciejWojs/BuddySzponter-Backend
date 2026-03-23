@@ -37,7 +37,15 @@ app.use('*', validateAccessJWT);
 app.use('*', decryptBodyPayload);
 app.use('*', encryptPayloadBody);
 app.use('*', extendEncryptionKeyTTL);
-app.use('*', registerMetrics);
+
+if (configProvider.get('MONITORING_ENABLED')) {
+  logger.info('Monitoring is enabled. Registering metrics middleware.');
+  app.use('*', registerMetrics);
+} else {
+  logger.warn(
+    'Monitoring is disabled. Metrics endpoint will not be available.',
+  );
+}
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
 initSocket();
