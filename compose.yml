@@ -169,6 +169,7 @@ services:
       - --nginx.scrape-uri=http://waf:8080/nginx_status
     depends_on:
       - prometheus
+      - waf
     ports:
       - "9113:9113"
     networks:
