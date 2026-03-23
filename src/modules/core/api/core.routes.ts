@@ -1,4 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { supportedLocales } from '@shared/locales';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
 
@@ -7,7 +8,6 @@ import { defaultHook } from '@/shared/api/openapi/defaultHook';
 
 import { CreateAppVersion } from '../application/use-cases/createAppVersion';
 import { GetLocale } from '../application/use-cases/getLocale';
-import { GetSupportedLocalesByVersion } from '../application/use-cases/getSupportedLocalesByVersion';
 import { GetSupportedVersions } from '../application/use-cases/getSupportedVersions';
 import { UploadLocale } from '../application/use-cases/uploadLocale';
 import { CoreRepository } from '../infrastructure/repositories/CoreRepository';
@@ -147,27 +147,8 @@ coreRouter.openapi(uploadLocaleRoute, async (c) => {
   );
 });
 
-coreRouter.openapi(getSupportedLocalesRoute, async (c) => {
-  const { version } = c.req.valid('param');
-
-  const daoFactory = new DaoFactory();
-  const coreDao = daoFactory.db.coreDao();
-  const coreRepository = new CoreRepository(coreDao);
-  const getSupportedLocalesByVersion = new GetSupportedLocalesByVersion(
-    coreRepository,
-  );
-
-  try {
-    const languages = await getSupportedLocalesByVersion.execute(version);
-    return c.json(languages, StatusCodes.OK);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('not found')) {
-      throw new HTTPException(StatusCodes.NOT_FOUND, {
-        message: error.message,
-      });
-    }
-    throw error;
-  }
+coreRouter.openapi(getSupportedLocalesRoute, (c) => {
+  return c.json([...supportedLocales], StatusCodes.OK);
 });
 
 export default coreRouter;
