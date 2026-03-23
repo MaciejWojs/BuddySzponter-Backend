@@ -131,10 +131,12 @@ services:
     image: prom/prometheus:latest
     container_name: BS-Prometheus
     restart: unless-stopped
+    command: >
+      --web.enable-admin-api
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/prometheus/prometheus.yml
     networks:
       - backend
 
@@ -143,7 +145,7 @@ services:
     container_name: BS-Grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - backend
     environment:
