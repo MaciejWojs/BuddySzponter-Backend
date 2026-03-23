@@ -8,6 +8,7 @@ import {
 import {
   coreLocaleQuerySchema,
   createAppVersionRequestSchema,
+  supportedLocalesByVersionParamsSchema,
   uploadLocaleFormSchema,
 } from './schemas/core.requests.schema';
 import {
@@ -133,19 +134,22 @@ export const createAppVersionRoute = createRoute({
 
 export const getSupportedLocalesRoute = createRoute({
   method: 'get',
-  path: '/languages',
+  path: '/languages/{version}',
   tags: ['Core'],
-  summary: 'Get available languages',
-  description: 'Returns all language codes available in the application.',
+  summary: 'Get available languages by app version',
+  request: {
+    params: supportedLocalesByVersionParamsSchema,
+  },
   responses: {
     200: {
-      description: 'List of available language codes',
+      description: 'List of available language codes for selected version',
       content: {
         'application/json': {
           schema: supportedLocalesResponseSchema,
         },
       },
     },
+    ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
   },
 });
