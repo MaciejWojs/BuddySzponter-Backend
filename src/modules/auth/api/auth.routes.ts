@@ -10,6 +10,7 @@ import { APP_CONFIG } from '@/config/appConfig';
 import { configProvider } from '@/config/configProvider';
 import { client } from '@/infrastucture/cache/client';
 import { DaoFactory } from '@/infrastucture/factories/daoFactory';
+import { GetBasicUserInfo } from '@/modules/users/application/use-case/getBasicUserInfo';
 import { InvalidEmailAddress } from '@/modules/users/domain/errors/InvalidEmailAddress';
 import { UserAlreadyExistError } from '@/modules/users/domain/errors/UserAlreadyExistError';
 import { UserCacheRepository } from '@/modules/users/infrastructure/repositories/UserCacheRepository';
@@ -281,12 +282,34 @@ authRouter.openapi(logoutRoute, async (c) => {
 });
 
 authRouter.openapi(meRoute, async (c) => {
-  const payload = {
-    message: 'Authenticated user information retrieved successfully',
-  };
+  const data = c.get('jwt-payload');
 
-  // Here you would handle the logic for retrieving the authenticated user's information, such as validating the token and querying user data.
-  return c.json(payload, StatusCodes.OK);
+  if (!data) {
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Unauthorized',
+    });
+  }
+
+  const userRepository = new RepositoryFactory().userRepository();
+  const getUserProfile = new GetBasicUserInfo(userRepository);
+
+  try {
+    const userProfile = await getUserProfile.execute(data.userId);
+
+    return c.json(userProfile, StatusCodes.OK);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'User not found') {
+      throw new HTTPException(StatusCodes.NOT_FOUND, {
+        message: 'User not found',
+      });
+    }
+    logger.error(
+      `Error retrieving user profile for user ID ${data.userId}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+      message: 'An error occurred while retrieving user information',
+    });
+  }
 });
 
 export default authRouter;

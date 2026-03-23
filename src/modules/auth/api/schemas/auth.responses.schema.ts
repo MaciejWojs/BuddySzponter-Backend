@@ -25,7 +25,26 @@ export const logoutPayloadSchema = z.object({
 });
 
 export const mePayloadSchema = z.object({
-  message: z.string(),
+  id: z.number().positive().min(1).openapi({
+    description: 'Unique identifier for the user',
+    example: 123,
+  }),
+  avatar: z.string().nullable().openapi({
+    description: 'Random generated avatar identifier for avatar',
+    example: 'a1b2c3d4e5f6g7h8i9j0',
+  }),
+  email: z.email().openapi({
+    description: 'Email address for the user',
+    example: 'user@example.com',
+  }),
+  nickname: z.string().max(100).openapi({
+    description: 'Nickname for the user',
+    example: 'john_doe',
+  }),
+  createdAt: z.date().openapi({
+    description: 'Timestamp when the user was created',
+    example: '2023-01-01T00:00:00Z',
+  }),
 });
 
 // ── Types ───────────────────────────────────────────────────────────
