@@ -19,6 +19,10 @@ export const envSchema = z.object({
   MINIO_ENDPOINT: z.url(),
   MINIO_ROOT_USER: z.string().min(1),
   MINIO_ROOT_PASSWORD: z.string().min(8).max(64),
+  MONITORING_ENABLED: z
+    .enum(['true', 'false', '1', '0'])
+    .default('false')
+    .transform((val) => val === 'true' || val === '1'),
 });
 
 export type ENV = z.infer<typeof envSchema>;
