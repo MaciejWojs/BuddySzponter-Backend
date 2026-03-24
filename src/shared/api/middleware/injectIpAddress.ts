@@ -1,8 +1,9 @@
 import logger from '@logger';
-import { IpAddress } from '@/shared/value-objects';
 import { getConnInfo } from 'hono/bun';
 import { createMiddleware } from 'hono/factory';
+
 import { ENV } from '@/shared/types/honoENV';
+import { IpAddress } from '@/shared/value-objects';
 
 export const injectIpAddress = createMiddleware<ENV>(async (c, next) => {
   const info = getConnInfo(c);
@@ -20,7 +21,7 @@ export const injectIpAddress = createMiddleware<ENV>(async (c, next) => {
   try {
     const ip = new IpAddress(ipAddress);
     c.set('client-ip', ip);
-  } catch (error) {
+  } catch {
     c.set('client-ip', null);
     logger.warn('[IP Middleware] Invalid IP address:', ipAddress);
   }

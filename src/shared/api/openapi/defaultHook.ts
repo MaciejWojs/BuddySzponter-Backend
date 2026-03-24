@@ -1,7 +1,8 @@
-import { ENV } from '@/shared/types/honoENV';
 import { Hook } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { StatusCodes } from 'http-status-codes';
+
+import { ENV } from '@/shared/types/honoENV';
 
 export const defaultHook: Hook<unknown, ENV, string, unknown> = (
   result,

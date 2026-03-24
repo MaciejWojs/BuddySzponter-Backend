@@ -8,7 +8,7 @@ import { db } from '@/infrastucture/db/client';
 import { localesClient } from '@/infrastucture/s3/client';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 
-import { deepHealthRoute,healthRoute } from './health.openapi';
+import { deepHealthRoute, healthRoute } from './health.openapi';
 
 const healthRouter = new OpenAPIHono({ defaultHook });
 
