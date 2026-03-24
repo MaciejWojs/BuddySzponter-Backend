@@ -63,7 +63,6 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
         })(),
       );
       await Promise.all(tasks);
-      // console.log('Uploaded files:', uploadedFiles);
       return c.json({ message: `Avatar uploaded successfully.` }, 200);
     }
   }

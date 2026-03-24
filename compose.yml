@@ -137,7 +137,7 @@ services:
     command: >
       --web.enable-admin-api
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/prometheus/prometheus.yml
     networks:
@@ -158,12 +158,12 @@ services:
       start_period: 2s
       retries: 3
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     networks:
       - backend
     environment:
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
     volumes:
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
