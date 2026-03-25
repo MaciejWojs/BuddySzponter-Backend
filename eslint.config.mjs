@@ -2,24 +2,36 @@
 
 import eslint from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import prettier from 'eslint-config-prettier';
+import perfectionist from 'eslint-plugin-perfectionist';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
-import perfectionist from 'eslint-plugin-perfectionist';
-import prettier from 'eslint-config-prettier';
+import stylistic from '@stylistic/eslint-plugin';
 
 export default defineConfig(
   globalIgnores(['.dist/**']),
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  stylistic.configs.recommended,
   prettier,
   {
     plugins: {
       'unused-imports': unusedImports,
       'simple-import-sort': simpleImportSort,
       perfectionist: perfectionist,
+      '@stylistic': stylistic,
     },
     rules: {
+      '@stylistic/lines-between-class-members': [
+        'error',
+        'always',
+        {
+          exceptAfterSingleLine: false,
+          exceptAfterOverload: true,
+        },
+      ],
+      '@stylistic/comma-dangle': ['error', 'never'],
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -29,6 +41,7 @@ export default defineConfig(
           argsIgnorePattern: '^_',
         },
       ],
+      '@stylistic/template-curly-spacing': ['error', 'never'],
       'perfectionist/sort-classes': [
         'error',
         {
@@ -40,7 +53,7 @@ export default defineConfig(
             'static-method',
             'method',
           ],
-          // 'newlines-between': 'always',
+          // 'partitionByNewLine': true,
         },
       ],
       'simple-import-sort/imports': 'error',
