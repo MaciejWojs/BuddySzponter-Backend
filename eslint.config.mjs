@@ -1,13 +1,13 @@
 // @ts-check
 
 import eslint from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettier from 'eslint-config-prettier';
 import perfectionist from 'eslint-plugin-perfectionist';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
-import stylistic from '@stylistic/eslint-plugin';
 
 export default defineConfig(
   globalIgnores(['.dist/**']),
@@ -19,8 +19,7 @@ export default defineConfig(
     plugins: {
       'unused-imports': unusedImports,
       'simple-import-sort': simpleImportSort,
-      perfectionist: perfectionist,
-      '@stylistic': stylistic,
+      perfectionist: perfectionist
     },
     rules: {
       '@stylistic/lines-between-class-members': [
@@ -28,19 +27,11 @@ export default defineConfig(
         'always',
         {
           exceptAfterSingleLine: false,
-          exceptAfterOverload: true,
-        },
+          exceptAfterOverload: true
+        }
       ],
       '@stylistic/comma-dangle': ['error', 'never'],
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'off',
       '@stylistic/template-curly-spacing': ['error', 'never'],
       'perfectionist/sort-classes': [
         'error',
@@ -51,10 +42,10 @@ export default defineConfig(
             'property',
             'constructor',
             'static-method',
-            'method',
-          ],
+            'method'
+          ]
           // 'partitionByNewLine': true,
-        },
+        }
       ],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
@@ -65,9 +56,9 @@ export default defineConfig(
           vars: 'all',
           varsIgnorePattern: '^_',
           args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
-      ],
-    },
-  },
+          argsIgnorePattern: '^_'
+        }
+      ]
+    }
+  }
 );
