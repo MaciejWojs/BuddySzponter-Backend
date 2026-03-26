@@ -78,7 +78,56 @@ export const patchUserRequestSchema = z
       example: false,
     }),
   })
-  .partial();
+  .partial()
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided',
+  });
+
+export const patchUserQuerySchema = z
+  .object({
+    nickname: z.string().min(3).max(100).optional().openapi({
+      description: 'User nickname, must be between 3 and 100 characters',
+      example: 'john_doe_new',
+    }),
+    email: z.email().optional().openapi({
+      description: 'User email address, must be a valid email format',
+      example: 'john.doe.new@example.com',
+    }),
+    password: z.string().min(8).optional().openapi({
+      description: 'User password, must be at least 8 characters',
+      example: 'SecurePassword123#',
+    }),
+    isBanned: queryBooleanSchema.optional().openapi({
+      description: 'Indicates if the user is banned',
+      example: false,
+    }),
+    isDeleted: queryBooleanSchema.optional().openapi({
+      description: 'Indicates if the user is deleted',
+      example: false,
+    }),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided',
+  });
+
+export const patchSelfQuerySchema = z
+  .object({
+    nickname: z.string().min(3).max(100).optional().openapi({
+      description: 'Current user nickname',
+      example: 'john_doe_new',
+    }),
+    email: z.email().optional().openapi({
+      description: 'Current user email',
+      example: 'john.doe.new@example.com',
+    }),
+    password: z.string().min(8).optional().openapi({
+      description: 'Current user password',
+      example: 'SecurePassword123#',
+    }),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided',
+  });
 
 export const postUserAvatarRequestSchema = z.object({
   //TODO Waiting for zod-openapi to support file validation
@@ -100,4 +149,5 @@ export const postUserAvatarRequestSchema = z.object({
 
 export type UserIdParam = z.infer<typeof userIdParamSchema>;
 export type PatchUserInput = z.infer<typeof patchUserRequestSchema>;
+export type PatchSelfInput = z.infer<typeof patchSelfQuerySchema>;
 export type PostUserAvatarInput = z.infer<typeof postUserAvatarRequestSchema>;

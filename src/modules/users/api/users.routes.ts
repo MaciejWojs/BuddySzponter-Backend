@@ -21,6 +21,7 @@ import {
   getUsersFilteredRoute,
   getUsersPaginatedRoute,
   postUserAvatarRequestRoute,
+  updateSelfRoute,
   updateUserRoute,
 } from './user.openapi';
 
@@ -72,25 +73,104 @@ usersRouter.openapi(getUserByIdRoute, async (c) => {
   }
 });
 
+usersRouter.openapi(updateSelfRoute, async (c) => {
+  const jwtPayload = c.get('jwt-payload');
+
+  if (!jwtPayload) {
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Unauthorized',
+      cause: [{ field: 'authorization', error: 'Missing or invalid token' }],
+    });
+  }
+
+  const query = c.req.valid('query');
+
+  const repo = new RepositoryFactory().userCacheRepository();
+  const useCase = new UpdateUser(repo);
+
+  try {
+    await useCase.execute(jwtPayload.userId, jwtPayload.userId, query);
+    return c.json({ message: 'Profile updated successfully' }, StatusCodes.OK);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Forbidden') {
+      throw new HTTPException(StatusCodes.FORBIDDEN, {
+        message: 'Forbidden',
+        cause: [{ field: 'authorization', error: 'Insufficient permissions' }],
+      });
+    }
+
+    if (
+      err instanceof Error &&
+      (err.message === 'Forbidden fields for self update' ||
+        err.message === 'No changes detected' ||
+        err.message === 'At least one field must be provided')
+    ) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: 'ValidationError',
+        cause: [{ field: 'query', error: err.message }],
+      });
+    }
+
+    if (err instanceof Error && err.message.includes('not found')) {
+      throw new HTTPException(StatusCodes.NOT_FOUND, {
+        message: 'NotFoundError',
+        cause: [{ field: 'userId', error: err.message }],
+      });
+    }
+
+    throw err;
+  }
+});
+
 usersRouter.openapi(updateUserRoute, async (c) => {
+  const jwtPayload = c.get('jwt-payload');
+  if (!jwtPayload) {
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Unauthorized',
+      cause: [{ field: 'authorization', error: 'Missing or invalid token' }],
+    });
+  }
+
   const { id } = c.req.valid('param');
   // const id = c.req.param('id');
-  const body = c.req.valid('json');
+  const body = c.req.valid('query');
   const userId = Number(id);
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new UpdateUser(repo);
   logger.onlyDev(id);
   try {
-    await useCase.execute(userId, body);
+    await useCase.execute(jwtPayload.userId, userId, body);
     return c.json(
       { message: `User with ID ${id} updated successfully` },
       StatusCodes.OK,
     );
   } catch (err) {
-    if (err instanceof Error && err.message.includes('not found')) {
-      throw new HTTPException(StatusCodes.NOT_FOUND, { message: err.message });
+    if (err instanceof Error && err.message === 'Forbidden') {
+      throw new HTTPException(StatusCodes.FORBIDDEN, {
+        message: 'Forbidden',
+        cause: [{ field: 'authorization', error: 'Insufficient permissions' }],
+      });
     }
+
+    if (err instanceof Error && err.message.includes('not found')) {
+      throw new HTTPException(StatusCodes.NOT_FOUND, {
+        message: 'NotFoundError',
+        cause: [{ field: 'id', error: err.message }],
+      });
+    }
+
+    if (
+      err instanceof Error &&
+      (err.message === 'No changes detected' ||
+        err.message === 'At least one field must be provided')
+    ) {
+      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+        message: 'ValidationError',
+        cause: [{ field: 'body', error: 'At least one field must be changed' }],
+      });
+    }
+
     throw err;
   }
 });

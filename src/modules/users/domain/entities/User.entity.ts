@@ -57,6 +57,18 @@ export class User {
     return this.role.name === 'ADMIN';
   }
 
+  canEditUser(target: User): boolean {
+    if (!this.id || !target.id) {
+      return false;
+    }
+
+    return this.isAdmin() || this.id.value === target.id.value;
+  }
+
+  canEditAdminFields(): boolean {
+    return this.isAdmin();
+  }
+
   updateAvatar(avatar: string): User {
     return this.copy({ avatar });
   }

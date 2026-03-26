@@ -10,7 +10,8 @@ import {
 import {
   getUsersFilteredQuerySchema,
   getUsersPaginatedQuerySchema,
-  patchUserRequestSchema,
+  patchSelfQuerySchema,
+  patchUserQuerySchema,
   postUserAvatarRequestSchema,
   userIdParamSchema,
 } from './schemas/user.request.schema';
@@ -117,13 +118,7 @@ export const updateUserRoute = createRoute({
   ],
   request: {
     params: userIdParamSchema,
-    body: {
-      content: {
-        'application/json': {
-          schema: patchUserRequestSchema,
-        },
-      },
-    },
+    query: patchUserQuerySchema,
   },
   responses: {
     200: {
@@ -139,6 +134,35 @@ export const updateUserRoute = createRoute({
     ...decryptionErrorResponse,
   },
 });
+
+export const updateSelfRoute = createRoute({
+  method: 'patch',
+  path: '/me',
+  tags: ['User'],
+  summary: 'Update current user profile',
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
+  request: {
+    query: patchSelfQuerySchema,
+  },
+  responses: {
+    200: {
+      description: 'Profile updated successfully',
+      content: {
+        'application/json': {
+          schema: patchUserResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
+  },
+});
+
 export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
   path: '/{id}/avatar',
