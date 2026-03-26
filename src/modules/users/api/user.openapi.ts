@@ -8,6 +8,7 @@ import {
 } from '@/shared/api/openapi/error.openapi';
 
 import {
+  getUsersFilteredQuerySchema,
   getUsersPaginatedQuerySchema,
   patchUserRequestSchema,
   postUserAvatarRequestSchema,
@@ -23,8 +24,14 @@ import {
 
 export const getUserByIdRoute = createRoute({
   method: 'get',
-  path: '/:id',
+  path: '/{id}',
+  middleware: [isAdmin],
   tags: ['User'],
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
   summary: 'Get user by ID',
   request: {
     params: userIdParamSchema,
@@ -46,6 +53,7 @@ export const getUserByIdRoute = createRoute({
 export const getUsersPaginatedRoute = createRoute({
   method: 'get',
   path: '/',
+  middleware: [isAdmin],
   tags: ['User'],
   summary: 'Get users paginated',
   security: [
@@ -70,9 +78,35 @@ export const getUsersPaginatedRoute = createRoute({
     ...decryptionErrorResponse,
   },
 });
+
+export const getUsersFilteredRoute = createRoute({
+  method: 'get',
+  path: '/filtered',
+  middleware: [isAdmin],
+  tags: ['User'],
+  summary: 'Get users with filters',
+  security: [{ AuthorizationBearer: [] }],
+  request: {
+    query: getUsersFilteredQuerySchema,
+  },
+  responses: {
+    200: {
+      description: 'Filtered users retrieved successfully',
+      content: {
+        'application/json': {
+          schema: getUsersResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
+  },
+});
+
 export const updateUserRoute = createRoute({
   method: 'patch',
-  path: '/:id',
+  path: '/{id}',
   middleware: [isAdmin],
   tags: ['User'],
   summary: 'Update user by ID',
@@ -107,7 +141,7 @@ export const updateUserRoute = createRoute({
 });
 export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
-  path: '/:id/avatar',
+  path: '/{id}/avatar',
   tags: ['User'],
   security: [
     {
@@ -147,7 +181,8 @@ export const postUserAvatarRequestRoute = createRoute({
 });
 export const deleteUserRoute = createRoute({
   method: 'delete',
-  path: '/:id',
+  path: '/{id}',
+  middleware: [isAdmin],
   tags: ['User'],
   security: [
     {

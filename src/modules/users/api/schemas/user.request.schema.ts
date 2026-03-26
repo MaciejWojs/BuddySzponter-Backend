@@ -1,16 +1,58 @@
 import { z } from 'zod';
 
+const queryBooleanSchema = z.preprocess((value) => {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1' || normalized === 'on') {
+      return true;
+    }
+    if (normalized === 'false' || normalized === '0' || normalized === 'off') {
+      return false;
+    }
+  }
+  return value;
+}, z.boolean());
+
 export const userIdParamSchema = z.object({
   // TODO HONO AND ZOD-OPENAPI causing issues with number params, needs to be string for now
   id: z.string().openapi({
-    description: 'User ID',
+    param: {
+      name: 'id',
+      in: 'path',
+    },
     type: 'integer',
     example: '123',
   }),
 });
 export const getUsersPaginatedQuerySchema = z.object({
-  offset: z.number().min(0).default(0),
-  limit: z.number().positive().default(10),
+  offset: z.coerce.number().int().min(0).default(0).openapi({
+    example: 0,
+    description: 'Pagination offset',
+  }),
+  limit: z.coerce.number().int().min(1).max(100).default(10).openapi({
+    example: 10,
+    description: 'Pagination limit',
+  }),
+});
+
+export const getUsersFilteredQuerySchema = z.object({
+  ...getUsersPaginatedQuerySchema.shape,
+  search: z.string().trim().min(1).max(100).optional().openapi({
+    example: 'john',
+    description: 'Search by email or nickname',
+  }),
+  role: z.string().trim().min(1).max(100).optional().openapi({
+    example: 'ADMIN',
+    description: 'Filter by role name',
+  }),
+  isBanned: queryBooleanSchema.optional().openapi({
+    example: false,
+    description: 'Filter by banned flag',
+  }),
+  isDeleted: queryBooleanSchema.optional().openapi({
+    example: false,
+    description: 'Filter by deleted flag',
+  }),
 });
 
 export const patchUserRequestSchema = z

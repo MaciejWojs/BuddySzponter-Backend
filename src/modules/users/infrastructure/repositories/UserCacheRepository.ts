@@ -106,9 +106,13 @@ export class UserCacheRepository implements IUserRepository {
   async findById(id: UserId): Promise<User> {
     const cacheKey = `${APP_CONFIG.cache.keys.userIdPrefix}${id.value}`;
 
+    logger.onlyDev(`Attempting to fetch user with ID: ${id.value} from cache`);
     if (this.cacheClient.connected) {
       const cachedEmail = await this.cacheClient.get(cacheKey);
       if (cachedEmail) {
+        logger.onlyDev(
+          `Cache hit for user ID: ${id.value}, Email: ${cachedEmail}`,
+        );
         return this.findByEmail(new Email(cachedEmail));
       }
     } else {
@@ -118,6 +122,9 @@ export class UserCacheRepository implements IUserRepository {
     const userFromDb = await this.repository.findById(id);
 
     if (userFromDb) {
+      logger.onlyDev(
+        `User fetched from DB with ID: ${userFromDb.id?.value}, Email: ${userFromDb.email.value}`,
+      );
       try {
         const emailCacheKey = `${APP_CONFIG.cache.keys.userPrefix}${userFromDb.email.value}`;
         const cacheValue = this.serializeUser(userFromDb);
@@ -139,6 +146,22 @@ export class UserCacheRepository implements IUserRepository {
       }
     }
     return userFromDb;
+  }
+
+  async findMany(offset: number, limit: number): Promise<User[]> {
+    // listy na razie bez cache
+    return this.repository.findMany(offset, limit);
+  }
+
+  async findManyFiltered(filters: {
+    offset: number;
+    limit: number;
+    search?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<User[]> {
+    return this.repository.findManyFiltered(filters);
   }
 
   async updateUser(user: User): Promise<boolean> {

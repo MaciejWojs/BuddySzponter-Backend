@@ -1,3 +1,4 @@
+import logger from '@/infrastucture/logger';
 import { UserMapper } from '@/shared/mappers/userMapper';
 import { UserId } from '@/shared/value-objects';
 
@@ -46,6 +47,7 @@ export class UserRepository implements IUserRepository {
 
   async findById(id: UserId): Promise<User> {
     const result = await this.dao.findById(id.value);
+    logger.onlyDev(`Attempting to fetch user with ID: ${id.value} from db`);
     if (!result) {
       throw new Error('User not found');
     }
@@ -62,6 +64,23 @@ export class UserRepository implements IUserRepository {
       result.createdAt,
       result.updatedAt,
     );
+  }
+
+  async findMany(offset: number, limit: number): Promise<User[]> {
+    const rows = await this.dao.findMany(offset, limit);
+    return rows.map((row) => UserMapper.toDomain(row));
+  }
+
+  async findManyFiltered(filters: {
+    offset: number;
+    limit: number;
+    search?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<User[]> {
+    const rows = await this.dao.findManyFiltered(filters);
+    return rows.map((row) => UserMapper.toDomain(row));
   }
 
   async updateUser(user: User): Promise<boolean> {
