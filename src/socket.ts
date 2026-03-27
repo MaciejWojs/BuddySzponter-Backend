@@ -167,6 +167,7 @@ export function initSocket() {
   });
 
   io.use(async (socket, next) => {
+    // This middleware is required and will reject connections without a valid connection token
     try {
       const token = socket.handshake.auth.connectionToken;
       if (!token) {
@@ -216,6 +217,7 @@ export function initSocket() {
 
   io.on('connection', (socket) => {
     if (configProvider.get('PAYLOAD_ENCRYPTED')) {
+      // Middleware to decrypt incoming messages only if encryption is enabled
       socket.use(async (packet, next) => {
         const [_eventName, data] = packet;
         const isEnctyptedFormat = encryptedPayloadSchema.safeParse(data);
