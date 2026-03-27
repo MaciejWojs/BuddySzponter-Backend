@@ -98,7 +98,7 @@ export class PostUserAvatar {
     const deleteTasks = [];
     if (user.avatar) {
       deleteTasks.push(
-        sizes.map((size) =>
+        ...sizes.map((size) =>
           photosClient.delete(`${user.avatar}/${size}.${ext}`),
         ),
       );
