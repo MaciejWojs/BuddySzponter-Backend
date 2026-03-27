@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { rolesTable, usersTable } from '@infra/db/schema';
-import { and, desc, eq, getColumns, ilike, or } from 'drizzle-orm';
+import { and, desc, eq, getColumns, ilike } from 'drizzle-orm';
 
 import { UserDbRecord } from '@/shared/types';
 import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
@@ -47,7 +47,8 @@ export class DrizzleUserDao
   async findManyFiltered(
     filters: FindUsersFilters,
   ): Promise<UserDbRecordWithRole[]> {
-    const { offset, limit, search, role, isBanned, isDeleted } = filters;
+    const { offset, limit, nickname, email, role, isBanned, isDeleted } =
+      filters;
 
     const whereParts = [
       typeof isBanned === 'boolean'
@@ -57,12 +58,8 @@ export class DrizzleUserDao
         ? eq(usersTable.isDeleted, isDeleted)
         : undefined,
       role ? ilike(rolesTable.name, role) : undefined,
-      search
-        ? or(
-            ilike(usersTable.email, `%${search}%`),
-            ilike(usersTable.nickname, `%${search}%`),
-          )
-        : undefined,
+      email ? ilike(usersTable.email, `%${email}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
     ].filter(Boolean);
 
     return this.database

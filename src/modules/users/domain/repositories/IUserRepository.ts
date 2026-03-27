@@ -6,7 +6,8 @@ import { Email } from '../value-objects';
 export type FindUsersFilters = {
   offset: number;
   limit: number;
-  search?: string;
+  nickname?: string;
+  email?: string;
   role?: string;
   isBanned?: boolean;
   isDeleted?: boolean;

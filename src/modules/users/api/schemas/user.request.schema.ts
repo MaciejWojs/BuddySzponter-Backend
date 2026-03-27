@@ -24,7 +24,7 @@ export const userIdParamSchema = z.object({
     example: '123',
   }),
 });
-export const getUsersPaginatedQuerySchema = z.object({
+export const getUsersQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0).openapi({
     example: 0,
     description: 'Pagination offset',
@@ -33,13 +33,13 @@ export const getUsersPaginatedQuerySchema = z.object({
     example: 10,
     description: 'Pagination limit',
   }),
-});
-
-export const getUsersFilteredQuerySchema = z.object({
-  ...getUsersPaginatedQuerySchema.shape,
-  search: z.string().trim().min(1).max(100).optional().openapi({
+  nickname: z.string().trim().min(1).max(100).optional().openapi({
     example: 'john',
-    description: 'Search by email or nickname',
+    description: 'Filter by nickname',
+  }),
+  email: z.email().optional().openapi({
+    example: 'john@example.com',
+    description: 'Filter by email',
   }),
   role: z.string().trim().min(1).max(100).optional().openapi({
     example: 'ADMIN',

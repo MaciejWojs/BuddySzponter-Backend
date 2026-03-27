@@ -8,8 +8,7 @@ import {
 } from '@/shared/api/openapi/error.openapi';
 
 import {
-  getUsersFilteredQuerySchema,
-  getUsersPaginatedQuerySchema,
+  getUsersQuerySchema,
   patchSelfQuerySchema,
   patchUserQuerySchema,
   postUserAvatarRequestSchema,
@@ -51,48 +50,23 @@ export const getUserByIdRoute = createRoute({
     ...decryptionErrorResponse,
   },
 });
-export const getUsersPaginatedRoute = createRoute({
+export const getUsersRoute = createRoute({
   method: 'get',
   path: '/',
   middleware: [isAdmin],
   tags: ['User'],
-  summary: 'Get users paginated',
+  summary: 'Get users',
   security: [
     {
       AuthorizationBearer: [],
     },
   ],
   request: {
-    query: getUsersPaginatedQuerySchema,
+    query: getUsersQuerySchema,
   },
   responses: {
     200: {
       description: 'Users retrieved successfully',
-      content: {
-        'application/json': {
-          schema: getUsersResponseSchema,
-        },
-      },
-    },
-    ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
-
-export const getUsersFilteredRoute = createRoute({
-  method: 'get',
-  path: '/filtered',
-  middleware: [isAdmin],
-  tags: ['User'],
-  summary: 'Get users with filters',
-  security: [{ AuthorizationBearer: [] }],
-  request: {
-    query: getUsersFilteredQuerySchema,
-  },
-  responses: {
-    200: {
-      description: 'Filtered users retrieved successfully',
       content: {
         'application/json': {
           schema: getUsersResponseSchema,

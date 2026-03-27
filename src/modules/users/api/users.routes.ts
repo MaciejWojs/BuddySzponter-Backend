@@ -8,8 +8,7 @@ import { RepositoryFactory } from '@/infrastucture/factories/RepositoryFactory';
 import logger from '@/infrastucture/logger';
 import { photosClient } from '@/infrastucture/s3/client';
 import { DeleteUser } from '@/modules/users/application/use-case/deleteUser';
-import { GetUsersFiltered } from '@/modules/users/application/use-case/getUsersFiltered';
-import { GetUsersPaginated } from '@/modules/users/application/use-case/getUsersPaginated';
+import { GetUsers } from '@/modules/users/application/use-case/getUsers';
 import { UpdateUser } from '@/modules/users/application/use-case/updateUser';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 import { ENV } from '@/shared/types/honoENV';
@@ -18,8 +17,7 @@ import { GetAdminUserProfile } from '../application/use-case/getAdminUserProfile
 import {
   deleteUserRoute,
   getUserByIdRoute,
-  getUsersFilteredRoute,
-  getUsersPaginatedRoute,
+  getUsersRoute,
   postUserAvatarRequestRoute,
   updateSelfRoute,
   updateUserRoute,
@@ -37,19 +35,10 @@ const usersRouter = new OpenAPIHono<ENV>({ defaultHook });
 //   return c.json({ message: `User with ID ${id} retrieved successfully` });
 // });
 
-usersRouter.openapi(getUsersPaginatedRoute, async (c) => {
-  const { offset, limit } = c.req.valid('query');
-  const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetUsersPaginated(repo);
-
-  const users = await useCase.execute(offset, limit);
-  return c.json(users, StatusCodes.OK);
-});
-
-usersRouter.openapi(getUsersFilteredRoute, async (c) => {
+usersRouter.openapi(getUsersRoute, async (c) => {
   const query = c.req.valid('query');
   const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetUsersFiltered(repo);
+  const useCase = new GetUsers(repo);
 
   const users = await useCase.execute(query);
   return c.json(users, StatusCodes.OK);
