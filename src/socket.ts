@@ -8,6 +8,11 @@ import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
 import { client } from './infrastucture/cache/client';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
+import {
+  authTokenSchema,
+  connectionTokenSchema,
+  sessionIdSchema
+} from './infrastucture/ws/socket.schemas';
 import { ValidateSession } from './modules/auth/application/use-cases/validateSession';
 import {
   ConnectionTokenData,
@@ -18,11 +23,6 @@ import { ValidationError } from './shared/errors/Specialized/ValidationError';
 import { jwtPaylaod } from './shared/types/jwtPayload';
 import { decryptPayload } from './shared/utils/decrypt-payload';
 import { encryptPayload } from './shared/utils/encrypt-payload';
-import {
-  authTokenSchema,
-  connectionTokenSchema,
-  sessionIdSchema
-} from './socket.schemas';
 
 let io: Server;
 let engine: Engine;
@@ -250,10 +250,6 @@ export function initSocket() {
         next();
       });
     }
-
-    logger.info(
-      `Client connected: ${socket.id} as ${socket.data.connectionTokenData?.role}`
-    );
 
     socket.on('message', (message) => {
       logger.info(
