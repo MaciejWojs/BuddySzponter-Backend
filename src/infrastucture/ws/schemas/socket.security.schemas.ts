@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { APP_CONFIG } from '../../config/appConfig';
+import { APP_CONFIG } from '@/config/appConfig';
 
 export const connectionTokenSchema = z
   .string()

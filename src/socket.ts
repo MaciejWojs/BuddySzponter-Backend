@@ -2,17 +2,24 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { verify } from 'hono/jwt';
 import { JwtTokenExpired } from 'hono/utils/jwt/types';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
 import { client } from './infrastucture/cache/client';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
+  IncomingEventNames,
+  IncomingEventPayloads,
+  incomingEventSchemas,
+  OutgoingEventNames,
+  OutgoingEventPayloads
+} from './infrastucture/ws/eventMap';
+import {
   authTokenSchema,
   connectionTokenSchema,
   sessionIdSchema
-} from './infrastucture/ws/socket.schemas';
+} from './infrastucture/ws/schemas/socket.security.schemas';
 import { ValidateSession } from './modules/auth/application/use-cases/validateSession';
 import {
   ConnectionTokenData,
@@ -28,6 +35,45 @@ let io: Server;
 let engine: Engine;
 
 const tokenService = new TokenService();
+
+/**
+ * Helper function to register event handlers with type safety for incoming events.
+ * !Do not use for Reserved events like 'connection', 'disconnect', or 'error'
+ * @param socket The Socket.IO socket instance
+ * @param event The name of the event to listen for
+ * @param handler The callback function that handles the event, with typed data
+ */
+function on<K extends keyof IncomingEventPayloads>(
+  socket: Socket,
+  event: K,
+  handler: (data: IncomingEventPayloads[K]) => void
+) {
+  if (!IncomingEventNames.has(event)) {
+    throw new Error(`Cannot register handler for reserved event ${event}`);
+  }
+  // @ts-expect-error - Do not use for Reserved events like 'connection', 'disconnect', or 'error'
+  socket.on(event, handler);
+  logger.onlyDev(`Registered handler for event ${event}`);
+}
+
+/** Helper function to emit events with type safety for outgoing events. Automatically encrypts payload if encryption is enabled. */
+function emit<K extends keyof OutgoingEventPayloads>(
+  socket: Socket,
+  event: K,
+  data: OutgoingEventPayloads[K]
+) {
+  if (!OutgoingEventNames.has(event)) {
+    throw new Error(`Cannot emit reserved event ${event}`);
+  }
+  if (configProvider.get('PAYLOAD_ENCRYPTED')) {
+    const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+    const payload = encryptPayload({ payload: data }, decryptionKey);
+
+    socket.emit(event, payload);
+    return;
+  }
+  socket.emit(event, data);
+}
 
 export function initSocket() {
   if (io) return { io, engine };
@@ -224,7 +270,9 @@ export function initSocket() {
 
         if (!isEnctyptedFormat.success) {
           return next(
-            new Error('Data is not encrypted or wrong payload format')
+            new Error(
+              `Data is not encrypted or wrong payload format during ${_eventName}`
+            )
           );
         }
 
@@ -250,6 +298,182 @@ export function initSocket() {
         next();
       });
     }
+    socket.use((packet, next) => {
+      const [eventName, data] = packet;
+      logger.info(
+        `[EVENT VALIDATOR MIDDLEWARE] ${eventName} from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      if (
+        eventName === 'connection' ||
+        eventName === 'disconnect' ||
+        eventName === 'error'
+      ) {
+        logger.onlyDev(`Skipping validation for special event ${eventName}`);
+        return next();
+      }
+
+      const schema =
+        incomingEventSchemas[eventName as keyof typeof incomingEventSchemas];
+      if (!schema) {
+        logger.warn(
+          `No schema defined for event ${eventName}, skipping validation`
+        );
+        return next(
+          new Error(`Unrecognized event: ${eventName}, no validation schema`)
+        );
+      }
+      const result = schema.safeParse(data);
+      if (!result.success) {
+        logger.warn(
+          `Validation failed for event ${eventName} from ${socket.id}: ${JSON.stringify(result.error.issues)}`
+        );
+        const errorDetails = result.error.issues
+          .map((issue) => {
+            const path =
+              issue.path.length > 0
+                ? `['${issue.path.join('.')}' - ${issue.message}]`
+                : `[${issue.message}]`;
+            return path;
+          })
+          .join(', ');
+        return next(new Error('Invalid event payload: ' + errorDetails));
+      }
+
+      packet[1] = result.data;
+      next();
+    });
+
+    on(socket, 'connection:accept', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
+
+    on(socket, 'connection:disconnect', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload: payload });
+    });
+
+    on(socket, 'connection:reject', (data) => {
+      logger.info(
+        `[connection:reject] data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+
+      emit(socket, 'connection:rejected', {
+        sessionId: data.sessionId,
+        ...{
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        }
+      });
+    });
+
+    on(socket, 'connection:request-access', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
+
+    on(socket, 'webrtc:answer', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
+
+    on(socket, 'webrtc:offer', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
+
+    on(socket, 'webrtc:ice-candidate', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
+
+    on(socket, 'webrtc:ready', (data) => {
+      logger.info(
+        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+      const payload = encryptPayload(
+        {
+          ...data,
+          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        },
+        decryptionKey
+      );
+
+      socket.send({ payload });
+    });
 
     socket.on('message', (message) => {
       logger.info(
@@ -268,9 +492,24 @@ export function initSocket() {
 
       socket.send({ payload });
     });
-    socket.on('disconnect', () => {
-      logger.info(`Client disconnected: ${socket.id}`);
+    socket.on('error', (err) => {
+      // logger.error(`Socket error from ${socket.id}:`, err);
+      socket.emit('error', { message: err.message });
     });
+
+    socket.on('disconnect', () => {
+      logger.info(
+        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
+      );
+    });
+
+    const p = encryptPayload(
+      {
+        news: `Welcome, your socket ID is ${socket.id}`
+      },
+      Buffer.from(socket.data.encryptionKey, 'base64')
+    );
+    socket.emit('message', { payload: p });
   });
 
   return { io, engine };
