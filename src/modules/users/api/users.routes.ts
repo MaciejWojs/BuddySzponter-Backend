@@ -325,7 +325,6 @@ usersRouter.openapi(postSelfAvatarRequestRoute, async (c) => {
       {
         message: 'Avatar uploaded successfully',
         avatar: result.avatar,
-        hash: result.hash,
       },
       StatusCodes.OK,
     );
@@ -450,7 +449,6 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
       {
         message: 'Avatar uploaded successfully',
         avatar: result.avatar,
-        hash: result.hash,
       },
       StatusCodes.OK,
     );

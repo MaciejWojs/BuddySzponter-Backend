@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { fileTypeFromBuffer } from 'file-type';
 import { resize, stripExif, toWebp } from 'imgkit';
 
@@ -54,7 +54,7 @@ export class PostUserAvatar {
     userId: number,
     fileBuffer: Buffer,
     mime: SupportedMime,
-  ): Promise<{ avatar: string; hash: string }> {
+  ): Promise<{ avatar: string }> {
     try {
       const detectedMime = await this.detectMimeFromBuffer(fileBuffer);
 
@@ -72,9 +72,6 @@ export class PostUserAvatar {
 
     // original (full image, only metadata stripped)
     const original = await this.stripMetadata(fileBuffer, mime);
-
-    // hash as avatar id in DB
-    const hash = createHash('sha256').update(original).digest('hex');
 
     const ext = 'webp';
 
@@ -100,9 +97,9 @@ export class PostUserAvatar {
 
     // DB avatar = hash (as requested)
     const user = await this.userRepository.findById(new UserId(userId));
-    const updated = user.updateAvatar(hash);
+    const updated = user.updateAvatar(name);
     await this.userRepository.updateUser(updated);
 
-    return { avatar: hash, hash };
+    return { avatar: name };
   }
 }
