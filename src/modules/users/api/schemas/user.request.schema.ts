@@ -163,10 +163,10 @@ export const postUserAvatarRequestSchema = z.object({
   //       ['image/png', 'image/jpeg', 'image/webp'],
   //       'Avatar must be PNG, JPEG, or WEBP',
   //     ),
-  file: z.any().openapi({
-    // type: 'string',
+  avatar: z.any().openapi({
+    type: 'string',
     format: 'binary',
-    description: 'Image file(max 10MB)',
+    description: 'Avatar image file (png, jpg/jpeg, webp, max 10MB)',
   }),
   // avatar: z.string().min(1, 'Avatar cannot be empty'),
 });

@@ -57,6 +57,7 @@ export const deleteUserResponseSchema = z.object({
 
 export const postUserAvatarResponseSchema = z.object({
   message: z.string().min(2).max(255),
+  avatar: z.string().length(32),
 });
 
 export type GetUserResponse = z.infer<typeof getUserResponseSchema>;

@@ -120,7 +120,13 @@ export const updateUserRoute = createRoute({
   ],
   request: {
     params: userIdParamSchema,
-    query: patchUserQuerySchema,
+    body: {
+      content: {
+        'application/json': {
+          schema: patchUserQuerySchema,
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -148,7 +154,13 @@ export const updateSelfRoute = createRoute({
     },
   ],
   request: {
-    query: patchSelfQuerySchema,
+    body: {
+      content: {
+        'application/json': {
+          schema: patchSelfQuerySchema,
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -179,6 +191,9 @@ export const postUserAvatarRequestRoute = createRoute({
     params: userIdParamSchema,
     body: {
       content: {
+        'multipart/form-data': {
+          schema: postUserAvatarRequestSchema,
+        },
         'image/png': {
           schema: postUserAvatarRequestSchema,
         },
