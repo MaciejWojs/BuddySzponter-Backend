@@ -180,6 +180,7 @@ export const updateSelfRoute = createRoute({
 export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
   path: '/{id}/avatar',
+  middleware: [isAdmin],
   tags: ['User'],
   security: [
     {
@@ -192,15 +193,6 @@ export const postUserAvatarRequestRoute = createRoute({
     body: {
       content: {
         'multipart/form-data': {
-          schema: postUserAvatarRequestSchema,
-        },
-        'image/png': {
-          schema: postUserAvatarRequestSchema,
-        },
-        'image/jpeg': {
-          schema: postUserAvatarRequestSchema,
-        },
-        'image/webp': {
           schema: postUserAvatarRequestSchema,
         },
       },
@@ -220,6 +212,35 @@ export const postUserAvatarRequestRoute = createRoute({
     ...decryptionErrorResponse,
   },
 });
+
+export const postSelfAvatarRequestRoute = createRoute({
+  method: 'post',
+  path: '/me/avatar',
+  tags: ['User'],
+  security: [{ AuthorizationBearer: [] }],
+  summary: 'Post current user avatar request',
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': { schema: postUserAvatarRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Current user avatar updated successfully',
+      content: {
+        'application/json': {
+          schema: postUserAvatarResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
+  },
+});
+
 export const deleteUserRoute = createRoute({
   method: 'delete',
   path: '/{id}',
