@@ -220,7 +220,9 @@ authRouter.openapi(refreshRoute, async (c) => {
         sub: tokenPayload.userId,
         role: newData.user.role.name,
         sessionId: tokenPayload.sessionId,
-        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15 minutes
+        exp:
+          Math.floor(Date.now() / 1000) +
+          APP_CONFIG.auth.tokens.accessTokenTtlSeconds,
       },
       configProvider.get('JWT_ACCESS_SECRET'),
     );
@@ -229,7 +231,7 @@ authRouter.openapi(refreshRoute, async (c) => {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds,
     });
     const payload = {
       message: 'Authentication token refreshed successfully',
