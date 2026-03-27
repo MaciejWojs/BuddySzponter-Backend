@@ -24,6 +24,30 @@ export const userIdParamSchema = z.object({
     example: '123',
   }),
 });
+
+export const getUsersTotalQuerySchema = z.object({
+  nickname: z.string().trim().min(1).max(100).optional().openapi({
+    example: 'john',
+    description: 'Filter by nickname',
+  }),
+  email: z.email().optional().openapi({
+    example: 'john@example.com',
+    description: 'Filter by email',
+  }),
+  role: z.string().trim().min(1).max(100).optional().openapi({
+    example: 'ADMIN',
+    description: 'Filter by role name',
+  }),
+  isBanned: queryBooleanSchema.optional().openapi({
+    example: false,
+    description: 'Filter by banned flag',
+  }),
+  isDeleted: queryBooleanSchema.optional().openapi({
+    example: false,
+    description: 'Filter by deleted flag',
+  }),
+});
+
 export const getUsersQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0).openapi({
     example: 0,

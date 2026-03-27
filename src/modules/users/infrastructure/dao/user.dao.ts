@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { rolesTable, usersTable } from '@infra/db/schema';
-import { and, desc, eq, getColumns, ilike } from 'drizzle-orm';
+import { and, desc, eq, getColumns, ilike, sql } from 'drizzle-orm';
 
 import { UserDbRecord } from '@/shared/types';
 import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
@@ -26,6 +26,38 @@ export class DrizzleUserDao
       .limit(1);
 
     return user[0] ?? null;
+  }
+
+  async countAll(): Promise<number> {
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(usersTable);
+
+    return Number(row?.count ?? 0);
+  }
+
+  async countFiltered(filters: FindUsersFilters): Promise<number> {
+    const { nickname, email, role, isBanned, isDeleted } = filters;
+
+    const whereParts = [
+      typeof isBanned === 'boolean'
+        ? eq(usersTable.isBanned, isBanned)
+        : undefined,
+      typeof isDeleted === 'boolean'
+        ? eq(usersTable.isDeleted, isDeleted)
+        : undefined,
+      role ? ilike(rolesTable.name, role) : undefined,
+      email ? ilike(usersTable.email, `%${email}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
+    ].filter(Boolean);
+
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .where(whereParts.length ? and(...whereParts) : undefined);
+
+    return Number(row?.count ?? 0);
   }
 
   async findMany(

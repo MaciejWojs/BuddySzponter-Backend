@@ -9,6 +9,7 @@ import {
 
 import {
   getUsersQuerySchema,
+  getUsersTotalQuerySchema,
   patchSelfQuerySchema,
   patchUserQuerySchema,
   postUserAvatarRequestSchema,
@@ -18,6 +19,7 @@ import {
   deleteUserResponseSchema,
   getUserResponseSchema,
   getUsersResponseSchema,
+  getUsersTotalResponseSchema,
   patchUserResponseSchema,
   postUserAvatarResponseSchema,
 } from './schemas/user.response.schema';
@@ -50,6 +52,32 @@ export const getUserByIdRoute = createRoute({
     ...decryptionErrorResponse,
   },
 });
+
+export const getUsersTotalRoute = createRoute({
+  method: 'get',
+  path: '/total',
+  middleware: [isAdmin],
+  tags: ['User'],
+  summary: 'Get users total',
+  security: [{ AuthorizationBearer: [] }],
+  request: {
+    query: getUsersTotalQuerySchema,
+  },
+  responses: {
+    200: {
+      description: 'Users total retrieved successfully',
+      content: {
+        'application/json': {
+          schema: getUsersTotalResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
+  },
+});
+
 export const getUsersRoute = createRoute({
   method: 'get',
   path: '/',

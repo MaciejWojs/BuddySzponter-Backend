@@ -9,6 +9,7 @@ import logger from '@/infrastucture/logger';
 import { photosClient } from '@/infrastucture/s3/client';
 import { DeleteUser } from '@/modules/users/application/use-case/deleteUser';
 import { GetUsers } from '@/modules/users/application/use-case/getUsers';
+import { GetUsersTotal } from '@/modules/users/application/use-case/getUsersTotal';
 import { UpdateUser } from '@/modules/users/application/use-case/updateUser';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 import { ENV } from '@/shared/types/honoENV';
@@ -18,6 +19,7 @@ import {
   deleteUserRoute,
   getUserByIdRoute,
   getUsersRoute,
+  getUsersTotalRoute,
   postUserAvatarRequestRoute,
   updateSelfRoute,
   updateUserRoute,
@@ -34,6 +36,15 @@ const usersRouter = new OpenAPIHono<ENV>({ defaultHook });
 //   // Here you would handle the logic for retrieving a user by their ID, such as querying a database.
 //   return c.json({ message: `User with ID ${id} retrieved successfully` });
 // });
+
+usersRouter.openapi(getUsersTotalRoute, async (c) => {
+  const query = c.req.valid('query');
+  const repo = new RepositoryFactory().userCacheRepository();
+  const useCase = new GetUsersTotal(repo);
+
+  const total = await useCase.execute(query);
+  return c.json({ total }, StatusCodes.OK);
+});
 
 usersRouter.openapi(getUsersRoute, async (c) => {
   const query = c.req.valid('query');

@@ -148,6 +148,22 @@ export class UserCacheRepository implements IUserRepository {
     return userFromDb;
   }
 
+  async countAll(): Promise<number> {
+    return this.repository.countAll();
+  }
+
+  async countFiltered(filters: {
+    offset: number;
+    limit: number;
+    nickname?: string;
+    email?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<number> {
+    return this.repository.countFiltered(filters);
+  }
+
   async findMany(offset: number, limit: number): Promise<User[]> {
     // listy na razie bez cache
     return this.repository.findMany(offset, limit);

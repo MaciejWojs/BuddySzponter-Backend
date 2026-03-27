@@ -22,6 +22,8 @@ export type FindUsersFilters = {
 export interface IUserDAO {
   findById(id: number): Promise<UserDbRecordWithRole | null>;
   findByEmail(email: string): Promise<UserDbRecordWithRole | null>;
+  countAll(): Promise<number>;
+  countFiltered(filters: FindUsersFilters): Promise<number>;
   findMany(offset: number, limit: number): Promise<UserDbRecordWithRole[]>;
   findManyFiltered(filters: FindUsersFilters): Promise<UserDbRecordWithRole[]>;
   create(data: CreateUser): Promise<UserDbRecordWithRole | null>;

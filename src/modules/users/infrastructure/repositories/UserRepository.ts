@@ -66,6 +66,22 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  async countAll(): Promise<number> {
+    return this.dao.countAll();
+  }
+
+  async countFiltered(filters: {
+    offset: number;
+    limit: number;
+    nickname?: string;
+    email?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<number> {
+    return this.dao.countFiltered(filters);
+  }
+
   async findMany(offset: number, limit: number): Promise<User[]> {
     const rows = await this.dao.findMany(offset, limit);
     return rows.map((row) => UserMapper.toDomain(row));

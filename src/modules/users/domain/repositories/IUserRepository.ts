@@ -16,6 +16,8 @@ export type FindUsersFilters = {
 export interface IUserRepository {
   createUser(user: User): Promise<User>;
   findByEmail(email: Email): Promise<User>;
+  countAll(): Promise<number>;
+  countFiltered(filters: FindUsersFilters): Promise<number>;
   findById(id: UserId): Promise<User>;
   findMany(offset: number, limit: number): Promise<User[]>;
   findManyFiltered(filters: FindUsersFilters): Promise<User[]>;
