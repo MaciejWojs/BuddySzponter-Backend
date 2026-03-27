@@ -3,6 +3,7 @@ import { verify } from 'hono/jwt';
 
 import { configProvider } from '@/config/configProvider';
 import { ENV } from '@/shared/types/honoENV';
+import { jwtPaylaod } from '@/shared/types/jwtPayload';
 
 export const injectJwtPayload = createMiddleware<ENV>(async (c, next) => {
   if (c.req.header('Authorization')) {
@@ -12,17 +13,9 @@ export const injectJwtPayload = createMiddleware<ENV>(async (c, next) => {
       const decodedPayload = await verify(
         token,
         configProvider.get('JWT_ACCESS_SECRET'),
-        'HS256',
+        'HS256'
       );
-      const {
-        sub: userId,
-        role,
-        sessionId,
-      } = decodedPayload as {
-        sub: number;
-        role: string;
-        sessionId: string;
-      };
+      const { sub: userId, role, sessionId } = decodedPayload as jwtPaylaod;
       c.set('jwt-payload', { userId, role, sessionId });
     } catch {
       c.set('jwt-payload', null);
