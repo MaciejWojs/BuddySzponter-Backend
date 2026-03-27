@@ -15,6 +15,7 @@ import {
 } from './modules/connection/application/TokenService';
 import { encryptedPayloadSchema } from './shared/api/schemas/encryptedPayload.schema';
 import { ValidationError } from './shared/errors/Specialized/ValidationError';
+import { jwtPaylaod } from './shared/types/jwtPayload';
 import { decryptPayload } from './shared/utils/decrypt-payload';
 import { encryptPayload } from './shared/utils/encrypt-payload';
 import {
@@ -37,7 +38,7 @@ export function initSocket() {
   io.bind(engine);
 
   if (configProvider.get('PAYLOAD_ENCRYPTED')) {
-    // TODO: Inject session ID and encryption key
+    // Inject session ID and encryption key
     io.use(async (socket, next) => {
       logger.warn(
         'Payload encryption is enabled, but encryption logic is not yet implemented. Data will be sent in plaintext.'
@@ -139,11 +140,7 @@ export function initSocket() {
         return next();
       }
 
-      const jwtPayload = decodedToken as {
-        sub: number;
-        role: string;
-        sessionId: string;
-      };
+      const jwtPayload = decodedToken as jwtPaylaod;
 
       const repo = new RepositoryFactory().authSessionRepository();
       const validateSession = new ValidateSession(repo);
