@@ -93,10 +93,18 @@ export class PostUserAvatar {
       original,
     );
 
-    await Promise.all([...resizeTasks, originalTask]);
-
     // DB avatar = hash (as requested)
     const user = await this.userRepository.findById(new UserId(userId));
+    const deleteTasks = [];
+    if (user.avatar) {
+      deleteTasks.push(
+        sizes.map((size) =>
+          photosClient.delete(`${user.avatar}/${size}.${ext}`),
+        ),
+      );
+      deleteTasks.push(photosClient.delete(`${user.avatar}/original.${ext}`));
+    }
+    await Promise.all([...resizeTasks, originalTask, ...deleteTasks]);
     const updated = user.updateAvatar(name);
     await this.userRepository.updateUser(updated);
 
