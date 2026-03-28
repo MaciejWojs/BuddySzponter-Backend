@@ -72,7 +72,8 @@ function emit<K extends keyof OutgoingEventPayloads>(
     const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
     const dataWithEventName = {
       event,
-      ...data
+      ...data,
+      sentAt: new Date().toISOString()
     };
     const payload = encryptPayload(
       { payload: dataWithEventName },
@@ -108,7 +109,8 @@ function emitToOtherSocket<K extends keyof OutgoingEventPayloads>(
     }
     const dataWithEventName = {
       event,
-      ...data
+      ...data,
+      sentAt: new Date().toISOString()
     };
     const decryptionKey = Buffer.from(key, 'base64');
     const payload = encryptPayload(
@@ -441,12 +443,6 @@ export function initSocket() {
         `data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
-      // const payload = {
-      //   ...data,
-      //   news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-      // };
-
-      // emit(socket, 'connection:accepted', payload);
       emitToOtherSocket(
         socket,
         socket.data.connectionTokenData!.connectionId,
@@ -461,8 +457,7 @@ export function initSocket() {
       );
 
       const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        ...data
       };
 
       socket.send({ payload: payload });
@@ -473,12 +468,12 @@ export function initSocket() {
         `[connection:reject] data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
-      emit(socket, 'connection:rejected', {
-        sessionId: data.sessionId,
-        ...{
-          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-        }
-      });
+      emitToOtherSocket(
+        socket,
+        socket.data.connectionTokenData!.connectionId,
+        'connection:rejected',
+        data
+      );
     });
 
     on(socket, 'connection:request-access', (data) => {
@@ -516,8 +511,7 @@ export function initSocket() {
       );
 
       const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
+        ...data
       };
 
       emitToOtherSocket(
