@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 
 import { isAdmin } from '@/shared/api/middleware/isAdmin';
+import { isAdminOrSelf } from '@/shared/api/middleware/isAdminOrSelf';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -10,7 +11,6 @@ import {
 import {
   getUsersQuerySchema,
   getUsersTotalQuerySchema,
-  patchSelfQuerySchema,
   patchUserQuerySchema,
   postUserAvatarRequestSchema,
   userIdParamSchema,
@@ -110,9 +110,9 @@ export const getUsersRoute = createRoute({
 export const updateUserRoute = createRoute({
   method: 'patch',
   path: '/{id}',
-  middleware: [isAdmin],
+  middleware: [isAdminOrSelf],
   tags: ['User'],
-  summary: 'Update user by ID',
+  summary: 'Update user by ID (admin or self)',
   security: [
     {
       AuthorizationBearer: [],
@@ -143,51 +143,17 @@ export const updateUserRoute = createRoute({
   },
 });
 
-export const updateSelfRoute = createRoute({
-  method: 'patch',
-  path: '/me',
-  tags: ['User'],
-  summary: 'Update current user profile',
-  security: [
-    {
-      AuthorizationBearer: [],
-    },
-  ],
-  request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: patchSelfQuerySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Profile updated successfully',
-      content: {
-        'application/json': {
-          schema: patchUserResponseSchema,
-        },
-      },
-    },
-    ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
-
 export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
   path: '/{id}/avatar',
-  middleware: [isAdmin],
+  middleware: [isAdminOrSelf],
   tags: ['User'],
   security: [
     {
       AuthorizationBearer: [],
     },
   ],
-  summary: 'Post user avatar request',
+  summary: 'Post user avatar request (admin or self)',
   request: {
     params: userIdParamSchema,
     body: {
@@ -201,34 +167,6 @@ export const postUserAvatarRequestRoute = createRoute({
   responses: {
     200: {
       description: 'User avatar request posted successfully',
-      content: {
-        'application/json': {
-          schema: postUserAvatarResponseSchema,
-        },
-      },
-    },
-    ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
-
-export const postSelfAvatarRequestRoute = createRoute({
-  method: 'post',
-  path: '/me/avatar',
-  tags: ['User'],
-  security: [{ AuthorizationBearer: [] }],
-  summary: 'Post current user avatar request',
-  request: {
-    body: {
-      content: {
-        'multipart/form-data': { schema: postUserAvatarRequestSchema },
-      },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Current user avatar updated successfully',
       content: {
         'application/json': {
           schema: postUserAvatarResponseSchema,

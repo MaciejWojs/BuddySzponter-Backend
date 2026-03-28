@@ -134,25 +134,6 @@ export const patchUserQuerySchema = z
     message: 'At least one field must be provided',
   });
 
-export const patchSelfQuerySchema = z
-  .object({
-    nickname: z.string().min(3).max(100).optional().openapi({
-      description: 'Current user nickname',
-      example: 'john_doe_new',
-    }),
-    email: z.email().optional().openapi({
-      description: 'Current user email',
-      example: 'john.doe.new@example.com',
-    }),
-    password: z.string().min(8).optional().openapi({
-      description: 'Current user password',
-      example: 'SecurePassword123#',
-    }),
-  })
-  .refine((data) => Object.values(data).some((value) => value !== undefined), {
-    message: 'At least one field must be provided',
-  });
-
 export const postUserAvatarRequestSchema = z.object({
   //TODO Waiting for zod-openapi to support file validation
   //   avatar: z
@@ -173,5 +154,4 @@ export const postUserAvatarRequestSchema = z.object({
 
 export type UserIdParam = z.infer<typeof userIdParamSchema>;
 export type PatchUserInput = z.infer<typeof patchUserRequestSchema>;
-export type PatchSelfInput = z.infer<typeof patchSelfQuerySchema>;
 export type PostUserAvatarInput = z.infer<typeof postUserAvatarRequestSchema>;

@@ -33,13 +33,12 @@ export class PostUserAvatar {
     buffer: Buffer,
     mime: SupportedMime,
   ): Promise<Buffer> {
-    if (mime == 'image/png') {
+    if (mime === 'image/png') {
       return toWebp(buffer);
     }
 
     if (mime === 'image/webp') {
-      const stripped = await stripExif(buffer);
-      return stripped;
+      return stripExif(buffer);
     }
 
     const stripped = await stripExif(buffer);
