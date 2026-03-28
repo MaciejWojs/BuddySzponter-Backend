@@ -527,12 +527,12 @@ export function initSocket() {
         `data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
-      const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-      };
-
-      socket.send({ payload });
+      emitToOtherSocket(
+        socket,
+        socket.data.connectionTokenData!.connectionId,
+        'webrtc:answer',
+        data
+      );
     });
 
     on(socket, 'webrtc:offer', (data) => {
@@ -540,38 +540,30 @@ export function initSocket() {
         `data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
-      const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-      };
-
-      socket.send({ payload });
+      emitToOtherSocket(
+        socket,
+        socket.data.connectionTokenData!.connectionId,
+        'webrtc:offer',
+        data
+      );
     });
 
     on(socket, 'webrtc:ice-candidate', (data) => {
       logger.info(
         `data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
-
-      const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-      };
-
-      socket.send({ payload });
+      emitToOtherSocket(
+        socket,
+        socket.data.connectionTokenData!.connectionId,
+        'webrtc:ice-candidate',
+        data
+      );
     });
 
     on(socket, 'webrtc:ready', (data) => {
       logger.info(
         `data Received data from ${socket.id}: ${JSON.stringify(data)}`
       );
-
-      const payload = {
-        ...data,
-        news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-      };
-
-      socket.send({ payload });
     });
 
     socket.on('message', (message) => {
