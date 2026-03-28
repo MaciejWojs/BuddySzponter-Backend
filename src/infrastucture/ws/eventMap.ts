@@ -29,10 +29,14 @@ const webrtcEventSchemas = {
   'webrtc:ready': readySchema
 } as const;
 
+const sharedEventSchemas = {
+  'connection:request-access': requestAccessEventSchema
+} as const;
+
 /** Events sent by the client */
 export const incomingEventSchemas = {
   ...webrtcEventSchemas,
-  'connection:request-access': requestAccessEventSchema,
+  ...sharedEventSchemas,
   'connection:accept': acceptConnectionEventSchema,
   'connection:reject': rejectConnectionEventSchema,
   'connection:disconnect': disconnectFromConnectionSchema
@@ -41,6 +45,7 @@ export const incomingEventSchemas = {
 /** Events sent by the server */
 export const outgoingEventSchemas = {
   ...webrtcEventSchemas,
+  ...sharedEventSchemas,
   'connection:accepted': ConnectionAcceptedEventSchema,
   'connection:rejected': ConnectionRejectedEventSchema,
   'connection:disconnected': ConnectionDisconnectedEventSchema,
