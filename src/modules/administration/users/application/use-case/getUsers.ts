@@ -1,8 +1,9 @@
-import { GetUserResponse } from '../../api/schemas/user.response.schema';
 import {
   FindUsersFilters,
   IUserRepository,
-} from '../../domain/repositories/IUserRepository';
+} from '@modules/users/domain/repositories/IUserRepository';
+
+import { GetUserResponse } from '../../api/schemas/user.response.schema';
 
 export class GetUsers {
   constructor(private readonly userRepository: IUserRepository) {}

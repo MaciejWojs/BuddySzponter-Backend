@@ -38,6 +38,11 @@ export class User {
   updatePassword(password: Password): User {
     return this.copy({ password });
   }
+
+  updateRole(role: UserRole): User {
+    return this.copy({ role });
+  }
+
   ban(): User {
     return this.copy({ isBanned: true });
   }

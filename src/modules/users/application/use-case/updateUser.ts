@@ -3,9 +3,19 @@ import { UserId } from '@/shared/value-objects';
 import { PatchUserInput } from '../../api/schemas/user.request.schema';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';
+import { RoleId } from '../../domain/value-objects/RoleId.vo';
+import { RoleName } from '../../domain/value-objects/RoleName.vo';
+import { UserRole } from '../../domain/value-objects/userRole.vo';
+
+type IRoleReader = {
+  findById(id: number): Promise<{ id: number; name: string } | null>;
+};
 
 export class UpdateUser {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly roleReader?: IRoleReader,
+  ) {}
 
   async execute(
     requesterId: number,
@@ -43,7 +53,9 @@ export class UpdateUser {
     }
 
     const triedAdminOnlyFields =
-      input.isBanned !== undefined || input.isDeleted !== undefined;
+      input.isBanned !== undefined ||
+      input.isDeleted !== undefined ||
+      input.roleId !== undefined;
 
     if (!requester.canEditAdminFields() && triedAdminOnlyFields) {
       throw new Error('Forbidden fields for self update');
@@ -63,6 +75,26 @@ export class UpdateUser {
         input.isDeleted !== user.isDeleted
       ) {
         user = input.isDeleted ? user.delete() : user.restore();
+        hasChanges = true;
+      }
+
+      if (typeof input.roleId === 'number' && input.roleId !== user.role.id) {
+        if (requester.id && user.id && requester.id.value === user.id.value) {
+          throw new Error('Cannot change own role');
+        }
+
+        if (!this.roleReader) {
+          throw new Error('Role lookup is not configured');
+        }
+
+        const role = await this.roleReader.findById(input.roleId);
+        if (!role) {
+          throw new Error('Role not found');
+        }
+
+        user = user.updateRole(
+          new UserRole(new RoleId(role.id), new RoleName(role.name)),
+        );
         hasChanges = true;
       }
     }

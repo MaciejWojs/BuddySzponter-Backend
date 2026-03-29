@@ -1,7 +1,7 @@
 import {
   FindUsersFilters,
   IUserRepository,
-} from '../../domain/repositories/IUserRepository';
+} from '@modules/users/domain/repositories/IUserRepository';
 
 type TotalInput = Omit<FindUsersFilters, 'offset' | 'limit'>;
 

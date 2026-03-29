@@ -25,6 +25,24 @@ export const userIdParamSchema = z.object({
   }),
 });
 
+export const userIdDeviceIdParamSchema = z.object({
+  id: z.string().openapi({
+    param: {
+      name: 'id',
+      in: 'path',
+    },
+    type: 'integer',
+    example: '123',
+  }),
+  deviceId: z.uuid().openapi({
+    param: {
+      name: 'deviceId',
+      in: 'path',
+    },
+    example: 'd2faf722-af7c-4925-aa67-1cc1ef579d82',
+  }),
+});
+
 export const getUsersTotalQuerySchema = z.object({
   nickname: z.string().trim().min(1).max(100).optional().openapi({
     example: 'john',
@@ -79,39 +97,7 @@ export const getUsersQuerySchema = z.object({
   }),
 });
 
-export const patchUserRequestSchema = z
-  .object({
-    nickname: z.string().min(3).max(100).openapi({
-      description: 'User nickname, must be between 3 and 100 characters',
-      example: 'john_doe_new',
-    }),
-    email: z.email().openapi({
-      description: 'User email address, must be a valid email format',
-      example: 'john.doe.new@example.com',
-    }),
-    password: z.string().min(8).openapi({
-      description: 'User password, must be at least 8 characters',
-      example: 'SecurePassword123#',
-    }),
-    isBanned: z.boolean().openapi({
-      description: 'Indicates if the user is banned',
-      example: false,
-    }),
-    isDeleted: z.boolean().openapi({
-      description: 'Indicates if the user is deleted',
-      example: false,
-    }),
-    roleId: z.number().int().positive().openapi({
-      description: 'Role identifier assigned to the user (admin only)',
-      example: 2,
-    }),
-  })
-  .partial()
-  .refine((data) => Object.values(data).some((value) => value !== undefined), {
-    message: 'At least one field must be provided',
-  });
-
-export const patchUserQuerySchema = z
+export const patchAdminUserSchema = z
   .object({
     nickname: z.string().min(3).max(100).optional().openapi({
       description: 'User nickname, must be between 3 and 100 characters',
@@ -134,7 +120,7 @@ export const patchUserQuerySchema = z
       example: false,
     }),
     roleId: z.coerce.number().int().positive().optional().openapi({
-      description: 'Role identifier assigned to the user (admin only)',
+      description: 'Role identifier assigned to the user',
       example: 2,
     }),
   })
@@ -142,44 +128,13 @@ export const patchUserQuerySchema = z
     message: 'At least one field must be provided',
   });
 
-export const patchSelfUserSchema = z
-  .object({
-    nickname: z.string().min(3).max(100).optional().openapi({
-      description: 'User nickname, must be between 3 and 100 characters',
-      example: 'john_doe_new',
-    }),
-    email: z.email().optional().openapi({
-      description: 'User email address, must be a valid email format',
-      example: 'john.doe.new@example.com',
-    }),
-    password: z.string().min(8).optional().openapi({
-      description: 'User password, must be at least 8 characters',
-      example: 'SecurePassword123#',
-    }),
-  })
-  .refine((data) => Object.values(data).some((value) => value !== undefined), {
-    message: 'At least one field must be provided',
-  });
-
 export const postUserAvatarRequestSchema = z.object({
-  //TODO Waiting for zod-openapi to support file validation
-  //   avatar: z
-  //     .file()
-  //     .min(1, 'Avatar cannot be empty')
-  //     .max(10 * 1024 * 1024, 'Avatar max size is 10MB')
-  //     .mime(
-  //       ['image/png', 'image/jpeg', 'image/webp'],
-  //       'Avatar must be PNG, JPEG, or WEBP',
-  //     ),
   avatar: z.any().openapi({
     type: 'string',
     format: 'binary',
     description: 'Avatar image file (png, jpg/jpeg, webp, max 10MB)',
   }),
-  // avatar: z.string().min(1, 'Avatar cannot be empty'),
 });
 
 export type UserIdParam = z.infer<typeof userIdParamSchema>;
-export type PatchUserInput = z.infer<typeof patchUserRequestSchema>;
-export type PatchSelfUserInput = z.infer<typeof patchSelfUserSchema>;
-export type PostUserAvatarInput = z.infer<typeof postUserAvatarRequestSchema>;
+export type PatchAdminUserInput = z.infer<typeof patchAdminUserSchema>;

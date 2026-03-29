@@ -5,21 +5,15 @@ import { StatusCodes } from 'http-status-codes';
 import { RepositoryFactory } from '@/infrastucture/factories/RepositoryFactory';
 import logger from '@/infrastucture/logger';
 import { DeleteUser } from '@/modules/users/application/use-case/deleteUser';
-import { GetUsers } from '@/modules/users/application/use-case/getUsers';
-import { GetUsersTotal } from '@/modules/users/application/use-case/getUsersTotal';
 import { PostUserAvatar } from '@/modules/users/application/use-case/postUserAvatar';
 import { UpdateUser } from '@/modules/users/application/use-case/updateUser';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 import { ENV } from '@/shared/types/honoENV';
 
-import { GetAdminUserProfile } from '../application/use-case/getAdminUserProfile';
 import {
-  deleteUserRoute,
-  getUserByIdRoute,
-  getUsersRoute,
-  getUsersTotalRoute,
-  postUserAvatarRequestRoute,
-  updateUserRoute,
+  deleteSelfUserRoute,
+  postSelfUserAvatarRequestRoute,
+  updateSelfUserRoute,
 } from './user.openapi';
 
 const usersRouter = new OpenAPIHono<ENV>({ defaultHook });
@@ -34,43 +28,7 @@ const usersRouter = new OpenAPIHono<ENV>({ defaultHook });
 //   return c.json({ message: `User with ID ${id} retrieved successfully` });
 // });
 
-usersRouter.openapi(getUsersTotalRoute, async (c) => {
-  const query = c.req.valid('query');
-  const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetUsersTotal(repo);
-
-  const total = await useCase.execute(query);
-  return c.json({ total }, StatusCodes.OK);
-});
-
-usersRouter.openapi(getUsersRoute, async (c) => {
-  const query = c.req.valid('query');
-  const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetUsers(repo);
-
-  const users = await useCase.execute(query);
-  return c.json(users, StatusCodes.OK);
-});
-
-usersRouter.openapi(getUserByIdRoute, async (c) => {
-  const { id } = c.req.valid('param');
-  const userId = Number(id);
-
-  const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetAdminUserProfile(repo);
-
-  try {
-    const user = await useCase.execute(userId);
-    return c.json(user, StatusCodes.OK);
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('not found')) {
-      throw new HTTPException(StatusCodes.NOT_FOUND, { message: err.message });
-    }
-    throw err;
-  }
-});
-
-usersRouter.openapi(updateUserRoute, async (c) => {
+usersRouter.openapi(updateSelfUserRoute, async (c) => {
   const jwtPayload = c.get('jwt-payload');
   if (!jwtPayload) {
     throw new HTTPException(StatusCodes.UNAUTHORIZED, {
@@ -79,38 +37,29 @@ usersRouter.openapi(updateUserRoute, async (c) => {
     });
   }
 
-  const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = jwtPayload.userId;
   const body = c.req.valid('json');
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new UpdateUser(repo);
-  logger.onlyDev(id);
+  logger.onlyDev(String(userId));
   try {
-    await useCase.execute(jwtPayload.userId, userId, body);
+    await useCase.execute(userId, userId, body);
     return c.json(
-      { message: `User with ID ${id} updated successfully` },
+      { message: 'Current user updated successfully' },
       StatusCodes.OK,
     );
   } catch (err) {
-    if (err instanceof Error && err.message === 'Forbidden') {
-      throw new HTTPException(StatusCodes.FORBIDDEN, {
-        message: 'Forbidden',
-        cause: [{ field: 'authorization', error: 'Insufficient permissions' }],
-      });
-    }
-
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'user', error: err.message }],
       });
     }
 
     if (
       err instanceof Error &&
-      (err.message === 'Forbidden fields for self update' ||
-        err.message === 'No changes detected' ||
+      (err.message === 'No changes detected' ||
         err.message === 'At least one field must be provided')
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
@@ -123,9 +72,16 @@ usersRouter.openapi(updateUserRoute, async (c) => {
   }
 });
 
-usersRouter.openapi(deleteUserRoute, async (c) => {
-  const { id } = c.req.valid('param');
-  const userId = Number(id);
+usersRouter.openapi(deleteSelfUserRoute, async (c) => {
+  const jwtPayload = c.get('jwt-payload');
+  if (!jwtPayload) {
+    throw new HTTPException(StatusCodes.UNAUTHORIZED, {
+      message: 'Unauthorized',
+      cause: [{ field: 'authorization', error: 'Missing or invalid token' }],
+    });
+  }
+
+  const userId = jwtPayload.userId;
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new DeleteUser(repo);
@@ -133,12 +89,15 @@ usersRouter.openapi(deleteUserRoute, async (c) => {
   try {
     await useCase.execute(userId);
     return c.json(
-      { message: `User with ID ${id} deleted successfully` },
+      { message: 'Current user deleted successfully' },
       StatusCodes.OK,
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
-      throw new HTTPException(StatusCodes.NOT_FOUND, { message: err.message });
+      throw new HTTPException(StatusCodes.NOT_FOUND, {
+        message: 'NotFoundError',
+        cause: [{ field: 'user', error: err.message }],
+      });
     }
     throw err;
   }
@@ -178,7 +137,7 @@ usersRouter.openapi(deleteUserRoute, async (c) => {
 //   return c.json({ message: 'Avatar uploaded successfully' }, 200);
 // });
 
-usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
+usersRouter.openapi(postSelfUserAvatarRequestRoute, async (c) => {
   const jwtPayload = c.get('jwt-payload');
   if (!jwtPayload) {
     throw new HTTPException(StatusCodes.UNAUTHORIZED, {
@@ -187,8 +146,7 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
     });
   }
 
-  const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = jwtPayload.userId;
 
   const contentType = (c.req.header('content-type') || '').toLowerCase();
   const allowed = new Set(['image/png', 'image/jpeg', 'image/webp']);
@@ -283,7 +241,7 @@ usersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'user', error: err.message }],
       });
     }
     if (
