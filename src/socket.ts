@@ -1,7 +1,5 @@
 import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
-import { verify } from 'hono/jwt';
-import { JwtTokenExpired } from 'hono/utils/jwt/types';
 import { Server, Socket } from 'socket.io';
 
 import { APP_CONFIG } from './config/appConfig';
@@ -15,8 +13,8 @@ import {
   OutgoingEventNames,
   OutgoingEventPayloads
 } from './infrastucture/ws/eventMap';
+import { JwtMiddleware } from './infrastucture/ws/middleware/JwtMiddleware';
 import {
-  authTokenSchema,
   connectionTokenSchema,
   sessionIdSchema
 } from './infrastucture/ws/schemas/socket.security.schemas';
@@ -27,7 +25,6 @@ import {
 } from './modules/connection/application/TokenService';
 import { encryptedPayloadSchema } from './shared/api/schemas/encryptedPayload.schema';
 import { ValidationError } from './shared/errors/Specialized/ValidationError';
-import { jwtPaylaod } from './shared/types/jwtPayload';
 import { decryptPayload } from './shared/utils/decrypt-payload';
 import { encryptPayload } from './shared/utils/encrypt-payload';
 
@@ -193,77 +190,11 @@ export function initSocket() {
     });
   }
 
+  const repo = new RepositoryFactory().authSessionRepository();
+  const validateSession = new ValidateSession(repo);
+  const jwtMiddleware = new JwtMiddleware(validateSession);
   // Optional JWT token verification middleware for Socket.IO connections
-  io.use(async (socket, next) => {
-    try {
-      const token = socket.handshake.auth.authToken;
-      if (!token) {
-        logger.warn('Socket connection rejected: No token provided');
-        return next();
-      }
-
-      if (!token.startsWith('Bearer ')) {
-        logger.warn('Socket connection rejected: Invalid token format');
-        return next();
-      }
-
-      const rawToken = token.replace('Bearer ', '');
-
-      const isValidFormat = authTokenSchema.safeParse(rawToken);
-      if (!isValidFormat.success) {
-        // logger.onlyDev(
-        //   `OPTIONAL authToken format validation failed: ${JSON.stringify(isValidFormat.error.issues)}`,
-        // );
-        return next();
-      }
-
-      console.log(
-        `Received token during socket connection: ${token.substring(0, 20)}...`
-      );
-
-      let decodedToken;
-      try {
-        decodedToken = await verify(
-          rawToken,
-          configProvider.get('JWT_ACCESS_SECRET'),
-          'HS256'
-        );
-      } catch (err) {
-        if (err instanceof JwtTokenExpired) {
-          logger.warn('Socket connection rejected: JWT token expired');
-          return next();
-        }
-        logger.warn('Socket connection rejected: JWT verification failed', {
-          error: err instanceof Error ? err.message : err
-        });
-        return next();
-      }
-
-      const jwtPayload = decodedToken as jwtPaylaod;
-
-      const repo = new RepositoryFactory().authSessionRepository();
-      const validateSession = new ValidateSession(repo);
-      const isValid = await validateSession.execute(jwtPayload.sessionId);
-
-      if (!isValid) {
-        logger.warn(
-          'Socket connection rejected: Invalid session - expired or revoked'
-        );
-        return next();
-      }
-
-      logger.onlyDev(
-        `JWT payload for socket connection: ${JSON.stringify(jwtPayload)}`
-      );
-
-      socket.data.jwtPayload = jwtPayload;
-
-      next();
-    } catch (error) {
-      logger.error('Error verifying token during socket connection:', error);
-      return next();
-    }
-  });
+  io.use(jwtMiddleware.use.bind(jwtMiddleware));
 
   io.use(async (socket, next) => {
     // This middleware is required and will reject connections without a valid connection token
