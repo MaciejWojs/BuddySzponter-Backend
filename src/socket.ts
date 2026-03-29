@@ -395,6 +395,7 @@ export function initSocket() {
         logger.warn(
           `Received event ${eventName} with no data from ${socket.id}, skipping decryption. Its completely valid for some events to not have data`
         );
+        packet[1] = { event: eventName };
         return next();
       }
 
@@ -404,6 +405,7 @@ export function initSocket() {
         eventName === 'error'
       ) {
         logger.onlyDev(`Skipping validation for special event ${eventName}`);
+        packet[1] = { event: eventName, ...data };
         return next();
       }
 
@@ -433,14 +435,14 @@ export function initSocket() {
           .join(', ');
         return next(new Error('Invalid event payload: ' + errorDetails));
       }
-
-      packet[1] = result.data;
+      const finalData = { event: eventName, ...result.data };
+      packet[1] = finalData;
       next();
     });
 
     on(socket, 'connection:accept', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
       emitToOtherSocket(
@@ -453,7 +455,7 @@ export function initSocket() {
 
     on(socket, 'connection:disconnect', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
       const payload = {
@@ -465,7 +467,7 @@ export function initSocket() {
 
     on(socket, 'connection:reject', (data) => {
       logger.info(
-        `[connection:reject] data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
       emitToOtherSocket(
@@ -478,7 +480,7 @@ export function initSocket() {
 
     on(socket, 'connection:request-access', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
       const role = socket.data.connectionTokenData?.role;
 
@@ -524,7 +526,7 @@ export function initSocket() {
 
     on(socket, 'webrtc:answer', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
       emitToOtherSocket(
@@ -537,7 +539,7 @@ export function initSocket() {
 
     on(socket, 'webrtc:offer', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
       emitToOtherSocket(
@@ -550,7 +552,7 @@ export function initSocket() {
 
     on(socket, 'webrtc:ice-candidate', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
       emitToOtherSocket(
         socket,
@@ -562,7 +564,7 @@ export function initSocket() {
 
     on(socket, 'webrtc:ready', (data) => {
       logger.info(
-        `data Received data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
     });
 

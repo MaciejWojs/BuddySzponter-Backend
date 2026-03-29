@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { Flatten } from '@/shared/types/Flatten';
+
 import {
   acceptConnectionEventSchema,
   disconnectFromConnectionSchema,
@@ -59,8 +61,10 @@ export const IncomingEventNames = new Set<keyof IncomingEventPayloads>(
 );
 
 export type IncomingEventPayloads = {
-  [K in keyof typeof incomingEventSchemas]: z.infer<
-    (typeof incomingEventSchemas)[K]
+  [K in keyof typeof incomingEventSchemas]: Flatten<
+    {
+      readonly event: K;
+    } & z.infer<(typeof incomingEventSchemas)[K]>
   >;
 };
 
@@ -70,6 +74,6 @@ export const OutgoingEventNames = new Set<keyof OutgoingEventPayloads>(
 
 export type OutgoingEventPayloads = {
   [K in keyof typeof outgoingEventSchemas]: z.infer<
-    (typeof outgoingEventSchemas)[K]
+    (typeof outgoingEventSchemas)[K] & { readonly event: K }
   >;
 };
