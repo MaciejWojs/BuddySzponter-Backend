@@ -58,9 +58,13 @@ function emit<K extends keyof OutgoingEventPayloads>(
   }
   if (configProvider.get('PAYLOAD_ENCRYPTED')) {
     const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
+
+    // @ts-expect-error - If data has an 'event' property, it will be overridden by the actual event name to ensure consistency on the receiving end
+    const { event: _event, ...newData } = data;
+
     const dataWithEventName = {
       event,
-      ...data,
+      ...newData,
       sentAt: new Date().toISOString()
     };
     const payload = encryptPayload(
@@ -95,9 +99,12 @@ function emitToOtherSocket<K extends keyof OutgoingEventPayloads>(
       );
       throw new Error('Encryption key not found for target socket');
     }
+    // @ts-expect-error - If data has an 'event' property, it will be overridden by the actual event name to ensure consistency on the receiving end
+    const { event: _event, ...newData } = data;
+
     const dataWithEventName = {
       event,
-      ...data,
+      ...newData,
       sentAt: new Date().toISOString()
     };
     const decryptionKey = Buffer.from(key, 'base64');
@@ -289,14 +296,9 @@ export function initSocket() {
       logger.info(
         `[${role}] [${data.event}] data from ${socket.id} with role: ${role}: ${JSON.stringify(data)}, emitting event ${responseEvent} to host in room ${socket.data.connectionTokenData?.connectionId}`
       );
-      
+
       // server -> host
-      emitToOtherSocket(
-        socket,
-        data.sessionId,
-        responseEvent,
-        data
-      );
+      emitToOtherSocket(socket, data.sessionId, responseEvent, data);
     });
 
     // host -> server (after connection:acknowledged sent by server)
