@@ -408,23 +408,6 @@ export function initSocket() {
       );
     });
 
-    socket.on('message', (message) => {
-      logger.info(
-        `[MESSAGE EVENT] Received message from ${socket.id}: ${JSON.stringify(message)}`
-      );
-
-      const decryptionKey = Buffer.from(socket.data.encryptionKey, 'base64');
-
-      const payload = encryptPayload(
-        {
-          ...message,
-          news: `Echoing back to ${socket.id} at ${new Date().toISOString()}`
-        },
-        decryptionKey
-      );
-
-      socket.send({ payload });
-    });
     socket.on('error', (err) => {
       // logger.error(`Socket error from ${socket.id}:`, err);
       socket.emit('error', { message: err.message });
