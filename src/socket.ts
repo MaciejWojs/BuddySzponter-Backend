@@ -233,6 +233,7 @@ export function initSocket() {
     const eventValidatorMiddleware = new EventValidatorMiddleware(socket);
     socket.use(eventValidatorMiddleware.use.bind(eventValidatorMiddleware));
 
+    // host -> server -> guest
     on(socket, 'connection:accept', (data) => {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
@@ -246,6 +247,7 @@ export function initSocket() {
       );
     });
 
+    // guest or host -> server -> the other party
     on(socket, 'connection:disconnect', (data) => {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
@@ -258,6 +260,7 @@ export function initSocket() {
       socket.send({ payload: payload });
     });
 
+    // host -> server -> guest
     on(socket, 'connection:reject', (data) => {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
@@ -271,6 +274,7 @@ export function initSocket() {
       );
     });
 
+    // guest -> server -> host
     on(socket, 'connection:request-access', (data) => {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
@@ -309,11 +313,54 @@ export function initSocket() {
         ...data
       };
 
+      // host -> server -> guest
       emitToOtherSocket(
         socket,
         socket.data.connectionTokenData!.connectionId,
         'connection:request-access',
         payload
+      );
+    });
+
+    // guest -> server -> host
+    on(socket, 'connection:acknowledge', (data) => {
+      logger.info(
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+      const role = socket.data.connectionTokenData?.role;
+
+      if (role.toLowerCase() === 'host') {
+        logger.warn(
+          `Host client ${socket.id} attempted to request access to themselves. Rejecting request.`
+        );
+        return emit(socket, 'connection:error', {
+          message: 'Hosts cannot acknowledge connection to themselves'
+        });
+      }
+
+      // server -> host
+      emitToOtherSocket(
+        socket,
+        data.sessionId,
+        'connection:acknowledged',
+        data
+      );
+    });
+
+    // host -> server (after connection:acknowledged sent by server)
+    on(socket, 'connection:acknowledged', (data) => {
+      const role = socket.data.connectionTokenData?.role;
+
+      if (role.toLowerCase() === 'guest') {
+        logger.warn(
+          `Guest client ${socket.id} attempted to acknowledge connection to themselves. Rejecting request.`
+        );
+        return emit(socket, 'connection:error', {
+          message: 'Guest cannot acknowledge connection to themselves'
+        });
+      }
+      logger.info(
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
     });
 

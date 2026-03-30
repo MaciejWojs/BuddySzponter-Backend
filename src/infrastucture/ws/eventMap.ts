@@ -5,6 +5,7 @@ import { Flatten } from '@/shared/types/Flatten';
 import {
   acceptConnectionEventSchema,
   disconnectFromConnectionSchema,
+  guestAcknowledgeConnectionSchema,
   rejectConnectionEventSchema,
   requestAccessEventSchema
 } from './schemas/events/incoming/connectionMange.events';
@@ -16,6 +17,7 @@ import {
   kickFromConnectionEventSchema,
   terminateConnectionEventSchema
 } from './schemas/events/outgoing/connectionMange.events';
+import { connectionAknowledgedEventSchema } from './schemas/events/shared/connectionMange.events';
 import {
   iceCandidateSchema,
   readySchema,
@@ -32,7 +34,8 @@ const webrtcEventSchemas = {
 } as const;
 
 const sharedEventSchemas = {
-  'connection:request-access': requestAccessEventSchema
+  'connection:request-access': requestAccessEventSchema,
+  'connection:acknowledged': connectionAknowledgedEventSchema
 } as const;
 
 /** Events sent by the client */
@@ -41,7 +44,8 @@ export const incomingEventSchemas = {
   ...sharedEventSchemas,
   'connection:accept': acceptConnectionEventSchema,
   'connection:reject': rejectConnectionEventSchema,
-  'connection:disconnect': disconnectFromConnectionSchema
+  'connection:disconnect': disconnectFromConnectionSchema,
+  'connection:acknowledge': guestAcknowledgeConnectionSchema
 } as const;
 
 /** Events sent by the server */

@@ -19,3 +19,10 @@ export const rejectConnectionEventSchema = z.object({
 export const disconnectFromConnectionSchema = z.object({
   reason: z.string().optional()
 });
+
+/** Used by client to acknowledge connection acceptance
+ * sent by guest after receiving connection:accepted event from host
+ */
+export const guestAcknowledgeConnectionSchema = z.object({
+  sessionId: z.uuid()
+});
