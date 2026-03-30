@@ -15,15 +15,10 @@ import {
 import { DecryptEventPayloadMiddleware } from './infrastucture/ws/middleware/DecryptEventPayloadMIddleware';
 import { EventValidatorMiddleware } from './infrastucture/ws/middleware/EventValidatorMiddleware';
 import { JwtMiddleware } from './infrastucture/ws/middleware/JwtMiddleware';
-import {
-  connectionTokenSchema,
-  sessionIdSchema
-} from './infrastucture/ws/schemas/socket.security.schemas';
+import { ValidateConnectionTokenMiddleware } from './infrastucture/ws/middleware/ValidateConnectionTokenMiddleware';
+import { sessionIdSchema } from './infrastucture/ws/schemas/socket.security.schemas';
 import { ValidateSession } from './modules/auth/application/use-cases/validateSession';
-import {
-  ConnectionTokenData,
-  TokenService
-} from './modules/connection/application/TokenService';
+import { TokenService } from './modules/connection/application/TokenService';
 import { encryptPayload } from './shared/utils/encrypt-payload';
 
 let io: Server;
@@ -194,55 +189,12 @@ export function initSocket() {
   // Optional JWT token verification middleware for Socket.IO connections
   io.use(jwtMiddleware.use.bind(jwtMiddleware));
 
-  io.use(async (socket, next) => {
-    // This middleware is required and will reject connections without a valid connection token
-    try {
-      const token = socket.handshake.auth.connectionToken;
-      if (!token) {
-        logger.warn('Socket connection rejected: No token provided');
-        return next(new Error('Authentication error: No token provided'));
-      }
-
-      const isValidFormat = connectionTokenSchema.safeParse(token);
-      if (!isValidFormat.success) {
-        logger.onlyDev(
-          `Connection token format validation failed: ${JSON.stringify(isValidFormat.error.issues)}`
-        );
-        return next(new Error('Authentication error: Invalid token format'));
-      }
-
-      const connectionTokenData: ConnectionTokenData | null =
-        await tokenService.verifyToken(token);
-
-      if (!connectionTokenData) {
-        logger.warn(
-          'Socket connection rejected: Invalid connection token - expired or malformed'
-        );
-        return next(new Error('Authentication error: Invalid token'));
-      }
-
-      socket.data.connectionTokenData = connectionTokenData;
-
-      const room = io.sockets.adapter.rooms.get(
-        connectionTokenData.connectionId
-      );
-      if (!room || room.size < 2) {
-        socket.join(connectionTokenData.connectionId);
-      } else {
-        logger.warn(
-          `Socket connection rejected: Room ${connectionTokenData.connectionId} already has 2 clients.`
-        );
-        return next(
-          new Error('Authentication error: Connection already has 2 clients')
-        );
-      }
-
-      next();
-    } catch (error) {
-      logger.error('Error verifying token during socket connection:', error);
-      return next(new Error('Authentication error: Token verification failed'));
-    }
-  });
+  const connTokenMiddleware = new ValidateConnectionTokenMiddleware(
+    tokenService,
+    io
+  );
+  // This middleware is required and will reject connections without a valid connection token
+  io.use(connTokenMiddleware.use.bind(connTokenMiddleware));
 
   io.on('connection', (socket) => {
     const roomId = socket.data.connectionTokenData?.connectionId;
