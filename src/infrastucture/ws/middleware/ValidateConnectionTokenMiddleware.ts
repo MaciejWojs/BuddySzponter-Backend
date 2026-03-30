@@ -52,6 +52,11 @@ export class ValidateConnectionTokenMiddleware
         return next(new Error('Authentication error: Invalid token'));
       }
 
+      await this.tokenService.revokeToken(
+        token,
+        connectionTokenData.connectionId
+      );
+
       socket.data.connectionTokenData = connectionTokenData;
 
       const room = this.io.sockets.adapter.rooms.get(
