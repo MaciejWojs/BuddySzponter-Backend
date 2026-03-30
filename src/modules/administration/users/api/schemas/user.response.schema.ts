@@ -79,6 +79,45 @@ export const getUserDevicesResponseSchema = z.array(
   getUserDeviceResponseSchema,
 );
 
+export const getUserSessionResponseSchema = z.object({
+  id: z.uuid().openapi({
+    description: 'Unique identifier for the auth session',
+    example: 'd2faf722-af7c-4925-aa67-1cc1ef579d82',
+  }),
+  userId: z.number().positive().openapi({
+    description: 'User identifier owning the session',
+    example: 123,
+  }),
+  deviceId: z.uuid().openapi({
+    description: 'Device identifier associated with the session',
+    example: '6f4f2c9c-6a7f-4b37-9324-0fc8a5f5f951',
+  }),
+  ipAddress: z.string().openapi({
+    description: 'IP address used in the session',
+    example: '192.168.0.10',
+  }),
+  userAgent: z.string().openapi({
+    description: 'User-Agent string captured for the session',
+    example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+  }),
+  revoked: z.boolean().openapi({
+    description: 'Whether the session has been revoked',
+    example: false,
+  }),
+  createdAt: z.date().openapi({
+    description: 'Timestamp when the session was created',
+    example: '2026-03-29T15:55:00.386Z',
+  }),
+  expiresAt: z.date().openapi({
+    description: 'Timestamp when the session expires',
+    example: '2026-04-05T15:55:00.386Z',
+  }),
+});
+
+export const getUserSessionsResponseSchema = z.array(
+  getUserSessionResponseSchema,
+);
+
 export const patchUserResponseSchema = z.object({
   message: z.string().min(2).max(255),
 });
@@ -94,3 +133,6 @@ export const postUserAvatarResponseSchema = z.object({
 
 export type GetUserResponse = z.infer<typeof getUserResponseSchema>;
 export type GetUserDeviceResponse = z.infer<typeof getUserDeviceResponseSchema>;
+export type GetUserSessionResponse = z.infer<
+  typeof getUserSessionResponseSchema
+>;

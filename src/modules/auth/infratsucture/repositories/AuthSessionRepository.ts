@@ -28,6 +28,16 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return sessionRecord ? AuthSessionMapper.toDomain(sessionRecord) : null;
   }
 
+  async findAllSessions(): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAll();
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllActiveSessions(): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllActive();
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
   async deleteSession(id: AuthSessionUUID): Promise<boolean> {
     return this.dao.deleteById(id.value);
   }

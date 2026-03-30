@@ -1,4 +1,4 @@
-import { and, eq, gt, lt } from 'drizzle-orm';
+import { and, desc, eq, gt, lt } from 'drizzle-orm';
 
 import { BaseDao } from '@/infrastucture/db/base.dao';
 import * as schema from '@/infrastucture/db/schema';
@@ -29,6 +29,30 @@ export class DrizzleAuthSessionDAO
     }
 
     return authSessions[0] ?? null;
+  }
+
+  async findAll(): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .orderBy(desc(schema.authSessionsTable.createdAt));
+
+    return sessions;
+  }
+
+  async findAllActive(): Promise<AuthSessionDbRecord[]> {
+    const sessions = await this.database
+      .select()
+      .from(schema.authSessionsTable)
+      .where(
+        and(
+          eq(schema.authSessionsTable.revoked, false),
+          gt(schema.authSessionsTable.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(schema.authSessionsTable.createdAt));
+
+    return sessions;
   }
 
   override async create(

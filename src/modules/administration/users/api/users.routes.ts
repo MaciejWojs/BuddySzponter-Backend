@@ -14,6 +14,7 @@ import { DeleteUserDevices } from '../application/use-case/deleteUserDevices';
 import { GetAdminUserProfile } from '../application/use-case/getAdminUserProfile';
 import { GetUserDevices } from '../application/use-case/getUserDevices';
 import { GetUsers } from '../application/use-case/getUsers';
+import { GetUserSessions } from '../application/use-case/getUserSessions';
 import { GetUsersTotal } from '../application/use-case/getUsersTotal';
 import administrationUsersConnectionsRouter from '../connections/api/connections.routes';
 import administrationUsersDevicesRouter from '../devices/api/devices.routes';
@@ -25,6 +26,7 @@ import {
   getAdministrationUsersRoute,
   getUserByIdRoute,
   getUserDevicesRoute,
+  getUserSessionsRoute,
   getUsersRoute,
   getUsersTotalRoute,
   postUserAvatarRequestRoute,
@@ -90,6 +92,17 @@ administrationUsersRouter.openapi(getUserDevicesRoute, async (c) => {
 
   const devices = await useCase.execute(userId);
   return c.json(devices, StatusCodes.OK);
+});
+
+administrationUsersRouter.openapi(getUserSessionsRoute, async (c) => {
+  const { id } = c.req.valid('param');
+  const userId = Number(id);
+
+  const authSessionRepository = new RepositoryFactory().authSessionRepository();
+  const useCase = new GetUserSessions(authSessionRepository);
+
+  const sessions = await useCase.execute(userId);
+  return c.json(sessions, StatusCodes.OK);
 });
 
 administrationUsersRouter.openapi(deleteUserDevicesRoute, async (c) => {

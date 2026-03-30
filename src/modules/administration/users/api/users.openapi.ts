@@ -21,6 +21,7 @@ import {
   deleteUserResponseSchema,
   getUserDevicesResponseSchema,
   getUserResponseSchema,
+  getUserSessionsResponseSchema,
   getUsersResponseSchema,
   getUsersTotalResponseSchema,
   patchUserResponseSchema,
@@ -98,6 +99,36 @@ export const getUserDevicesRoute = createRoute({
       content: {
         'application/json': {
           schema: getUserDevicesResponseSchema,
+        },
+      },
+    },
+    ...unprocessableEntityResponse,
+    ...unauthorizedErrorResponse,
+    ...internalServerErrorResponse,
+    ...decryptionErrorResponse,
+  },
+});
+
+export const getUserSessionsRoute = createRoute({
+  method: 'get',
+  path: '/{id}/sessions',
+  middleware: [isAdmin],
+  tags: ['Administration/Users'],
+  security: [
+    {
+      AuthorizationBearer: [],
+    },
+  ],
+  summary: 'Get user sessions by user ID',
+  request: {
+    params: userIdParamSchema,
+  },
+  responses: {
+    200: {
+      description: 'User sessions retrieved successfully',
+      content: {
+        'application/json': {
+          schema: getUserSessionsResponseSchema,
         },
       },
     },
