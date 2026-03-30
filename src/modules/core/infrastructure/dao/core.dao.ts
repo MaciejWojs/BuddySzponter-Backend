@@ -1,8 +1,13 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { appVersionTable } from '@infra/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, ilike, sql } from 'drizzle-orm';
 
-import { AppVersionDbRecord, CreateAppVersion, ICoreDao } from './ICoreDao';
+import {
+  AppVersionDbRecord,
+  CreateAppVersion,
+  FindVersionsFilters,
+  ICoreDao,
+} from './ICoreDao';
 
 export class DrizzleCoreDao
   extends BaseDao<AppVersionDbRecord, CreateAppVersion>
@@ -10,6 +15,45 @@ export class DrizzleCoreDao
 {
   constructor() {
     super();
+  }
+
+  async countAll(): Promise<number> {
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(appVersionTable);
+
+    return Number(row?.count ?? 0);
+  }
+
+  async findMany(offset: number, limit: number): Promise<AppVersionDbRecord[]> {
+    return this.database
+      .select()
+      .from(appVersionTable)
+      .orderBy(desc(appVersionTable.version))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async findManyFiltered(
+    filters: FindVersionsFilters,
+  ): Promise<AppVersionDbRecord[]> {
+    const { offset, limit, version, codename, isSupported } = filters;
+
+    const whereParts = [
+      version ? eq(appVersionTable.version, version) : undefined,
+      codename ? ilike(appVersionTable.codename, `%${codename}%`) : undefined,
+      typeof isSupported === 'boolean'
+        ? eq(appVersionTable.isSupported, isSupported)
+        : undefined,
+    ].filter(Boolean);
+
+    return this.database
+      .select()
+      .from(appVersionTable)
+      .where(whereParts.length ? and(...whereParts) : undefined)
+      .orderBy(desc(appVersionTable.version))
+      .limit(limit)
+      .offset(offset);
   }
 
   override async findById(id: string): Promise<AppVersionDbRecord | null> {

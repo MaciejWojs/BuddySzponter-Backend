@@ -28,5 +28,3 @@ export const uploadLocaleResponseSchema = z.object({
   lang: z.string(),
   version: z.string(),
 });
-
-export const createAppVersionResponseSchema = appVersionSchema;
