@@ -9,11 +9,11 @@ import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
   IncomingEventNames,
   IncomingEventPayloads,
-  incomingEventSchemas,
   OutgoingEventNames,
   OutgoingEventPayloads
 } from './infrastucture/ws/eventMap';
 import { DecryptEventPayloadMiddleware } from './infrastucture/ws/middleware/DecryptEventPayloadMIddleware';
+import { EventValidatorMiddleware } from './infrastucture/ws/middleware/EventValidatorMiddleware';
 import { JwtMiddleware } from './infrastucture/ws/middleware/JwtMiddleware';
 import {
   connectionTokenSchema,
@@ -278,59 +278,8 @@ export function initSocket() {
       const decryptMiddleware = new DecryptEventPayloadMiddleware(socket);
       socket.use(decryptMiddleware.use.bind(decryptMiddleware));
     }
-    socket.use((packet, next) => {
-      const [eventName, data] = packet;
-      logger.info(
-        `[EVENT VALIDATOR MIDDLEWARE] ${eventName} from ${socket.id}: ${JSON.stringify(data)}`
-      );
-      if (!data) {
-        logger.warn(
-          `Received event ${eventName} with no data from ${socket.id}, skipping decryption. Its completely valid for some events to not have data`
-        );
-        packet[1] = { event: eventName };
-        return next();
-      }
-
-      if (
-        eventName === 'connection' ||
-        eventName === 'disconnect' ||
-        eventName === 'error'
-      ) {
-        logger.onlyDev(`Skipping validation for special event ${eventName}`);
-        packet[1] = { event: eventName, ...data };
-        return next();
-      }
-
-      const schema =
-        incomingEventSchemas[eventName as keyof typeof incomingEventSchemas];
-      if (!schema) {
-        logger.warn(
-          `No schema defined for event ${eventName}, skipping validation`
-        );
-        return next(
-          new Error(`Unrecognized event: ${eventName}, no validation schema`)
-        );
-      }
-      const result = schema.safeParse(data);
-      if (!result.success) {
-        logger.warn(
-          `Validation failed for event ${eventName} from ${socket.id}: ${JSON.stringify(result.error.issues)}`
-        );
-        const errorDetails = result.error.issues
-          .map((issue) => {
-            const path =
-              issue.path.length > 0
-                ? `['${issue.path.join('.')}' - ${issue.message}]`
-                : `[${issue.message}]`;
-            return path;
-          })
-          .join(', ');
-        return next(new Error('Invalid event payload: ' + errorDetails));
-      }
-      const finalData = { event: eventName, ...result.data };
-      packet[1] = finalData;
-      next();
-    });
+    const eventValidatorMiddleware = new EventValidatorMiddleware(socket);
+    socket.use(eventValidatorMiddleware.use.bind(eventValidatorMiddleware));
 
     on(socket, 'connection:accept', (data) => {
       logger.info(
