@@ -389,12 +389,16 @@ export function initSocket() {
       );
     });
 
-    const p = encryptPayload(
-      {
-        news: `Welcome, your socket ID is ${socket.id}`
-      },
-      Buffer.from(socket.data.encryptionKey, 'base64')
-    );
+    const partialPayload = {
+      news: `Welcome, your socket ID is ${socket.id}`
+    };
+
+    const p = configProvider.get('PAYLOAD_ENCRYPTED')
+      ? encryptPayload(
+          partialPayload,
+          Buffer.from(socket.data.encryptionKey, 'base64')
+        )
+      : partialPayload;
     socket.emit('message', { payload: p });
   });
 
