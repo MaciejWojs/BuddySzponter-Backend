@@ -284,11 +284,17 @@ export function initSocket() {
         });
       }
 
+      const responseEvent = 'connection:acknowledged';
+
+      logger.info(
+        `[${role}] [${data.event}] data from ${socket.id} with role: ${role}: ${JSON.stringify(data)}, emitting event ${responseEvent} to host in room ${socket.data.connectionTokenData?.connectionId}`
+      );
+      
       // server -> host
       emitToOtherSocket(
         socket,
         data.sessionId,
-        'connection:acknowledged',
+        responseEvent,
         data
       );
     });
@@ -306,7 +312,7 @@ export function initSocket() {
         });
       }
       logger.info(
-        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
+        `[${role}] [${data.event}] data from ${socket.id} with role: ${role}: ${JSON.stringify(data)}`
       );
     });
 
