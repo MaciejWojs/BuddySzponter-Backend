@@ -2,9 +2,7 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { Server, Socket } from 'socket.io';
 
-import { APP_CONFIG } from './config/appConfig';
 import { configProvider } from './config/configProvider';
-import { client } from './infrastucture/cache/client';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
   IncomingEventNames,
@@ -13,10 +11,10 @@ import {
   OutgoingEventPayloads
 } from './infrastucture/ws/eventMap';
 import { DecryptEventPayloadMiddleware } from './infrastucture/ws/middleware/DecryptEventPayloadMIddleware';
+import { EncryptionSessionMiddleware } from './infrastucture/ws/middleware/EncryptionSessionMiddleware';
 import { EventValidatorMiddleware } from './infrastucture/ws/middleware/EventValidatorMiddleware';
 import { JwtMiddleware } from './infrastucture/ws/middleware/JwtMiddleware';
 import { ValidateConnectionTokenMiddleware } from './infrastucture/ws/middleware/ValidateConnectionTokenMiddleware';
-import { sessionIdSchema } from './infrastucture/ws/schemas/socket.security.schemas';
 import { ValidateSession } from './modules/auth/application/use-cases/validateSession';
 import { TokenService } from './modules/connection/application/TokenService';
 import { encryptPayload } from './shared/utils/encrypt-payload';
@@ -127,60 +125,8 @@ export function initSocket() {
 
   if (configProvider.get('PAYLOAD_ENCRYPTED')) {
     // Inject session ID and encryption key
-    io.use(async (socket, next) => {
-      // logger.warn(
-      //   'Payload encryption is enabled, but encryption logic is not yet implemented. Data will be sent in plaintext.',
-      // );
-      const sid = socket.handshake.auth.sessionId;
-      const isValidSessionIdFormat = sessionIdSchema.safeParse(sid);
-
-      if (!isValidSessionIdFormat.success) {
-        logger.onlyDev(
-          `Session ID format validation failed: ${JSON.stringify(isValidSessionIdFormat.error.issues)}`
-        );
-        return next(
-          new Error('Authentication error: Invalid session ID format')
-        );
-      }
-
-      if (!sid) {
-        logger.warn('Socket connection rejected: No session ID provided');
-        return next(new Error('Authentication error: No session ID provided'));
-      }
-
-      if (!client.connected) {
-        logger.error('Redis client is not connected');
-        return next(new Error('Internal server error: Cache unavailable'));
-      }
-
-      const key = await client.get(
-        `${APP_CONFIG.cache.keys.handshakePrefix}${sid}`
-      );
-
-      if (!key) {
-        logger.warn(
-          'Socket connection rejected: Invalid or expired session ID'
-        );
-        return next(new Error('Authentication error: Invalid session ID'));
-      }
-
-      const result = await client.expire(
-        `${APP_CONFIG.cache.keys.handshakePrefix}${sid}`,
-        APP_CONFIG.cache.ttl.handshakeSession
-      );
-      if (result !== 1) {
-        logger.warn(
-          `Failed to extend TTL for session ${sid} during socket connection`
-        );
-      }
-
-      const encryptiosnKey = key;
-      keyMapping.set(socket.id, encryptiosnKey);
-      logger.onlyDev(`Received session ID during socket connection: ${sid}`);
-      socket.data.sessionId = sid;
-      socket.data.encryptionKey = encryptiosnKey;
-      next();
-    });
+    const sessionMiddleware = new EncryptionSessionMiddleware();
+    io.use(sessionMiddleware.use.bind(sessionMiddleware));
   }
 
   const repo = new RepositoryFactory().authSessionRepository();
