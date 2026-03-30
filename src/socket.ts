@@ -13,6 +13,7 @@ import {
   OutgoingEventNames,
   OutgoingEventPayloads
 } from './infrastucture/ws/eventMap';
+import { DecryptEventPayloadMiddleware } from './infrastucture/ws/middleware/DecryptEventPayloadMIddleware';
 import { JwtMiddleware } from './infrastucture/ws/middleware/JwtMiddleware';
 import {
   connectionTokenSchema,
@@ -23,9 +24,6 @@ import {
   ConnectionTokenData,
   TokenService
 } from './modules/connection/application/TokenService';
-import { encryptedPayloadSchema } from './shared/api/schemas/encryptedPayload.schema';
-import { ValidationError } from './shared/errors/Specialized/ValidationError';
-import { decryptPayload } from './shared/utils/decrypt-payload';
 import { encryptPayload } from './shared/utils/encrypt-payload';
 
 let io: Server;
@@ -277,45 +275,8 @@ export function initSocket() {
 
     if (configProvider.get('PAYLOAD_ENCRYPTED')) {
       // Middleware to decrypt incoming messages only if encryption is enabled
-      socket.use(async (packet, next) => {
-        const [eventName, data] = packet;
-        if (!data) {
-          logger.warn(
-            `Received event ${eventName} with no data from ${socket.id}, skipping decryption. Its completely valid for some events to not have data`
-          );
-          return next();
-        }
-        const isEnctyptedFormat = encryptedPayloadSchema.safeParse(data);
-
-        if (!isEnctyptedFormat.success) {
-          return next(
-            new Error(
-              `Data is not encrypted or wrong payload format during ${eventName}`
-            )
-          );
-        }
-
-        try {
-          const decryptedData = decryptPayload(data, socket.data.encryptionKey);
-          logger.onlyDev(
-            `Decrypted data for message from ${socket.id}: ${JSON.stringify(decryptedData)}`
-          );
-          packet[1] = decryptedData;
-        } catch (error) {
-          if (error instanceof ValidationError) {
-            logger.warn(
-              `Decryption failed for message from ${socket.id}: ${error.message}`
-            );
-            return next(new Error(`Decryption failed: ${error.message}`));
-          }
-          logger.error(
-            `Unexpected error during decryption for message from ${socket.id}:`,
-            error
-          );
-          return next(new Error('Decryption failed due to unexpected error'));
-        }
-        next();
-      });
+      const decryptMiddleware = new DecryptEventPayloadMiddleware(socket);
+      socket.use(decryptMiddleware.use.bind(decryptMiddleware));
     }
     socket.use((packet, next) => {
       const [eventName, data] = packet;
