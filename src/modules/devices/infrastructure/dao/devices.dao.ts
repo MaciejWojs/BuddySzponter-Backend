@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { devicesTable } from '@infra/db/schema';
-import { eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 
 import { CreateDevice, DeviceDbRecord, IDevicesDAO } from './IDevicesDao';
 
@@ -11,6 +11,25 @@ export class DrizzleDevicesDao
   constructor() {
     super();
   }
+
+  async countAll(): Promise<number> {
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(devicesTable);
+
+    return Number(row?.count ?? 0);
+  }
+
+  async findMany(offset: number, limit: number): Promise<DeviceDbRecord[]> {
+    const devices = await this.database
+      .select()
+      .from(devicesTable)
+      .orderBy(desc(devicesTable.createdAt))
+      .offset(offset)
+      .limit(limit);
+    return devices;
+  }
+
   override async findById(id: string): Promise<DeviceDbRecord | null> {
     const device = await this.database
       .select()

@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 
+import administrationDevicesRouter from '../devices/api/devices.routes';
 import administrationRolesRouter from '../roles/api/roles.routes';
 import administrationSystemRouter from '../system/api/system.routes';
 import administrationUsersRouter from '../users/api/users.routes';
@@ -19,7 +20,7 @@ administrationRouter.openapi(getAdministrationRoute, (c) => {
       module: 'administration',
       status: 'dummy' as const,
       message: 'Administration module is in dummy mode',
-      children: ['users', 'roles', 'system'],
+      children: ['users', 'roles', 'devices', 'system'],
     },
     StatusCodes.OK,
   );
@@ -27,6 +28,7 @@ administrationRouter.openapi(getAdministrationRoute, (c) => {
 
 administrationRouter.route('/users', administrationUsersRouter);
 administrationRouter.route('/roles', administrationRolesRouter);
+administrationRouter.route('/devices', administrationDevicesRouter);
 administrationRouter.route('/system', administrationSystemRouter);
 
 export default administrationRouter;

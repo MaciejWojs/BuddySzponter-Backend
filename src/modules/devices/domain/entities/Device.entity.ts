@@ -25,6 +25,14 @@ export class Device {
     return this.copy({ name });
   }
 
+  updateOs(os: DeviceOS): Device {
+    return this.copy({ os });
+  }
+
+  updateUser(userId: UserId | null): Device {
+    return this.copy({ userId });
+  }
+
   changeUser(userId: UserId): Device {
     if (!this.userId) {
       return this.copy({ userId });

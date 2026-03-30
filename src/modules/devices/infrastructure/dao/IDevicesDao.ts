@@ -5,6 +5,8 @@ export type DeviceDbRecord = typeof devicesTable.$inferSelect;
 export type CreateDevice = Omit<DeviceDbRecord, 'id' | 'createdAt'>;
 
 export interface IDevicesDAO {
+  countAll(): Promise<number>;
+  findMany(offset: number, limit: number): Promise<DeviceDbRecord[]>;
   findById(id: string): Promise<DeviceDbRecord | null>;
   findByUserId(userId: number): Promise<DeviceDbRecord[]>;
   findByFingerprint(fingerprint: string): Promise<DeviceDbRecord[]>;
