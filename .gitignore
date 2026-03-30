@@ -245,3 +245,4 @@ docs/
 diagrams/**/*.png
 diagrams/**/*.jpg
 diagrams/**/*.svg
+ws-client/*
