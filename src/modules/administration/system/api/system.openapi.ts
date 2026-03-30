@@ -11,7 +11,7 @@ import { administrationDummyWithChildrenResponseSchema } from '../../api/schemas
 export const getAdministrationSystemRoute = createRoute({
   method: 'get',
   path: '/',
-  tags: ['Administration'],
+  tags: ['Administration/System'],
   summary: 'Get administration system module overview (dummy)',
   security: [{ AuthorizationBearer: [] }],
   responses: {
