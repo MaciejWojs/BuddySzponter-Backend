@@ -24,12 +24,6 @@ export class DecryptEventPayloadMiddleware
     const [packet, next] = args;
     const [eventName, data] = packet;
 
-    logger.onlyDev(`Packet ${JSON.stringify(packet)} `);
-
-    logger.onlyDev(`Packet[0] ${JSON.stringify(packet[0])} `);
-
-    logger.onlyDev(`Packet[1] ${JSON.stringify(packet[1])} `);
-
     if (!data) {
       logger.warn(
         `Received event ${eventName} with no data from ${this.socket.id}, skipping decryption. Its completely valid for some events to not have data`
