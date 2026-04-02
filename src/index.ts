@@ -30,6 +30,42 @@ import { getEngine, initSocket } from './socket';
 
 const app = new OpenAPIHono<ENV>({ defaultHook }).basePath('/api/v1');
 
+const getFirstForwardedHeaderValue = (value: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const [firstValue] = value.split(',');
+  return firstValue?.trim() || null;
+};
+
+const getPublicOrigin = (request: Request): string => {
+  const url = new URL(request.url);
+  const forwardedProto = getFirstForwardedHeaderValue(
+    request.headers.get('x-forwarded-proto'),
+  );
+  const forwardedHost = getFirstForwardedHeaderValue(
+    request.headers.get('x-forwarded-host'),
+  );
+  const forwardedPort = getFirstForwardedHeaderValue(
+    request.headers.get('x-forwarded-port'),
+  );
+
+  if (forwardedProto) {
+    url.protocol = forwardedProto.endsWith(':')
+      ? forwardedProto
+      : `${forwardedProto}:`;
+  }
+
+  if (forwardedHost) {
+    url.host = forwardedHost;
+  } else if (forwardedPort) {
+    url.port = forwardedPort;
+  }
+
+  return url.origin;
+};
+
 app.use(honoLogger());
 app.use('*', injectIpAddress);
 app.use('*', injectJwtPayload);
@@ -132,7 +168,7 @@ if (isDevelopment) {
     },
     servers: [
       {
-        url: new URL(c.req.url).origin,
+        url: getPublicOrigin(c.req.raw),
         description: 'development server',
       },
     ],
