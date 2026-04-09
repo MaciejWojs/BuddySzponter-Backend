@@ -15,46 +15,19 @@ import { GetAdminUserProfile } from '../application/use-case/getAdminUserProfile
 import { GetUserDevices } from '../application/use-case/getUserDevices';
 import { GetUsers } from '../application/use-case/getUsers';
 import { GetUserSessions } from '../application/use-case/getUserSessions';
-import { GetUsersTotal } from '../application/use-case/getUsersTotal';
-import administrationUsersConnectionsRouter from '../connections/api/connections.routes';
-import administrationUsersDevicesRouter from '../devices/api/devices.routes';
-import administrationUsersSessionsRouter from '../sessions/api/sessions.routes';
 import {
   deleteUserDeviceRoute,
   deleteUserDevicesRoute,
   deleteUserRoute,
-  getAdministrationUsersRoute,
   getUserByIdRoute,
   getUserDevicesRoute,
   getUserSessionsRoute,
   getUsersRoute,
-  getUsersTotalRoute,
   postUserAvatarRequestRoute,
   updateUserRoute,
 } from './users.openapi';
 
 const administrationUsersRouter = new OpenAPIHono<ENV>({ defaultHook });
-
-administrationUsersRouter.openapi(getAdministrationUsersRoute, (c) => {
-  return c.json(
-    {
-      module: 'administration/users',
-      status: 'dummy' as const,
-      message: 'Dummy endpoint for administration users',
-      children: ['devices', 'sessions', 'connections'],
-    },
-    StatusCodes.OK,
-  );
-});
-
-administrationUsersRouter.openapi(getUsersTotalRoute, async (c) => {
-  const query = c.req.valid('query');
-  const repo = new RepositoryFactory().userCacheRepository();
-  const useCase = new GetUsersTotal(repo);
-
-  const total = await useCase.execute(query);
-  return c.json({ total }, StatusCodes.OK);
-});
 
 administrationUsersRouter.openapi(getUsersRoute, async (c) => {
   const query = c.req.valid('query');
@@ -350,12 +323,5 @@ administrationUsersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
     throw err;
   }
 });
-
-administrationUsersRouter.route('/devices', administrationUsersDevicesRouter);
-administrationUsersRouter.route('/sessions', administrationUsersSessionsRouter);
-administrationUsersRouter.route(
-  '/connections',
-  administrationUsersConnectionsRouter,
-);
 
 export default administrationUsersRouter;

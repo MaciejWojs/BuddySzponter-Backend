@@ -18,7 +18,6 @@ import {
   deviceMutationResponseSchema,
   deviceResponseSchema,
   devicesResponseSchema,
-  devicesTotalResponseSchema,
 } from './schemas/devices.response.schema';
 
 export const getAdministrationDevicesRoute = createRoute({
@@ -59,28 +58,6 @@ export const getDevicesRoute = createRoute({
       content: {
         'application/json': {
           schema: devicesResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
-
-export const getDevicesTotalRoute = createRoute({
-  method: 'get',
-  path: '/total',
-  middleware: [isAdmin],
-  tags: ['Administration'],
-  summary: 'Get total devices count',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description: 'Devices total retrieved successfully',
-      content: {
-        'application/json': {
-          schema: devicesTotalResponseSchema,
         },
       },
     },

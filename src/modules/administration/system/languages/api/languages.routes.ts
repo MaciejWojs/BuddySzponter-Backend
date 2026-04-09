@@ -15,7 +15,6 @@ import { UploadLocale } from '../application/use-case/uploadLocale';
 import {
   deleteLocaleRoute,
   deleteLocalesByVersionRoute,
-  getAdministrationSystemLanguagesRoute,
   getLocaleRoute,
   getSupportedLocalesRoute,
   uploadLocaleRoute,
@@ -24,20 +23,6 @@ import {
 const administrationSystemLanguagesRouter = new OpenAPIHono<ENV>({
   defaultHook,
 });
-
-administrationSystemLanguagesRouter.openapi(
-  getAdministrationSystemLanguagesRoute,
-  (c) => {
-    return c.json(
-      {
-        module: 'administration/system/languages',
-        status: 'dummy' as const,
-        message: 'Dummy endpoint for administration system languages',
-      },
-      StatusCodes.OK,
-    );
-  },
-);
 
 administrationSystemLanguagesRouter.openapi(getLocaleRoute, async (c) => {
   const { lang, version } = c.req.valid('query');

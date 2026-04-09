@@ -8,24 +8,9 @@ import { ENV } from '@/shared/types/honoENV';
 
 import { GetSessions } from '../application/use-case/getSessions';
 import { TerminateSession } from '../application/use-case/terminateSession';
-import {
-  getAdministrationSessionsRoute,
-  getSessionsRoute,
-  terminateSessionRoute,
-} from './sessions.openapi';
+import { getSessionsRoute, terminateSessionRoute } from './sessions.openapi';
 
 const administrationSessionsRouter = new OpenAPIHono<ENV>({ defaultHook });
-
-administrationSessionsRouter.openapi(getAdministrationSessionsRoute, (c) => {
-  return c.json(
-    {
-      module: 'administration/sessions',
-      status: 'dummy' as const,
-      message: 'Dummy endpoint for administration sessions',
-    },
-    StatusCodes.OK,
-  );
-});
 
 administrationSessionsRouter.openapi(getSessionsRoute, async (c) => {
   const query = c.req.valid('query');

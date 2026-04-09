@@ -13,23 +13,11 @@ import { UpdateRole } from '../application/use-case/updateRole';
 import {
   createRoleRoute,
   deleteRoleRoute,
-  getAdministrationRolesRoute,
   getRolesRoute,
   updateRoleRoute,
 } from './roles.openapi';
 
 const administrationRolesRouter = new OpenAPIHono<ENV>({ defaultHook });
-
-administrationRolesRouter.openapi(getAdministrationRolesRoute, (c) => {
-  return c.json(
-    {
-      module: 'administration/roles',
-      status: 'dummy' as const,
-      message: 'Dummy endpoint for administration roles',
-    },
-    StatusCodes.OK,
-  );
-});
 
 administrationRolesRouter.openapi(getRolesRoute, async (c) => {
   const roleDao = new DaoFactory().db.roleDao();

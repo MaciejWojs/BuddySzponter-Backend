@@ -11,7 +11,6 @@ import {
 import { administrationDummyWithChildrenResponseSchema } from '../../api/schemas/administration.response.schema';
 import {
   getUsersQuerySchema,
-  getUsersTotalQuerySchema,
   patchAdminUserSchema,
   postUserAvatarRequestSchema,
   userIdDeviceIdParamSchema,
@@ -23,7 +22,6 @@ import {
   getUserResponseSchema,
   getUserSessionsResponseSchema,
   getUsersResponseSchema,
-  getUsersTotalResponseSchema,
   patchUserResponseSchema,
   postUserAvatarResponseSchema,
 } from './schemas/user.response.schema';
@@ -194,31 +192,6 @@ export const deleteUserDeviceRoute = createRoute({
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
-
-export const getUsersTotalRoute = createRoute({
-  method: 'get',
-  path: '/total',
-  middleware: [isAdmin],
-  tags: ['Administration/Users'],
-  summary: 'Get users total',
-  security: [{ AuthorizationBearer: [] }],
-  request: {
-    query: getUsersTotalQuerySchema,
-  },
-  responses: {
-    200: {
-      description: 'Users total retrieved successfully',
-      content: {
-        'application/json': {
-          schema: getUsersTotalResponseSchema,
-        },
-      },
-    },
-    ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
     ...decryptionErrorResponse,
   },

@@ -15,7 +15,6 @@ import { UpdateVersion } from '../application/use-case/updateVersion';
 import {
   createVersionRoute,
   deleteVersionRoute,
-  getAdministrationSystemVersionsRoute,
   getVersionByIdRoute,
   getVersionsRoute,
   getVersionsTotalRoute,
@@ -25,20 +24,6 @@ import {
 const administrationSystemVersionsRouter = new OpenAPIHono<ENV>({
   defaultHook,
 });
-
-administrationSystemVersionsRouter.openapi(
-  getAdministrationSystemVersionsRoute,
-  (c) => {
-    return c.json(
-      {
-        module: 'administration/system/versions',
-        status: 'dummy' as const,
-        message: 'Dummy endpoint for administration system versions',
-      },
-      StatusCodes.OK,
-    );
-  },
-);
 
 administrationSystemVersionsRouter.openapi(getVersionsTotalRoute, async (c) => {
   const coreDao = new DaoFactory().db.coreDao();

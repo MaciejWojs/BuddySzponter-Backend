@@ -9,29 +9,15 @@ import { ENV } from '@/shared/types/honoENV';
 import { DeleteDevice } from '../application/use-case/deleteDevice';
 import { GetDeviceById } from '../application/use-case/getDeviceById';
 import { GetDevices } from '../application/use-case/getDevices';
-import { GetDevicesTotal } from '../application/use-case/getDevicesTotal';
 import { UpdateDevice } from '../application/use-case/updateDevice';
 import {
   deleteDeviceRoute,
-  getAdministrationDevicesRoute,
   getDeviceByIdRoute,
   getDevicesRoute,
-  getDevicesTotalRoute,
   updateDeviceRoute,
 } from './devices.openapi';
 
 const administrationDevicesRouter = new OpenAPIHono<ENV>({ defaultHook });
-
-administrationDevicesRouter.openapi(getAdministrationDevicesRoute, (c) => {
-  return c.json(
-    {
-      module: 'administration/devices',
-      status: 'dummy' as const,
-      message: 'Dummy endpoint for administration devices',
-    },
-    StatusCodes.OK,
-  );
-});
 
 administrationDevicesRouter.openapi(getDevicesRoute, async (c) => {
   const query = c.req.valid('query');
@@ -40,14 +26,6 @@ administrationDevicesRouter.openapi(getDevicesRoute, async (c) => {
 
   const devices = await useCase.execute(query);
   return c.json(devices, StatusCodes.OK);
-});
-
-administrationDevicesRouter.openapi(getDevicesTotalRoute, async (c) => {
-  const repository = new RepositoryFactory().deviceRepository();
-  const useCase = new GetDevicesTotal(repository);
-
-  const total = await useCase.execute();
-  return c.json({ total }, StatusCodes.OK);
 });
 
 administrationDevicesRouter.openapi(getDeviceByIdRoute, async (c) => {
