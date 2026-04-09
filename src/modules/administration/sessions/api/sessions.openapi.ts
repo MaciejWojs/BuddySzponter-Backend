@@ -8,7 +8,6 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { administrationDummyResponseSchema } from '../../api/schemas/administration.response.schema';
 import {
   getSessionsQuerySchema,
   sessionIdParamSchema,
@@ -17,28 +16,6 @@ import {
   sessionsResponseSchema,
   terminateSessionResponseSchema,
 } from './schemas/sessions.response.schema';
-
-export const getAdministrationSessionsRoute = createRoute({
-  method: 'get',
-  path: '/dummy',
-  middleware: [isAdmin],
-  tags: ['Administration'],
-  summary: 'Get administration sessions module overview (dummy)',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description: 'Administration sessions overview returned successfully',
-      content: {
-        'application/json': {
-          schema: administrationDummyResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
 
 export const getSessionsRoute = createRoute({
   method: 'get',

@@ -8,7 +8,6 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { administrationDummyWithChildrenResponseSchema } from '../../api/schemas/administration.response.schema';
 import {
   getUsersQuerySchema,
   patchAdminUserSchema,
@@ -25,28 +24,6 @@ import {
   patchUserResponseSchema,
   postUserAvatarResponseSchema,
 } from './schemas/user.response.schema';
-
-export const getAdministrationUsersRoute = createRoute({
-  method: 'get',
-  path: '/dummy',
-  middleware: [isAdmin],
-  tags: ['Administration/Users'],
-  summary: 'Get administration users module overview (dummy)',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description: 'Administration users overview returned successfully',
-      content: {
-        'application/json': {
-          schema: administrationDummyWithChildrenResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
 
 export const getUserByIdRoute = createRoute({
   method: 'get',

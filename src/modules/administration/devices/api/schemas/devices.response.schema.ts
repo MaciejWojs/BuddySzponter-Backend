@@ -29,13 +29,6 @@ export const deviceResponseSchema = z.object({
 
 export const devicesResponseSchema = z.array(deviceResponseSchema);
 
-export const devicesTotalResponseSchema = z.object({
-  total: z.number().int().min(0).openapi({
-    description: 'Total number of devices',
-    example: 42,
-  }),
-});
-
 export const deviceMutationResponseSchema = z.object({
   message: z.string().min(2).max(255),
 });

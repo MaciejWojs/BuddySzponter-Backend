@@ -8,7 +8,6 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { administrationDummyResponseSchema } from '../../api/schemas/administration.response.schema';
 import {
   createRoleRequestSchema,
   patchRoleRequestSchema,
@@ -18,28 +17,6 @@ import {
   getRolesResponseSchema,
   roleMutationResponseSchema,
 } from './schemas/roles.response.schema';
-
-export const getAdministrationRolesRoute = createRoute({
-  method: 'get',
-  path: '/dummy',
-  middleware: [isAdmin],
-  tags: ['Administration'],
-  summary: 'Get administration roles module overview (dummy)',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description: 'Administration roles overview returned successfully',
-      content: {
-        'application/json': {
-          schema: administrationDummyResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
 
 export const getRolesRoute = createRoute({
   method: 'get',

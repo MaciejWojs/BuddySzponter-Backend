@@ -8,7 +8,6 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { administrationDummyResponseSchema } from '../../../api/schemas/administration.response.schema';
 import {
   createVersionRequestSchema,
   getVersionsQuerySchema,
@@ -21,29 +20,6 @@ import {
   versionsResponseSchema,
   versionsTotalResponseSchema,
 } from './schemas/versions.response.schema';
-
-export const getAdministrationSystemVersionsRoute = createRoute({
-  method: 'get',
-  path: '/dummy',
-  middleware: [isAdmin],
-  tags: ['Administration/System'],
-  summary: 'Get administration system versions module overview (dummy)',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description:
-        'Administration system versions overview returned successfully',
-      content: {
-        'application/json': {
-          schema: administrationDummyResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
 
 export const getVersionsTotalRoute = createRoute({
   method: 'get',

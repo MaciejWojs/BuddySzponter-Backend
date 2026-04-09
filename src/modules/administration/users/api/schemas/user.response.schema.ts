@@ -1,12 +1,5 @@
 import { z } from 'zod';
 
-export const getUsersTotalResponseSchema = z.object({
-  total: z.number().int().min(0).openapi({
-    example: 125,
-    description: 'Total number of users for given filters',
-  }),
-});
-
 export const getUserResponseSchema = z.object({
   id: z.number().positive().min(1).openapi({
     description: 'Unique identifier for the user',

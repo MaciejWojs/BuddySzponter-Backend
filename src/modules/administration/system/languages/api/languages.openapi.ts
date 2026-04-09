@@ -19,35 +19,11 @@ import {
   unprocessableEntityResponse,
 } from '@/shared/api/openapi/error.openapi';
 
-import { administrationDummyResponseSchema } from '../../../api/schemas/administration.response.schema';
 import {
   versionLangParamsSchema,
   versionParamsSchema,
 } from './schemas/languages.request.schema';
 import { languageDeleteResponseSchema } from './schemas/languages.response.schema';
-
-export const getAdministrationSystemLanguagesRoute = createRoute({
-  method: 'get',
-  path: '/dummy',
-  middleware: [isAdmin],
-  tags: ['Administration/System'],
-  summary: 'Get administration system languages module overview (dummy)',
-  security: [{ AuthorizationBearer: [] }],
-  responses: {
-    200: {
-      description:
-        'Administration system languages overview returned successfully',
-      content: {
-        'application/json': {
-          schema: administrationDummyResponseSchema,
-        },
-      },
-    },
-    ...unauthorizedErrorResponse,
-    ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
-});
 
 export const getLocaleRoute = createRoute({
   method: 'get',
