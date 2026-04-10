@@ -9,12 +9,12 @@ import {
 import {
   patchSelfUserSchema,
   postUserAvatarRequestSchema,
-} from './schemas/user.request.schema';
+} from './schemas/users.request.schema';
 import {
   deleteUserResponseSchema,
   patchUserResponseSchema,
   postUserAvatarResponseSchema,
-} from './schemas/user.response.schema';
+} from './schemas/users.response.schema';
 
 export const updateSelfUserRoute = createRoute({
   method: 'patch',

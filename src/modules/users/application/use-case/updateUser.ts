@@ -1,6 +1,6 @@
 import { UserId } from '@/shared/value-objects';
 
-import { PatchUserInput } from '../../api/schemas/user.request.schema';
+import { PatchUserInput } from '../../api/schemas/users.request.schema';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Email, Password, UserNickname } from '../../domain/value-objects';
 import { RoleId } from '../../domain/value-objects/RoleId.vo';
