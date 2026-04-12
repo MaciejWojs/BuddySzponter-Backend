@@ -17,27 +17,35 @@ export class CreateUserDevice {
     deviceOs: string = 'Unknown OS',
   ): Promise<Device> {
     const fingerprintVO = new DeviceFingerprint(fingerprint);
+    const userIdVO = new UserId(userId);
 
     const existingDevices =
       await this.deviceRepository.findByFingerprint(fingerprintVO);
     if (existingDevices.length > 0) {
-      try {
-        if (!existingDevices[0]!.userId) {
-          existingDevices[0] = existingDevices[0]!.changeUser(
-            new UserId(userId),
-          );
-          await this.deviceRepository.save(existingDevices[0]!);
-        }
-      } catch (error) {
-        logger.error(`Failed to assign device to user ${userId}: ${error}`);
-        throw new Error('Device is already assigned to another user', {
-          cause: error,
-        });
+      const sameUserDevice = existingDevices.find(
+        (device) => device.userId?.value === userId,
+      );
+
+      if (sameUserDevice) {
+        return sameUserDevice;
       }
-      return existingDevices[0]!;
+
+      const unassignedDevice = existingDevices.find((device) => !device.userId);
+
+      if (unassignedDevice) {
+        try {
+          const assignedDevice = unassignedDevice.changeUser(userIdVO);
+          await this.deviceRepository.save(assignedDevice);
+          return assignedDevice;
+        } catch (error) {
+          logger.error(`Failed to assign device to user ${userId}: ${error}`);
+          throw new Error('Failed to assign unbound device to user', {
+            cause: error,
+          });
+        }
+      }
     }
 
-    const userIdVO = new UserId(userId);
     const deviceNameVO = new DeviceName(deviceName);
     const deviceOsVO = new DeviceOS(deviceOs);
 

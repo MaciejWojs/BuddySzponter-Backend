@@ -1,7 +1,6 @@
 import { localesClient } from '@/infrastucture/s3/client';
-
-import { ICoreRepository } from '../../domain/repositories/ICoreRepository';
-import { Version } from '../../domain/value-objects/version.vo';
+import { ICoreRepository } from '@/modules/core/domain/repositories/ICoreRepository';
+import { Version } from '@/modules/core/domain/value-objects/version.vo';
 
 export interface UploadLocaleInput {
   buffer: Buffer;

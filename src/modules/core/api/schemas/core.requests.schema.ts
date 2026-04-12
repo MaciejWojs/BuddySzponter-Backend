@@ -1,19 +1,5 @@
 import { z } from '@hono/zod-openapi';
 
-const multipartBooleanSchema = z.preprocess((value) => {
-  if (typeof value === 'string') {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === 'true' || normalized === '1' || normalized === 'on') {
-      return true;
-    }
-    if (normalized === 'false' || normalized === '0' || normalized === 'off') {
-      return false;
-    }
-  }
-
-  return value;
-}, z.boolean());
-
 export const localeCodeSchema = z
   .string()
   .trim()
@@ -60,18 +46,6 @@ export const supportedLocalesByVersionParamsSchema = z.object({
     },
     description: 'Application version in x.y.z format',
     example: '1.0.0',
-  }),
-});
-
-export const createAppVersionRequestSchema = z.object({
-  version: appVersionServerSchema,
-  codename: z.string().min(1).nullable().optional().openapi({
-    description: 'Optional app codename',
-    example: 'alpha',
-  }),
-  isSupported: multipartBooleanSchema.openapi({
-    description: 'Whether this version is supported',
-    example: true,
   }),
 });
 

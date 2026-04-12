@@ -1,11 +1,11 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { rolesTable, usersTable } from '@infra/db/schema';
-import { eq, getColumns } from 'drizzle-orm';
+import { and, desc, eq, getColumns, ilike, sql } from 'drizzle-orm';
 
 import { UserDbRecord } from '@/shared/types';
 import type { UserDbRecordWithRole } from '@/shared/types/UserDB';
 
-import { CreateUser, IUserDAO } from './IUserDAO';
+import { CreateUser, FindUsersFilters, IUserDAO } from './IUserDAO';
 
 export class DrizzleUserDao
   extends BaseDao<UserDbRecord, CreateUser, number>
@@ -27,6 +27,86 @@ export class DrizzleUserDao
 
     return user[0] ?? null;
   }
+
+  async countAll(): Promise<number> {
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(usersTable);
+
+    return Number(row?.count ?? 0);
+  }
+
+  async countFiltered(filters: FindUsersFilters): Promise<number> {
+    const { nickname, email, role, isBanned, isDeleted } = filters;
+
+    const whereParts = [
+      typeof isBanned === 'boolean'
+        ? eq(usersTable.isBanned, isBanned)
+        : undefined,
+      typeof isDeleted === 'boolean'
+        ? eq(usersTable.isDeleted, isDeleted)
+        : undefined,
+      role ? ilike(rolesTable.name, role) : undefined,
+      email ? ilike(usersTable.email, `%${email}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
+    ].filter(Boolean);
+
+    const [row] = await this.database
+      .select({ count: sql<number>`count(*)` })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .where(whereParts.length ? and(...whereParts) : undefined);
+
+    return Number(row?.count ?? 0);
+  }
+
+  async findMany(
+    offset: number,
+    limit: number,
+  ): Promise<UserDbRecordWithRole[]> {
+    return this.database
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name,
+      })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .orderBy(desc(usersTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async findManyFiltered(
+    filters: FindUsersFilters,
+  ): Promise<UserDbRecordWithRole[]> {
+    const { offset, limit, nickname, email, role, isBanned, isDeleted } =
+      filters;
+
+    const whereParts = [
+      typeof isBanned === 'boolean'
+        ? eq(usersTable.isBanned, isBanned)
+        : undefined,
+      typeof isDeleted === 'boolean'
+        ? eq(usersTable.isDeleted, isDeleted)
+        : undefined,
+      role ? ilike(rolesTable.name, role) : undefined,
+      email ? ilike(usersTable.email, `%${email}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
+    ].filter(Boolean);
+
+    return this.database
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name,
+      })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .where(whereParts.length ? and(...whereParts) : undefined)
+      .orderBy(desc(usersTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
   override async create(
     data: CreateUser,
   ): Promise<UserDbRecordWithRole | null> {
@@ -78,14 +158,16 @@ export class DrizzleUserDao
     return result.length > 0;
   }
   override async save(user: UserDbRecord): Promise<UserDbRecord> {
+    const { id, ...data } = user;
+
     const [updatedUser] = await this.database
       .update(usersTable)
-      .set(user)
-      .where(eq(usersTable.id, user.id))
+      .set(data)
+      .where(eq(usersTable.id, id))
       .returning();
 
     if (!updatedUser) {
-      throw new Error(`Failed to update user with id ${user.id}`);
+      throw new Error(`Failed to update user with id ${id}`);
     }
 
     return updatedUser;

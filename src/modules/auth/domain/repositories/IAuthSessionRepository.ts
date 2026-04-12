@@ -5,6 +5,8 @@ import { AuthSessionUUID } from '../value-objects';
 export interface IAuthSessionRepository {
   createSession(authSession: AuthSession): Promise<AuthSession>;
   findSessionById(id: AuthSessionUUID): Promise<AuthSession | null>;
+  findAllSessions(): Promise<AuthSession[]>;
+  findAllActiveSessions(): Promise<AuthSession[]>;
   deleteSession(id: AuthSessionUUID): Promise<boolean>;
   save(authSession: AuthSession): Promise<boolean>;
 
