@@ -1,7 +1,7 @@
 import { AuthSession } from '@/modules/auth/domain/entities/AuthSession.entity';
 import {
   AuthSessionRefreshToken,
-  AuthSessionUUID,
+  AuthSessionUUID
 } from '@/modules/auth/domain/value-objects';
 import { AuthSessionDbRecord } from '@/modules/auth/infratsucture/dao/IAuthSessionDao';
 
@@ -18,7 +18,7 @@ export class AuthSessionMapper {
       record.userAgent,
       record.revoked,
       record.createdAt,
-      record.expiresAt,
+      record.expiresAt
     );
   }
 
@@ -32,7 +32,7 @@ export class AuthSessionMapper {
       userAgent: authSession.userAgent,
       revoked: authSession.revoked,
       createdAt: authSession.createdAt,
-      expiresAt: authSession.expiresAt,
+      expiresAt: authSession.expiresAt
     };
   }
 }

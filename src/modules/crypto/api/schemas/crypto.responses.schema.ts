@@ -8,5 +8,5 @@ export const handshakeResponseSchema = z.object({
       return buf.length === 65;
     }, 'Invalid ECDH public key'),
 
-  sessionId: z.uuid(),
+  sessionId: z.uuid()
 });

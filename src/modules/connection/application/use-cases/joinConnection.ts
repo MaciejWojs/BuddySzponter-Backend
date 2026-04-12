@@ -7,7 +7,7 @@ import { ConnectionParticipant } from '../../domain/entities/ConnectionParticipa
 import {
   ConnectionJoinAttemptsExceededError,
   ConnectionNotFoundError,
-  InvalidConnectionPasswordError,
+  InvalidConnectionPasswordError
 } from '../../domain/error/ConnectionBusinessErrors';
 import { IConnectionRepository } from '../../domain/repositories/IConnectionRepository';
 import { ConnectionCode } from '../../domain/value-objects';
@@ -20,6 +20,7 @@ export interface JoinConnectionCommand {
 }
 export class JoinConnection {
   constructor(private readonly repo: IConnectionRepository) {}
+
   async execute(input: JoinConnectionCommand): Promise<Connection> {
     const connection = await this.repo.findByCode(input.code);
     if (!connection) {
@@ -39,7 +40,7 @@ export class JoinConnection {
       input.device.userId,
       input.device.id,
       input.ipAddress,
-      input.device.fingerprint,
+      input.device.fingerprint
     );
     const updatedConnection = connection.joinConnection(guestParticipant);
     const didPersist = await this.repo.updateConnection(updatedConnection);

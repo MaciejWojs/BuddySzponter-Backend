@@ -10,42 +10,19 @@ import {
   PasswordWithoutDigitError,
   PasswordWithoutLowerCaseError,
   PasswordWithoutSpecialCharacterError,
-  PasswordWithoutUpperCaseError,
+  PasswordWithoutUpperCaseError
 } from '../errors';
 
 export class Password {
-  static readonly MIN_SCORE = 3;
-  static readonly MAX_LENGTH = 255;
-  static readonly MIN_LENGTH = 8;
   static readonly HASH_ALGORITHM = 'argon2id';
 
+  static readonly MAX_LENGTH = 255;
+
+  static readonly MIN_LENGTH = 8;
+
+  static readonly MIN_SCORE = 3;
+
   private constructor(private readonly hashedPass: string) {}
-
-  static async create(raw: string): Promise<Password> {
-    raw = raw.trim();
-    const passwordError = this.checkPasswordRequirements(raw);
-    if (passwordError) {
-      throw passwordError;
-    }
-
-    const hashed = await password.hash(raw, {
-      algorithm: this.HASH_ALGORITHM,
-    });
-
-    return new Password(hashed);
-  }
-
-  static fromHash(hash: string): Password {
-    return new Password(hash);
-  }
-
-  get value(): string {
-    return this.hashedPass;
-  }
-
-  async verify(pass: string): Promise<boolean> {
-    return password.verify(pass, this.hashedPass);
-  }
 
   private static checkPasswordRequirements(pass: string): Error | false {
     if (pass.length < this.MIN_LENGTH) {
@@ -58,7 +35,7 @@ export class Password {
 
     if (pass === pass[0]!.repeat(pass.length)) {
       return new PasswordValidationError(
-        'Password cannot consist of the same character',
+        'Password cannot consist of the same character'
       );
     }
 
@@ -78,5 +55,31 @@ export class Password {
     if (!hasSpecialChar) return new PasswordWithoutSpecialCharacterError();
 
     return false;
+  }
+
+  static async create(raw: string): Promise<Password> {
+    raw = raw.trim();
+    const passwordError = this.checkPasswordRequirements(raw);
+    if (passwordError) {
+      throw passwordError;
+    }
+
+    const hashed = await password.hash(raw, {
+      algorithm: this.HASH_ALGORITHM
+    });
+
+    return new Password(hashed);
+  }
+
+  static fromHash(hash: string): Password {
+    return new Password(hash);
+  }
+
+  get value(): string {
+    return this.hashedPass;
+  }
+
+  async verify(pass: string): Promise<boolean> {
+    return password.verify(pass, this.hashedPass);
   }
 }

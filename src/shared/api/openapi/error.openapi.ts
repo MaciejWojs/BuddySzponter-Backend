@@ -3,7 +3,7 @@ import {
   internalServerErrorResponseSchema,
   serviceUnavailableErrorResponseSchema,
   unauthorizedErrorResponseSchema,
-  validationErrorResponseSchema,
+  validationErrorResponseSchema
 } from '@shared/api/schemas/error.schema';
 
 export const unprocessableEntityResponse = {
@@ -11,10 +11,10 @@ export const unprocessableEntityResponse = {
     description: 'Validation error',
     content: {
       'application/json': {
-        schema: validationErrorResponseSchema,
-      },
-    },
-  },
+        schema: validationErrorResponseSchema
+      }
+    }
+  }
 };
 
 export const internalServerErrorResponse = {
@@ -22,10 +22,10 @@ export const internalServerErrorResponse = {
     description: 'Internal Server Error',
     content: {
       'application/json': {
-        schema: internalServerErrorResponseSchema,
-      },
-    },
-  },
+        schema: internalServerErrorResponseSchema
+      }
+    }
+  }
 };
 
 export const decryptionErrorResponse = {
@@ -33,10 +33,10 @@ export const decryptionErrorResponse = {
     description: 'Invalid encrypted payload',
     content: {
       'application/json': {
-        schema: decryptionErrorResponseSchema,
-      },
-    },
-  },
+        schema: decryptionErrorResponseSchema
+      }
+    }
+  }
 };
 
 export const unauthorizedErrorResponse = {
@@ -44,10 +44,10 @@ export const unauthorizedErrorResponse = {
     description: 'Unauthorized - missing or invalid session',
     content: {
       'application/json': {
-        schema: unauthorizedErrorResponseSchema,
-      },
-    },
-  },
+        schema: unauthorizedErrorResponseSchema
+      }
+    }
+  }
 };
 
 export const serviceUnavailableErrorResponse = {
@@ -55,8 +55,8 @@ export const serviceUnavailableErrorResponse = {
     description: 'Service Unavailable',
     content: {
       'application/json': {
-        schema: serviceUnavailableErrorResponseSchema,
-      },
-    },
-  },
+        schema: serviceUnavailableErrorResponseSchema
+      }
+    }
+  }
 };

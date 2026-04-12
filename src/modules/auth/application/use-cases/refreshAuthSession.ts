@@ -3,7 +3,7 @@ import { AuthSessionWithRawToken } from '@/shared/types/AuthSessionWithRawToken'
 
 import {
   AuthSessionRefreshToken,
-  AuthSessionUUID,
+  AuthSessionUUID
 } from '../../domain/value-objects';
 import { AuthSessionRepository } from '../../infratsucture/repositories/AuthSessionRepository';
 
@@ -15,11 +15,11 @@ export interface RefreshAuthSessionCommand {
 export class RefreshAuthSession {
   constructor(
     private readonly authSessionRepository: AuthSessionRepository,
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: IUserRepository
   ) {}
 
   async execute(
-    input: RefreshAuthSessionCommand,
+    input: RefreshAuthSessionCommand
   ): Promise<AuthSessionWithRawToken> {
     const sessionId = new AuthSessionUUID(input.sessionId);
     const session = await this.authSessionRepository.findSessionById(sessionId);
@@ -55,7 +55,7 @@ export class RefreshAuthSession {
     const finalData: AuthSessionWithRawToken = {
       session: newSession!,
       rawToken: rotatedSession.raw,
-      user,
+      user
     };
     return finalData;
   }

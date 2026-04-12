@@ -5,13 +5,13 @@ import {
   pgTable,
   timestamp,
   uuid,
-  varchar,
+  varchar
 } from 'drizzle-orm/pg-core';
 
 export const rolesTable = pgTable('roles', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 100 }).notNull().unique(),
-  description: varchar({ length: 255 }),
+  description: varchar({ length: 255 })
 });
 
 export const usersTable = pgTable('users', {
@@ -29,7 +29,7 @@ export const usersTable = pgTable('users', {
   isDeleted: boolean().default(false).notNull(),
 
   createdAt: timestamp().defaultNow().notNull(),
-  updatedAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp().defaultNow().notNull()
 });
 
 export const authSessionsTable = pgTable('auth_sessions', {
@@ -49,7 +49,7 @@ export const authSessionsTable = pgTable('auth_sessions', {
   revoked: boolean().default(false).notNull(),
 
   createdAt: timestamp().defaultNow().notNull(),
-  expiresAt: timestamp().notNull(),
+  expiresAt: timestamp().notNull()
 });
 
 export const devicesTable = pgTable('devices', {
@@ -62,7 +62,7 @@ export const devicesTable = pgTable('devices', {
   os: varchar({ length: 100 }),
 
   createdAt: timestamp().defaultNow().notNull(),
-  lastUsedAt: timestamp(),
+  lastUsedAt: timestamp()
 });
 
 export const connectionLogsTable = pgTable('connection_logs', {
@@ -70,10 +70,10 @@ export const connectionLogsTable = pgTable('connection_logs', {
   guestId: integer().references(() => usersTable.id, { onDelete: 'set null' }),
   hostId: integer().references(() => usersTable.id, { onDelete: 'set null' }),
   guestDeviceId: uuid().references(() => devicesTable.id, {
-    onDelete: 'set null',
+    onDelete: 'set null'
   }),
   hostDeviceId: uuid().references(() => devicesTable.id, {
-    onDelete: 'set null',
+    onDelete: 'set null'
   }),
 
   guestIpAddress: inet().notNull(),
@@ -83,7 +83,7 @@ export const connectionLogsTable = pgTable('connection_logs', {
   endedAt: timestamp().notNull(),
 
   connectionCode: varchar({ length: 10 }).notNull(),
-  connectionPasswordHash: varchar({ length: 255 }).notNull(),
+  connectionPasswordHash: varchar({ length: 255 }).notNull()
 });
 
 export const appVersionTable = pgTable('app_version', {
@@ -91,5 +91,5 @@ export const appVersionTable = pgTable('app_version', {
   version: varchar({ length: 50 }).notNull().unique(),
   codename: varchar({ length: 100 }),
   isSupported: boolean().default(true).notNull(),
-  langHash: varchar({ length: 255 }).notNull(),
+  langHash: varchar({ length: 255 }).notNull()
 });

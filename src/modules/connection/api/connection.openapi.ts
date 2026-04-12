@@ -2,16 +2,16 @@ import { createRoute } from '@hono/zod-openapi';
 
 import {
   internalServerErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   connectionCreateResponseSuccessSchema,
-  connectionJoinResponseSuccessSchema,
+  connectionJoinResponseSuccessSchema
 } from './schemas/conection.response.schema';
 import {
   createConnectionSchema,
-  joinConnectionSchema,
+  joinConnectionSchema
 } from './schemas/connection.request.schema';
 
 export const ConnectionCreateRoute = createRoute({
@@ -23,23 +23,23 @@ export const ConnectionCreateRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: createConnectionSchema,
-        },
-      },
-    },
+          schema: createConnectionSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Connection created successfully',
       content: {
         'application/json': {
-          schema: connectionCreateResponseSuccessSchema,
-        },
-      },
+          schema: connectionCreateResponseSuccessSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });
 export const ConnectionJoinRoute = createRoute({
   method: 'post',
@@ -50,21 +50,21 @@ export const ConnectionJoinRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: joinConnectionSchema,
-        },
-      },
-    },
+          schema: joinConnectionSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Connection joined successfully',
       content: {
         'application/json': {
-          schema: connectionJoinResponseSuccessSchema,
-        },
-      },
+          schema: connectionJoinResponseSuccessSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });

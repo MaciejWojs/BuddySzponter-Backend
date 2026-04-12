@@ -1,7 +1,9 @@
 import { configProvider } from '@config/configProvider';
 import winston, { format } from 'winston';
+import LokiTransport from 'winston-loki';
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
+const isMonitoringEnabled = configProvider.get('MONITORING_ENABLED');
 console.log('Logger initialized. Development mode: %s', isDevelopment);
 
 const logger = winston.createLogger({
@@ -26,6 +28,20 @@ logger.add(
   })
 );
 
+if (isMonitoringEnabled) {
+  logger.add(
+    new LokiTransport({
+      labels: { app: 'backend' },
+      host: 'http://loki:3100',
+      format: format.json(),
+      json: true,
+      replaceTimestamp: true,
+      onConnectionError: (error) => {
+        console.error('Failed to connect to Loki:', error);
+      }
+    })
+  );
+}
 if (!isDevelopment) {
   logger.add(
     new winston.transports.File({ filename: 'error.log', level: 'error' })

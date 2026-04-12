@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 
 import {
   internalServerErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import { handshakeRequestSchema } from './schemas/crypto.requests.schema';
@@ -17,21 +17,21 @@ export const handshakeRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: handshakeRequestSchema,
-        },
-      },
-    },
+          schema: handshakeRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Handshake successful',
       content: {
         'application/json': {
-          schema: handshakeResponseSchema,
-        },
-      },
+          schema: handshakeResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });

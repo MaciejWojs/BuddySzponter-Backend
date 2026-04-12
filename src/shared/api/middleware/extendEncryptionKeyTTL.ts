@@ -21,7 +21,7 @@ export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
 
   if (!client.connected) {
     logger.warn(
-      `Redis disconnected, skipping TTL extension for session ${sessionId}`,
+      `Redis disconnected, skipping TTL extension for session ${sessionId}`
     );
     return;
   }
@@ -31,7 +31,7 @@ export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
   try {
     const result = await client.expire(
       `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
-      APP_CONFIG.cache.ttl.handshakeSession,
+      APP_CONFIG.cache.ttl.handshakeSession
     );
 
     if (result !== 1) {
@@ -40,7 +40,7 @@ export const extendEncryptionKeyTTL = createMiddleware(async (c, next) => {
   } catch (error) {
     const errMessage = error instanceof Error ? error.message : 'unknown error';
     logger.warn(
-      `Error while extending TTL for session ${sessionId}: ${errMessage}`,
+      `Error while extending TTL for session ${sessionId}: ${errMessage}`
     );
   }
 });

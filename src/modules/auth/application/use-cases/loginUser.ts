@@ -14,7 +14,7 @@ export class LoginUser {
     const user: User = await this.userRepository.findByEmail(email);
 
     logger.info(
-      `Attempting login for email: ${email.value} - User found: ${!!user} - User ID: ${user?.id?.value || 'N/A'}`,
+      `Attempting login for email: ${email.value} - User found: ${!!user} - User ID: ${user?.id?.value || 'N/A'}`
     );
 
     const isPasswordValid = await user.password.verify(input.password);

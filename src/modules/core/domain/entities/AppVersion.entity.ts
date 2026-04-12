@@ -7,6 +7,6 @@ export class AppVersion {
     public readonly version: Version,
     public readonly codename: string | null,
     public readonly isSupported: boolean,
-    public readonly langHash: string,
+    public readonly langHash: string
   ) {}
 }

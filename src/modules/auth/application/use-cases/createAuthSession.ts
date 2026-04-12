@@ -7,7 +7,7 @@ import { AuthSession } from '../../domain/entities/AuthSession.entity';
 import { IAuthSessionRepository } from '../../domain/repositories/IAuthSessionRepository';
 import {
   AuthSessionRefreshToken,
-  AuthSessionUUID,
+  AuthSessionUUID
 } from '../../domain/value-objects';
 
 export interface CreateAuthSessionCommand {
@@ -20,32 +20,32 @@ export interface CreateAuthSessionCommand {
 export class CreateAuthSession {
   constructor(
     protected readonly repo: IAuthSessionRepository,
-    protected readonly userRepository: IUserRepository,
+    protected readonly userRepository: IUserRepository
   ) {}
 
   async execute(
-    command: CreateAuthSessionCommand,
+    command: CreateAuthSessionCommand
   ): Promise<AuthSessionWithRawToken> {
     const existingSessionsWithDevice =
       await this.repo.findAllSessionsByUserIdAndDeviceId(
         command.userId,
-        command.deviceId.value,
+        command.deviceId.value
       );
 
     await Promise.all(
       existingSessionsWithDevice.map((session) => {
         const revokedSession = session.revoke();
         return this.repo.save(revokedSession);
-      }),
+      })
     );
 
     const sessions = await this.repo.findAllActiveSessionsByUserId(
-      command.userId,
+      command.userId
     );
 
     if (sessions.length >= APP_CONFIG.auth.session.maxActivePerUser) {
       const oldestSession = sessions.reduce((oldest, current) =>
-        current.createdAt < oldest.createdAt ? current : oldest,
+        current.createdAt < oldest.createdAt ? current : oldest
       );
       const revokedOldestSession = oldestSession.revoke();
       await this.repo.save(revokedOldestSession);
@@ -55,7 +55,7 @@ export class CreateAuthSession {
     const sessionId = new AuthSessionUUID();
     const { raw, hashed: refreshToken } = await AuthSessionRefreshToken.create({
       sessionId: sessionId.value,
-      userId: command.userId.value,
+      userId: command.userId.value
     });
     const session = new AuthSession(
       sessionId,
@@ -66,7 +66,7 @@ export class CreateAuthSession {
       command.userAgent,
       false,
       new Date(),
-      expiresAt,
+      expiresAt
     );
     const createdSession = await this.repo.createSession(session);
     const user = await this.userRepository.findById(command.userId);
@@ -76,7 +76,7 @@ export class CreateAuthSession {
     const finalData: AuthSessionWithRawToken = {
       session: createdSession,
       rawToken: raw,
-      user: user,
+      user: user
     };
     return finalData;
   }

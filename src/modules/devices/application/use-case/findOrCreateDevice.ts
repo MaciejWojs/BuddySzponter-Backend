@@ -9,11 +9,12 @@ import { CreateUserDevice } from '../../../users/application/use-case/createUser
 
 export class FindOrCreateDevice {
   constructor(private readonly deviceRepository: IDevicesRepository) {}
+
   async execute(
     fingerprint: string,
     userId: number | null,
     deviceName: string = 'Unknown Device',
-    deviceOs: string = 'Unknown OS',
+    deviceOs: string = 'Unknown OS'
   ): Promise<Device> {
     if (userId) {
       const createUserDevice = new CreateUserDevice(this.deviceRepository);
@@ -21,7 +22,7 @@ export class FindOrCreateDevice {
         fingerprint,
         userId,
         deviceName,
-        deviceOs,
+        deviceOs
       );
     }
     const fingerprintVO = new DeviceFingerprint(fingerprint);
@@ -44,8 +45,8 @@ export class FindOrCreateDevice {
         fingerprintVO,
         deviceNameVO,
         deviceOsVO,
-        new Date(),
-      ),
+        new Date()
+      )
     );
     return newDevice;
   }

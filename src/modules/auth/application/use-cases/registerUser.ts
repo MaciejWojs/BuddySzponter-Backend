@@ -16,7 +16,7 @@ import { ValidationError } from '@/shared/errors/Specialized/ValidationError';
 export class RegisterUser {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly roleDao: IRolesDAO,
+    private readonly roleDao: IRolesDAO
   ) {}
 
   async execute(input: RegisterInput): Promise<User> {
@@ -42,7 +42,7 @@ export class RegisterUser {
       false,
       null,
       new Date(),
-      new Date(),
+      new Date()
     );
 
     let savedUser: User;
@@ -55,7 +55,7 @@ export class RegisterUser {
 
       if (err instanceof UserAlreadyExistError) {
         logger.warn(
-          'Re-throwing UserAlreadyExistError during user registration',
+          'Re-throwing UserAlreadyExistError during user registration'
         );
         throw err;
       }
@@ -66,11 +66,11 @@ export class RegisterUser {
       //   if (err instanceof UserAlreadyExistsError) {
       //     throw err;
       //   }
-      //TODO: Handle specific errors like user already exists, validation errors, etc. When we have our custom error classes defined.
+      // TODO: Handle specific errors like user already exists, validation errors, etc. When we have our custom error classes defined.
       throw new Error('Failed to register user', { cause: err });
     }
 
-    //TODO: Emit user registered event which will trigger cache update and other side effects
+    // TODO: Emit user registered event which will trigger cache update and other side effects
 
     return savedUser;
   }

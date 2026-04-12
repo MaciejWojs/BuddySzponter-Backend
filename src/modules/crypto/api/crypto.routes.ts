@@ -29,7 +29,7 @@ cryptoRouter.openapi(handshakeRoute, async (c) => {
     logger.error('Redis client is not connected - cannot store handshake key');
     return c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR } as const,
-      500,
+      500
     );
   }
 
@@ -38,30 +38,30 @@ cryptoRouter.openapi(handshakeRoute, async (c) => {
     result = await client.setex(
       `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
       APP_CONFIG.cache.ttl.handshakeSession,
-      aesKey.toString('base64'),
+      aesKey.toString('base64')
     );
   } catch (error) {
     logger.error(
-      `Failed to store handshake key in Redis: ${error instanceof Error ? error.message : 'unknown error'}`,
+      `Failed to store handshake key in Redis: ${error instanceof Error ? error.message : 'unknown error'}`
     );
     return c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR } as const,
-      500,
+      500
     );
   }
 
   if (result !== 'OK') {
     return c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR } as const,
-      500,
+      500
     );
   }
   return c.json(
     {
       serverPublicKey: serverPublicKey,
-      sessionId: sessionId,
+      sessionId: sessionId
     },
-    200,
+    200
   );
 });
 

@@ -3,7 +3,7 @@ import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidati
 export class PasswordWithoutSpecialCharacterError extends PasswordValidationError {
   constructor() {
     super(
-      'Password must contain at least one special character: ! @ # $ % ^ & * ( ) , . ? " : { } | < >',
+      'Password must contain at least one special character: ! @ # $ % ^ & * ( ) , . ? " : { } | < >'
     );
   }
 }

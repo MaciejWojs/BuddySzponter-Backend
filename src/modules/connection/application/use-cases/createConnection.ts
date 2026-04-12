@@ -7,7 +7,7 @@ import { Connection } from '../../domain/entities/Connection.entity';
 import { ConnectionParticipant } from '../../domain/entities/ConnectionParticipant.entity';
 import {
   ConnectionCodeAlreadyExistsError,
-  ConnectionCreateRetriesExceededError,
+  ConnectionCreateRetriesExceededError
 } from '../../domain/error/ConnectionBusinessErrors';
 import { IConnectionRepository } from '../../domain/repositories/IConnectionRepository';
 import { ConnectionCode, ConnectionStatus } from '../../domain/value-objects';
@@ -28,7 +28,7 @@ export class CreateConnection {
       input.device.userId,
       input.device.id,
       input.ipAddress,
-      input.device.fingerprint,
+      input.device.fingerprint
     );
 
     let retries = APP_CONFIG.connection.retries.createPendingMax;
@@ -41,7 +41,7 @@ export class CreateConnection {
         new ConnectionCode(),
         password,
         null,
-        ConnectionStatus.PENDING,
+        ConnectionStatus.PENDING
       );
 
       try {

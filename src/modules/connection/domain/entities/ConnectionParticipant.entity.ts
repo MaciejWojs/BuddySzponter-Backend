@@ -7,6 +7,6 @@ export class ConnectionParticipant {
     readonly userId: UserId | null,
     readonly deviceId: DeviceUUID | null,
     readonly ipAddress: IpAddress,
-    readonly fingerprint: DeviceFingerprint,
+    readonly fingerprint: DeviceFingerprint
   ) {}
 }

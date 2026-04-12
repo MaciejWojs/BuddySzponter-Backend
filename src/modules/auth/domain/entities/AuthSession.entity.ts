@@ -12,8 +12,9 @@ export class AuthSession {
     readonly userAgent: string,
     readonly revoked: boolean,
     readonly createdAt: Date,
-    readonly expiresAt: Date,
+    readonly expiresAt: Date
   ) {}
+
   private copy(changes: Partial<AuthSession>): AuthSession {
     return new AuthSession(
       changes.id ?? this.id,
@@ -24,9 +25,10 @@ export class AuthSession {
       changes.userAgent ?? this.userAgent,
       changes.revoked ?? this.revoked,
       changes.createdAt ?? this.createdAt,
-      changes.expiresAt ?? this.expiresAt,
+      changes.expiresAt ?? this.expiresAt
     );
   }
+
   revoke(): AuthSession {
     return this.copy({ revoked: true });
   }
@@ -34,11 +36,11 @@ export class AuthSession {
   async rotateRefreshToken(): Promise<{ token: AuthSession; raw: string }> {
     const newToken = await AuthSessionRefreshToken.create({
       sessionId: this.id.value,
-      userId: this.userId.value,
+      userId: this.userId.value
     });
     return {
       token: this.copy({ refreshToken: newToken.hashed }),
-      raw: newToken.raw,
+      raw: newToken.raw
     };
   }
 }

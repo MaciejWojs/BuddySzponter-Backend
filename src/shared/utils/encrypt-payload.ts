@@ -9,7 +9,7 @@ export function encryptPayload(data: object, key: Buffer) {
 
   const encrypted = Buffer.concat([
     cipher.update(JSON.stringify(data), 'utf8'),
-    cipher.final(),
+    cipher.final()
   ]);
 
   const tag = cipher.getAuthTag();
@@ -17,6 +17,6 @@ export function encryptPayload(data: object, key: Buffer) {
   return {
     iv: iv.toString('base64'),
     tag: tag.toString('base64'),
-    data: encrypted.toString('base64'),
+    data: encrypted.toString('base64')
   };
 }

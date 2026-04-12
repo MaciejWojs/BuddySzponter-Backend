@@ -9,13 +9,13 @@ export const it = {
     emailError: {
       invalid: 'Wprowadź prawidłowy adres e-mail',
       maxLength: 'Adres e-mail jest za długi',
-      required: 'Adres e-mail jest wymagany',
+      required: 'Adres e-mail jest wymagany'
     },
     passwordError: {
       minLength: 'Hasło jest za krótkie',
       required: 'Hasło jest wymagane',
-      weak: 'Hasło jest zbyt słabe',
-    },
+      weak: 'Hasło jest zbyt słabe'
+    }
   },
   validation: {
     invalidEmail: 'Podaj prawidłowy adres e-mail',
@@ -26,7 +26,7 @@ export const it = {
     passwordRequiresLowercase: 'Hasło musi zawierać małą literę',
     passwordRequiresUppercase: 'Hasło musi zawierać wielką literę',
     passwordRequiresDigit: 'Hasło musi zawierać cyfrę',
-    passwordRequiresSpecialCharacter: 'Hasło musi zawierać znak specjalny',
+    passwordRequiresSpecialCharacter: 'Hasło musi zawierać znak specjalny'
   },
   hostForm: {
     title: 'Oddaj kontrolę',
@@ -34,22 +34,22 @@ export const it = {
       'Wprowadź kod sesji, aby oddać kontrolę nad swoim urządzeniem innemu użytkownikowi.',
     sessionCode: 'Kod dostępu',
     sessionPassword: 'Hasło',
-    timeToJoin: 'Pozostało:',
+    timeToJoin: 'Pozostało:'
   },
   alert: {
     success: 'Sukces',
     error: 'Błąd',
     warning: 'Ostrzeżenie',
     info: 'Informacja',
-    copy: 'Skopiowano',
+    copy: 'Skopiowano'
   },
   languageSwitcher: {
     en: 'Angielski',
     pl: 'Polski',
     es: 'Hiszpański',
     plX67: 'Szponterski',
-    choice: 'Wybierz język',
-  },
+    choice: 'Wybierz język'
+  }
 } as const;
 
 export type LocaleKeys = keyof typeof it;

@@ -7,6 +7,7 @@ export class BaseUUID {
       throw new Error('Invalid UUID');
     }
   }
+
   get value(): string {
     return this.id;
   }

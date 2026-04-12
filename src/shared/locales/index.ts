@@ -9,7 +9,7 @@ export const locales = {
   en,
   pl,
   plX67,
-  it,
+  it
 } as const;
 
 export type SupportedLocale = (typeof supportedLocales)[number];

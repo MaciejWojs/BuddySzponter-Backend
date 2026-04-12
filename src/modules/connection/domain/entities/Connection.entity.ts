@@ -5,7 +5,7 @@ import { ConnectionUUID } from '@/shared/value-objects';
 import {
   ConnectionAlreadyOccupiedError,
   ConnectionJoinAttemptsExceededError,
-  ConnectionNotJoinableError,
+  ConnectionNotJoinableError
 } from '../error/ConnectionBusinessErrors';
 import { ConnectionCode, ConnectionStatus } from '../value-objects/';
 import { ConnectionParticipant } from './ConnectionParticipant.entity';
@@ -19,8 +19,13 @@ export class Connection {
     readonly password: Password,
     readonly startedAt: Date | null,
     readonly status: ConnectionStatus = ConnectionStatus.INACTIVE,
-    readonly joinAttempts: number = 0,
+    readonly joinAttempts: number = 0
   ) {}
+
+  async comparePassword(password: string): Promise<boolean> {
+    return this.password.verify(password);
+  }
+
   private copy(changes: Partial<Connection>): Connection {
     return new Connection(
       changes.id ?? this.id,
@@ -30,15 +35,8 @@ export class Connection {
       changes.password ?? this.password,
       changes.startedAt ?? this.startedAt,
       changes.status ?? this.status,
-      changes.joinAttempts ?? this.joinAttempts,
+      changes.joinAttempts ?? this.joinAttempts
     );
-  }
-  async comparePassword(password: string): Promise<boolean> {
-    return this.password.verify(password);
-  }
-
-  updateStatus(status: ConnectionStatus): Connection {
-    return this.copy({ status });
   }
 
   joinConnection(guest: ConnectionParticipant): Connection {
@@ -49,7 +47,7 @@ export class Connection {
     if (this.guest) {
       throw new ConnectionAlreadyOccupiedError();
     }
-    //? Optional: Prevent host from joining as guest
+    // ? Optional: Prevent host from joining as guest
     // if(this.host.userId?.value === guest.userId?.value) {
     //   throw new Error('Host cannot join their own connection as a guest');
     // }
@@ -60,10 +58,15 @@ export class Connection {
       guest,
       status: ConnectionStatus.ACTIVE,
       startedAt: new Date(),
-      joinAttempts: updatedJoinAttempts,
+      joinAttempts: updatedJoinAttempts
     });
   }
+
   updateCode(newCode: ConnectionCode = new ConnectionCode()): Connection {
     return this.copy({ code: newCode });
+  }
+
+  updateStatus(status: ConnectionStatus): Connection {
+    return this.copy({ status });
   }
 }

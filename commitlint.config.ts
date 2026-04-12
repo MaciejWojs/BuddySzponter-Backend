@@ -9,7 +9,7 @@ const Configuration: UserConfig = {
     feat: added new button component
   The commit message consists of a type (feat, fix, docs, etc.) followed by a colon and a brief description of the change.
   https://www.conventionalcommits.org/en/v1.0.0/
-  `,
+  `
 };
 
 export default Configuration;

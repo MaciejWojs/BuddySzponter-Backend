@@ -8,7 +8,7 @@ export class ConnectionCode {
     }
     if (code.length !== ConnectionCode.LENGTH) {
       throw new Error(
-        `Connection code must be ${ConnectionCode.LENGTH} characters long(got ${code.length})`,
+        `Connection code must be ${ConnectionCode.LENGTH} characters long(got ${code.length})`
       );
     }
   }

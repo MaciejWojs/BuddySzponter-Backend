@@ -11,7 +11,7 @@ export class ConnectionRepository implements IConnectionRepository {
   async createPendingConnection(connection: Connection): Promise<Connection> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot create connection.',
+        'Cache client is not connected. Cannot create connection.'
       );
     }
 
@@ -28,7 +28,7 @@ export class ConnectionRepository implements IConnectionRepository {
       code: connection.code.value,
       connectionUUID: connection.id.value,
       hostFingerprint: connection.host.fingerprint.value,
-      joinAttempts: connection.joinAttempts,
+      joinAttempts: connection.joinAttempts
     };
     let payloadData;
     try {
@@ -45,7 +45,7 @@ export class ConnectionRepository implements IConnectionRepository {
     }
     const ttlResult = await client.expire(
       key,
-      APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
+      APP_CONFIG.connection.cache.ttl.pendingCodeSeconds
     );
     if (ttlResult !== 1) {
       await client.del(key);
@@ -54,7 +54,7 @@ export class ConnectionRepository implements IConnectionRepository {
     const lookupResult = await client.setex(
       `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connection.id.value}`,
       APP_CONFIG.connection.cache.ttl.pendingCodeSeconds,
-      connection.code.value,
+      connection.code.value
     );
     if (lookupResult !== 'OK') {
       await client.del(key);
@@ -62,10 +62,31 @@ export class ConnectionRepository implements IConnectionRepository {
     }
     return connection;
   }
+
+  async deleteConnection(id: string): Promise<boolean> {
+    if (!client.connected) {
+      throw new Error(
+        'Cache client is not connected. Cannot delete connection.'
+      );
+    }
+    const uuidKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
+    const code = await client.get(uuidKey);
+
+    if (code) {
+      const codeKey = `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`;
+      const attemptsKey = `${APP_CONFIG.connection.cache.keys.attemptsPrefix}${code}`;
+      const delResult = await client.del(uuidKey, codeKey, attemptsKey);
+      return delResult > 0;
+    }
+
+    const delResult = await client.del(uuidKey);
+    return delResult > 0;
+  }
+
   async findByCode(code: ConnectionCode): Promise<Connection | null> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot retrieve connection.',
+        'Cache client is not connected. Cannot retrieve connection.'
       );
     }
     const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${code.value}`;
@@ -81,14 +102,15 @@ export class ConnectionRepository implements IConnectionRepository {
     }
     return ConnectionMapper.toDomain(connectionData);
   }
+
   async findByStatus(status: ConnectionStatus): Promise<Connection[]> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot retrieve connections.',
+        'Cache client is not connected. Cannot retrieve connections.'
       );
     }
     const keys = await client.keys(
-      `${APP_CONFIG.connection.cache.keys.codePrefix}*`,
+      `${APP_CONFIG.connection.cache.keys.codePrefix}*`
     );
     const connections: Connection[] = [];
     for (const key of keys) {
@@ -108,10 +130,11 @@ export class ConnectionRepository implements IConnectionRepository {
     }
     return connections;
   }
+
   async updateConnection(connection: Connection): Promise<boolean> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot update connection.',
+        'Cache client is not connected. Cannot update connection.'
       );
     }
     const key = `${APP_CONFIG.connection.cache.keys.codePrefix}${connection.code.value}`;
@@ -139,7 +162,7 @@ export class ConnectionRepository implements IConnectionRepository {
       guestDeviceId: connection.guest?.deviceId?.value ?? null,
       guestId: connection.guest?.userId?.value ?? null,
       guestFingerprint: connection.guest?.fingerprint.value ?? null,
-      joinAttempts: connection.joinAttempts,
+      joinAttempts: connection.joinAttempts
     };
     let payloadData;
     try {
@@ -149,24 +172,5 @@ export class ConnectionRepository implements IConnectionRepository {
     }
     const updatedDataStatus = await client.set(key, payloadData);
     return updatedDataStatus === 'OK';
-  }
-  async deleteConnection(id: string): Promise<boolean> {
-    if (!client.connected) {
-      throw new Error(
-        'Cache client is not connected. Cannot delete connection.',
-      );
-    }
-    const uuidKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
-    const code = await client.get(uuidKey);
-
-    if (code) {
-      const codeKey = `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`;
-      const attemptsKey = `${APP_CONFIG.connection.cache.keys.attemptsPrefix}${code}`;
-      const delResult = await client.del(uuidKey, codeKey, attemptsKey);
-      return delResult > 0;
-    }
-
-    const delResult = await client.del(uuidKey);
-    return delResult > 0;
   }
 }

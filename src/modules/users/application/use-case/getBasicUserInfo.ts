@@ -20,7 +20,7 @@ export class GetBasicUserInfo {
       avatar: user.avatar,
       email: user.email.value,
       nickname: user.nickname.value,
-      createdAt: user.createdAt,
+      createdAt: user.createdAt
     };
     return final;
   }

@@ -9,12 +9,12 @@ export const photosClient = new S3Client({
   endpoint: configProvider.get('MINIO_ENDPOINT'),
   accessKeyId: configProvider.get('MINIO_ROOT_USER'),
   secretAccessKey: configProvider.get('MINIO_ROOT_PASSWORD'),
-  bucket: avatarBucket,
+  bucket: avatarBucket
 });
 
 export const localesClient = new S3Client({
   endpoint: configProvider.get('MINIO_ENDPOINT'),
   accessKeyId: configProvider.get('MINIO_ROOT_USER'),
   secretAccessKey: configProvider.get('MINIO_ROOT_PASSWORD'),
-  bucket: localesBucket,
+  bucket: localesBucket
 });
