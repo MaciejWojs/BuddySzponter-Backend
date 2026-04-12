@@ -20,13 +20,29 @@ export class DrizzleDevicesDao
     return Number(row?.count ?? 0);
   }
 
-  async findMany(offset: number, limit: number): Promise<DeviceDbRecord[]> {
+  override async create(data: CreateDevice): Promise<DeviceDbRecord | null> {
+    const [newDevice] = await this.database
+      .insert(devicesTable)
+      .values(data)
+      .returning();
+    return newDevice ?? null;
+  }
+
+  override async deleteById(id: string): Promise<boolean> {
+    const result = await this.database
+      .delete(devicesTable)
+      .where(eq(devicesTable.id, id))
+      .returning();
+
+    return result.length > 0;
+  }
+
+  async findByFingerprint(fingerprint: string): Promise<DeviceDbRecord[]> {
     const devices = await this.database
       .select()
       .from(devicesTable)
-      .orderBy(desc(devicesTable.createdAt))
-      .offset(offset)
-      .limit(limit);
+      .where(eq(devicesTable.fingerprint, fingerprint));
+
     return devices;
   }
 
@@ -38,24 +54,6 @@ export class DrizzleDevicesDao
       .limit(1);
 
     return device[0] ?? null;
-  }
-
-  async findByUserId(userId: number): Promise<DeviceDbRecord[]> {
-    const devices = await this.database
-      .select()
-      .from(devicesTable)
-      .where(eq(devicesTable.userId, userId));
-
-    return devices;
-  }
-
-  async findByFingerprint(fingerprint: string): Promise<DeviceDbRecord[]> {
-    const devices = await this.database
-      .select()
-      .from(devicesTable)
-      .where(eq(devicesTable.fingerprint, fingerprint));
-
-    return devices;
   }
 
   async findByName(name: string): Promise<DeviceDbRecord[]> {
@@ -76,22 +74,25 @@ export class DrizzleDevicesDao
     return devices;
   }
 
-  override async create(data: CreateDevice): Promise<DeviceDbRecord | null> {
-    const [newDevice] = await this.database
-      .insert(devicesTable)
-      .values(data)
-      .returning();
-    return newDevice ?? null;
+  async findByUserId(userId: number): Promise<DeviceDbRecord[]> {
+    const devices = await this.database
+      .select()
+      .from(devicesTable)
+      .where(eq(devicesTable.userId, userId));
+
+    return devices;
   }
 
-  override async deleteById(id: string): Promise<boolean> {
-    const result = await this.database
-      .delete(devicesTable)
-      .where(eq(devicesTable.id, id))
-      .returning();
-
-    return result.length > 0;
+  async findMany(offset: number, limit: number): Promise<DeviceDbRecord[]> {
+    const devices = await this.database
+      .select()
+      .from(devicesTable)
+      .orderBy(desc(devicesTable.createdAt))
+      .offset(offset)
+      .limit(limit);
+    return devices;
   }
+
   override async save(device: DeviceDbRecord): Promise<DeviceDbRecord> {
     const { id, ...data } = device;
     const [updatedDevice] = await this.database

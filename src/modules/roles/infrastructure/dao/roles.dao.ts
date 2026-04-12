@@ -12,8 +12,22 @@ export class DrizzleRoleDao
     super();
   }
 
-  async findMany(): Promise<RoleDbRecord[]> {
-    return this.database.select().from(rolesTable).orderBy(asc(rolesTable.id));
+  override async create(data: CreateRole): Promise<RoleDbRecord | null> {
+    const roleToInsert = { ...data, name: data.name.toUpperCase() };
+    const [newRole] = await this.database
+      .insert(rolesTable)
+      .values(roleToInsert)
+      .returning();
+    return newRole ?? null;
+  }
+
+  override async deleteById(id: number): Promise<boolean> {
+    const result = await this.database
+      .delete(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .returning();
+
+    return result.length > 0;
   }
 
   override async findById(id: number): Promise<RoleDbRecord | null> {
@@ -37,23 +51,10 @@ export class DrizzleRoleDao
     return role[0] ?? null;
   }
 
-  override async create(data: CreateRole): Promise<RoleDbRecord | null> {
-    const roleToInsert = { ...data, name: data.name.toUpperCase() };
-    const [newRole] = await this.database
-      .insert(rolesTable)
-      .values(roleToInsert)
-      .returning();
-    return newRole ?? null;
+  async findMany(): Promise<RoleDbRecord[]> {
+    return this.database.select().from(rolesTable).orderBy(asc(rolesTable.id));
   }
 
-  override async deleteById(id: number): Promise<boolean> {
-    const result = await this.database
-      .delete(rolesTable)
-      .where(eq(rolesTable.id, id))
-      .returning();
-
-    return result.length > 0;
-  }
   override async save(role: RoleDbRecord): Promise<RoleDbRecord> {
     const { id, ...data } = role;
     const roleToSave = { ...data, name: data.name.toUpperCase() };

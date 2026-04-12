@@ -3,17 +3,17 @@ import { createRoute } from '@hono/zod-openapi';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   patchSelfUserSchema,
-  postUserAvatarRequestSchema,
+  postUserAvatarRequestSchema
 } from './schemas/users.request.schema';
 import {
   deleteUserResponseSchema,
   patchUserResponseSchema,
-  postUserAvatarResponseSchema,
+  postUserAvatarResponseSchema
 } from './schemas/users.response.schema';
 
 export const updateSelfUserRoute = createRoute({
@@ -23,31 +23,31 @@ export const updateSelfUserRoute = createRoute({
   summary: 'Update authenticated user profile',
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   request: {
     body: {
       content: {
         'application/json': {
-          schema: patchSelfUserSchema,
-        },
-      },
-    },
+          schema: patchSelfUserSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User updated successfully',
       content: {
         'application/json': {
-          schema: patchUserResponseSchema,
-        },
-      },
+          schema: patchUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const postSelfUserAvatarRequestRoute = createRoute({
@@ -56,32 +56,32 @@ export const postSelfUserAvatarRequestRoute = createRoute({
   tags: ['User'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Upload authenticated user avatar',
   request: {
     body: {
       content: {
         'multipart/form-data': {
-          schema: postUserAvatarRequestSchema,
-        },
-      },
-    },
+          schema: postUserAvatarRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User avatar request posted successfully',
       content: {
         'application/json': {
-          schema: postUserAvatarResponseSchema,
-        },
-      },
+          schema: postUserAvatarResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteSelfUserRoute = createRoute({
@@ -90,8 +90,8 @@ export const deleteSelfUserRoute = createRoute({
   tags: ['User'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Delete authenticated user',
   responses: {
@@ -99,12 +99,12 @@ export const deleteSelfUserRoute = createRoute({
       description: 'User deleted successfully',
       content: {
         'application/json': {
-          schema: deleteUserResponseSchema,
-        },
-      },
+          schema: deleteUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

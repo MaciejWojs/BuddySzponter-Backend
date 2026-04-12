@@ -14,7 +14,7 @@ import {
   deleteDeviceRoute,
   getDeviceByIdRoute,
   getDevicesRoute,
-  updateDeviceRoute,
+  updateDeviceRoute
 } from './devices.openapi';
 
 const administrationDevicesRouter = new OpenAPIHono<ENV>({ defaultHook });
@@ -41,7 +41,7 @@ administrationDevicesRouter.openapi(getDeviceByIdRoute, async (c) => {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'deviceID', error: err.message }],
+        cause: [{ field: 'deviceID', error: err.message }]
       });
     }
     throw err;
@@ -60,20 +60,20 @@ administrationDevicesRouter.openapi(updateDeviceRoute, async (c) => {
 
     return c.json(
       { message: `Device with ID ${deviceID} updated successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'deviceID', error: err.message }],
+        cause: [{ field: 'deviceID', error: err.message }]
       });
     }
 
     if (err instanceof Error && err.message === 'No changes detected') {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',
-        cause: [{ field: 'body', error: err.message }],
+        cause: [{ field: 'body', error: err.message }]
       });
     }
 
@@ -92,13 +92,13 @@ administrationDevicesRouter.openapi(deleteDeviceRoute, async (c) => {
 
     return c.json(
       { message: `Device with ID ${deviceID} deleted successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'deviceID', error: err.message }],
+        cause: [{ field: 'deviceID', error: err.message }]
       });
     }
     throw err;

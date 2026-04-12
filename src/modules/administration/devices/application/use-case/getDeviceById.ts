@@ -8,7 +8,7 @@ export class GetDeviceById {
 
   async execute(deviceId: string): Promise<DeviceResponse> {
     const device = await this.devicesRepository.findById(
-      new DeviceUUID(deviceId),
+      new DeviceUUID(deviceId)
     );
 
     if (!device) {
@@ -21,7 +21,7 @@ export class GetDeviceById {
       fingerprint: device.fingerprint.value,
       name: device.name.value,
       os: device.os.value,
-      createdAt: device.createdAt,
+      createdAt: device.createdAt
     };
   }
 }

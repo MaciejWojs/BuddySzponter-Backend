@@ -15,7 +15,7 @@ export class DeleteLocalesByVersion {
     }
 
     const hash = await this.coreRepository.getLangHashByVersion(
-      safeVersion.value,
+      safeVersion.value
     );
     if (!hash) {
       return 0;

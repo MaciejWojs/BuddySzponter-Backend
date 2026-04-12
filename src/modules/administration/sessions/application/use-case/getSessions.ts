@@ -19,7 +19,7 @@ export class GetSessions {
       userAgent: session.userAgent,
       revoked: session.revoked,
       createdAt: session.createdAt,
-      expiresAt: session.expiresAt,
+      expiresAt: session.expiresAt
     }));
   }
 }

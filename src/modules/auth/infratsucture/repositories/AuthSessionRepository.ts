@@ -13,7 +13,7 @@ export class AuthSessionRepository implements IAuthSessionRepository {
 
   async createSession(authSession: AuthSession): Promise<AuthSession> {
     const createdSession = await this.dao.create(
-      AuthSessionMapper.toPersistence(authSession),
+      AuthSessionMapper.toPersistence(authSession)
     );
 
     if (!createdSession) {
@@ -23,14 +23,8 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return AuthSessionMapper.toDomain(createdSession);
   }
 
-  async findSessionById(id: AuthSessionUUID): Promise<AuthSession | null> {
-    const sessionRecord = await this.dao.findById(id.value);
-    return sessionRecord ? AuthSessionMapper.toDomain(sessionRecord) : null;
-  }
-
-  async findAllSessions(): Promise<AuthSession[]> {
-    const sessionRecords = await this.dao.findAll();
-    return sessionRecords.map(AuthSessionMapper.toDomain);
+  async deleteSession(id: AuthSessionUUID): Promise<boolean> {
+    return this.dao.deleteById(id.value);
   }
 
   async findAllActiveSessions(): Promise<AuthSession[]> {
@@ -38,8 +32,40 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return sessionRecords.map(AuthSessionMapper.toDomain);
   }
 
-  async deleteSession(id: AuthSessionUUID): Promise<boolean> {
-    return this.dao.deleteById(id.value);
+  async findAllActiveSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllActiveByUserId(userId.value);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessions(): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAll();
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessionsByDeviceId(deviceId: string): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByDeviceId(deviceId);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByUserId(userId.value);
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findAllSessionsByUserIdAndDeviceId(
+    userId: UserId,
+    deviceId: string
+  ): Promise<AuthSession[]> {
+    const sessionRecords = await this.dao.findAllByUserIdAndDeviceId(
+      userId.value,
+      deviceId
+    );
+    return sessionRecords.map(AuthSessionMapper.toDomain);
+  }
+
+  async findSessionById(id: AuthSessionUUID): Promise<AuthSession | null> {
+    const sessionRecord = await this.dao.findById(id.value);
+    return sessionRecord ? AuthSessionMapper.toDomain(sessionRecord) : null;
   }
 
   async save(authSession: AuthSession): Promise<boolean> {
@@ -49,35 +75,9 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     } catch (error) {
       logger.onlyDev(
         `Failed to save AuthSession with id ${authSession.id.value}:`,
-        error,
+        error
       );
       return false;
     }
-  }
-
-  async findAllSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
-    const sessionRecords = await this.dao.findAllByUserId(userId.value);
-    return sessionRecords.map(AuthSessionMapper.toDomain);
-  }
-
-  async findAllSessionsByDeviceId(deviceId: string): Promise<AuthSession[]> {
-    const sessionRecords = await this.dao.findAllByDeviceId(deviceId);
-    return sessionRecords.map(AuthSessionMapper.toDomain);
-  }
-
-  async findAllSessionsByUserIdAndDeviceId(
-    userId: UserId,
-    deviceId: string,
-  ): Promise<AuthSession[]> {
-    const sessionRecords = await this.dao.findAllByUserIdAndDeviceId(
-      userId.value,
-      deviceId,
-    );
-    return sessionRecords.map(AuthSessionMapper.toDomain);
-  }
-
-  async findAllActiveSessionsByUserId(userId: UserId): Promise<AuthSession[]> {
-    const sessionRecords = await this.dao.findAllActiveByUserId(userId.value);
-    return sessionRecords.map(AuthSessionMapper.toDomain);
   }
 }

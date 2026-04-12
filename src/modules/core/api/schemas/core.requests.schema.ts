@@ -8,7 +8,7 @@ export const localeCodeSchema = z
   .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid language code')
   .openapi({
     description: 'Language code used for locale file path',
-    example: 'it',
+    example: 'it'
   });
 
 export const appVersionServerSchema = z
@@ -16,45 +16,45 @@ export const appVersionServerSchema = z
   .regex(/^\d+\.\d+\.\d+$/, 'Version must be in x.y.z format')
   .openapi({
     description: 'Application version in x.y.z format',
-    example: '1.0.0',
+    example: '1.0.0'
   });
 
 export const coreLocaleQuerySchema = z.object({
   lang: localeCodeSchema.openapi({
     param: {
       name: 'lang',
-      in: 'query',
+      in: 'query'
     },
     description: 'Language code',
-    example: 'pl',
+    example: 'pl'
   }),
   version: appVersionServerSchema.openapi({
     param: {
       name: 'version',
-      in: 'query',
+      in: 'query'
     },
     description: 'Application version in x.y.z format',
-    example: '1.0.0',
-  }),
+    example: '1.0.0'
+  })
 });
 
 export const supportedLocalesByVersionParamsSchema = z.object({
   version: appVersionServerSchema.openapi({
     param: {
       name: 'version',
-      in: 'path',
+      in: 'path'
     },
     description: 'Application version in x.y.z format',
-    example: '1.0.0',
-  }),
+    example: '1.0.0'
+  })
 });
 
 export const uploadLocaleFormSchema = z.object({
   file: z.any().openapi({
     type: 'string',
     format: 'binary',
-    description: 'Locale JSON file (max 10MB)',
+    description: 'Locale JSON file (max 10MB)'
   }),
   lang: localeCodeSchema,
-  version: appVersionServerSchema,
+  version: appVersionServerSchema
 });

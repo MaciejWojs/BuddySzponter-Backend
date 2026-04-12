@@ -16,7 +16,7 @@ export class CreateRole {
 
     const created = await this.roleDao.create({
       name: input.name,
-      description: input.description ?? null,
+      description: input.description ?? null
     });
 
     if (!created) {

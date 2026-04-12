@@ -25,7 +25,7 @@ export class GetAdminUserProfile {
       isBanned: user.isBanned,
       isDeleted: user.isDeleted,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      updatedAt: user.updatedAt
     };
     return final;
   }

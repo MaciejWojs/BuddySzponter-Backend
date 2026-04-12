@@ -2,18 +2,18 @@ import { createRoute } from '@hono/zod-openapi';
 
 import {
   internalServerErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   coreLocaleQuerySchema,
-  supportedLocalesByVersionParamsSchema,
+  supportedLocalesByVersionParamsSchema
 } from './schemas/core.requests.schema';
 import {
   coreLocaleNotFoundResponseSchema,
   coreLocalePayloadResponseSchema,
   supportedLocalesResponseSchema,
-  supportedVersionsResponseSchema,
+  supportedVersionsResponseSchema
 } from './schemas/core.responses.schema';
 
 export const getSupportedVersionsRoute = createRoute({
@@ -27,12 +27,12 @@ export const getSupportedVersionsRoute = createRoute({
       description: 'List of supported versions',
       content: {
         'application/json': {
-          schema: supportedVersionsResponseSchema,
-        },
-      },
+          schema: supportedVersionsResponseSchema
+        }
+      }
     },
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });
 
 export const getCoreLocaleRoute = createRoute({
@@ -43,28 +43,28 @@ export const getCoreLocaleRoute = createRoute({
   description:
     'Returns translation payload for selected language. Used by the frontend to set the application language.',
   request: {
-    query: coreLocaleQuerySchema,
+    query: coreLocaleQuerySchema
   },
   responses: {
     200: {
       description: 'Translation payload for requested language',
       content: {
         'application/json': {
-          schema: coreLocalePayloadResponseSchema,
-        },
-      },
+          schema: coreLocalePayloadResponseSchema
+        }
+      }
     },
     404: {
       description: 'Language not found',
       content: {
         'application/json': {
-          schema: coreLocaleNotFoundResponseSchema,
-        },
-      },
+          schema: coreLocaleNotFoundResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });
 
 export const getSupportedLocalesRoute = createRoute({
@@ -73,18 +73,18 @@ export const getSupportedLocalesRoute = createRoute({
   tags: ['Core'],
   summary: 'Get available languages by app version',
   request: {
-    params: supportedLocalesByVersionParamsSchema,
+    params: supportedLocalesByVersionParamsSchema
   },
   responses: {
     200: {
       description: 'List of available language codes for selected version',
       content: {
         'application/json': {
-          schema: supportedLocalesResponseSchema,
-        },
-      },
+          schema: supportedLocalesResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });

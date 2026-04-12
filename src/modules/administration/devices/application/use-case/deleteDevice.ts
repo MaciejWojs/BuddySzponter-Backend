@@ -6,7 +6,7 @@ export class DeleteDevice {
 
   async execute(deviceId: string): Promise<void> {
     const deleted = await this.devicesRepository.deleteById(
-      new DeviceUUID(deviceId),
+      new DeviceUUID(deviceId)
     );
 
     if (!deleted) {

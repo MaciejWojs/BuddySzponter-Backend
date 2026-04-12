@@ -27,7 +27,7 @@ export class UpdateRole {
       description:
         input.description !== undefined
           ? input.description
-          : existing.description,
+          : existing.description
     });
   }
 }

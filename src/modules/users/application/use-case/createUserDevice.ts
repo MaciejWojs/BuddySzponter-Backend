@@ -4,17 +4,18 @@ import { IDevicesRepository } from '@/modules/devices/domain/repositories/IDevic
 import {
   DeviceFingerprint,
   DeviceName,
-  DeviceOS,
+  DeviceOS
 } from '@/modules/devices/domain/value-objects';
 import { DeviceUUID, UserId } from '@/shared/value-objects';
 
 export class CreateUserDevice {
   constructor(private readonly deviceRepository: IDevicesRepository) {}
+
   async execute(
     fingerprint: string,
     userId: number,
     deviceName: string = 'Unknown Device',
-    deviceOs: string = 'Unknown OS',
+    deviceOs: string = 'Unknown OS'
   ): Promise<Device> {
     const fingerprintVO = new DeviceFingerprint(fingerprint);
     const userIdVO = new UserId(userId);
@@ -23,7 +24,7 @@ export class CreateUserDevice {
       await this.deviceRepository.findByFingerprint(fingerprintVO);
     if (existingDevices.length > 0) {
       const sameUserDevice = existingDevices.find(
-        (device) => device.userId?.value === userId,
+        (device) => device.userId?.value === userId
       );
 
       if (sameUserDevice) {
@@ -40,7 +41,7 @@ export class CreateUserDevice {
         } catch (error) {
           logger.error(`Failed to assign device to user ${userId}: ${error}`);
           throw new Error('Failed to assign unbound device to user', {
-            cause: error,
+            cause: error
           });
         }
       }
@@ -56,8 +57,8 @@ export class CreateUserDevice {
         fingerprintVO,
         deviceNameVO,
         deviceOsVO,
-        new Date(),
-      ),
+        new Date()
+      )
     );
     return newDevice;
   }

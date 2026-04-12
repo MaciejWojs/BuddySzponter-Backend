@@ -1,6 +1,6 @@
 import {
   FindUsersFilters,
-  IUserRepository,
+  IUserRepository
 } from '@modules/users/domain/repositories/IUserRepository';
 
 import { GetUserResponse } from '../../api/schemas/user.response.schema';
@@ -31,7 +31,7 @@ export class GetUsers {
         isBanned: user.isBanned,
         isDeleted: user.isDeleted,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        updatedAt: user.updatedAt
       }));
   }
 }

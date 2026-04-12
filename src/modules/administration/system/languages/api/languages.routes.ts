@@ -17,11 +17,11 @@ import {
   deleteLocalesByVersionRoute,
   getLocaleRoute,
   getSupportedLocalesRoute,
-  uploadLocaleRoute,
+  uploadLocaleRoute
 } from './languages.openapi';
 
 const administrationSystemLanguagesRouter = new OpenAPIHono<ENV>({
-  defaultHook,
+  defaultHook
 });
 
 administrationSystemLanguagesRouter.openapi(getLocaleRoute, async (c) => {
@@ -50,13 +50,13 @@ administrationSystemLanguagesRouter.openapi(uploadLocaleRoute, async (c) => {
 
   if (!(localeFile instanceof File)) {
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-      message: 'No locale file provided',
+      message: 'No locale file provided'
     });
   }
 
   if (localeFile.size > maxBytes) {
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-      message: 'Max locale file size is 10MB',
+      message: 'Max locale file size is 10MB'
     });
   }
 
@@ -67,7 +67,7 @@ administrationSystemLanguagesRouter.openapi(uploadLocaleRoute, async (c) => {
 
   if (!isJsonMime && !isJsonExt) {
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-      message: 'Locale file must be a JSON file',
+      message: 'Locale file must be a JSON file'
     });
   }
 
@@ -78,7 +78,7 @@ administrationSystemLanguagesRouter.openapi(uploadLocaleRoute, async (c) => {
     JSON.parse(buffer.toString('utf-8'));
   } catch {
     throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-      message: 'Invalid JSON content',
+      message: 'Invalid JSON content'
     });
   }
 
@@ -95,9 +95,9 @@ administrationSystemLanguagesRouter.openapi(uploadLocaleRoute, async (c) => {
         message: result.fileUrl,
         hash: result.hash,
         lang: result.lang,
-        version: result.version,
+        version: result.version
       },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (error) {
     if (
@@ -106,13 +106,13 @@ administrationSystemLanguagesRouter.openapi(uploadLocaleRoute, async (c) => {
         error.message.includes('Invalid language code'))
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
 
     if (error instanceof Error && error.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
-        message: error.message,
+        message: error.message
       });
     }
 
@@ -129,7 +129,7 @@ administrationSystemLanguagesRouter.openapi(
     const coreDao = daoFactory.db.coreDao();
     const coreRepository = new CoreRepository(coreDao);
     const getSupportedLocalesByVersion = new GetSupportedLocalesByVersion(
-      coreRepository,
+      coreRepository
     );
 
     try {
@@ -138,12 +138,12 @@ administrationSystemLanguagesRouter.openapi(
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new HTTPException(StatusCodes.NOT_FOUND, {
-          message: error.message,
+          message: error.message
         });
       }
       throw error;
     }
-  },
+  }
 );
 
 administrationSystemLanguagesRouter.openapi(deleteLocaleRoute, async (c) => {
@@ -158,13 +158,13 @@ administrationSystemLanguagesRouter.openapi(deleteLocaleRoute, async (c) => {
     await deleteLocale.execute(version, lang);
     return c.json(
       { message: `Locale '${lang}' deleted for version ${version}` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'lang', error: error.message }],
+        cause: [{ field: 'lang', error: error.message }]
       });
     }
     throw error;
@@ -185,20 +185,20 @@ administrationSystemLanguagesRouter.openapi(
       const deletedCount = await deleteLocalesByVersion.execute(version);
       return c.json(
         {
-          message: `Deleted ${deletedCount} locale file(s) for version ${version}`,
+          message: `Deleted ${deletedCount} locale file(s) for version ${version}`
         },
-        StatusCodes.OK,
+        StatusCodes.OK
       );
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new HTTPException(StatusCodes.NOT_FOUND, {
           message: 'NotFoundError',
-          cause: [{ field: 'version', error: error.message }],
+          cause: [{ field: 'version', error: error.message }]
         });
       }
       throw error;
     }
-  },
+  }
 );
 
 export default administrationSystemLanguagesRouter;

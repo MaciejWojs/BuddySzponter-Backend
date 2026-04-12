@@ -14,16 +14,16 @@ type IRoleReader = {
 export class UpdateUser {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly roleReader?: IRoleReader,
+    private readonly roleReader?: IRoleReader
   ) {}
 
   async execute(
     requesterId: number,
     targetUserId: number,
-    input: PatchUserInput,
+    input: PatchUserInput
   ): Promise<void> {
     const requester = await this.userRepository.findById(
-      new UserId(requesterId),
+      new UserId(requesterId)
     );
     let user = await this.userRepository.findById(new UserId(targetUserId));
 
@@ -93,7 +93,7 @@ export class UpdateUser {
         }
 
         user = user.updateRole(
-          new UserRole(new RoleId(role.id), new RoleName(role.name)),
+          new UserRole(new RoleId(role.id), new RoleName(role.name))
         );
         hasChanges = true;
       }

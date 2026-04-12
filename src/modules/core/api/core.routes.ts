@@ -12,7 +12,7 @@ import { CoreRepository } from '../infrastructure/repositories/CoreRepository';
 import {
   getCoreLocaleRoute,
   getSupportedLocalesRoute,
-  getSupportedVersionsRoute,
+  getSupportedVersionsRoute
 } from './core.openapi';
 
 const coreRouter = new OpenAPIHono({ defaultHook });
@@ -27,7 +27,7 @@ coreRouter.openapi(getSupportedVersionsRoute, async (c) => {
   const responseData = versions.map((v) => ({
     version: v.version.value,
     codename: v.codename,
-    isSupported: v.isSupported,
+    isSupported: v.isSupported
   }));
   return c.json(responseData, StatusCodes.OK);
 });
@@ -54,7 +54,7 @@ coreRouter.openapi(getSupportedLocalesRoute, async (c) => {
   const coreDao = daoFactory.db.coreDao();
   const coreRepository = new CoreRepository(coreDao);
   const getSupportedLocalesByVersion = new GetSupportedLocalesByVersion(
-    coreRepository,
+    coreRepository
   );
 
   try {
@@ -63,7 +63,7 @@ coreRouter.openapi(getSupportedLocalesRoute, async (c) => {
   } catch (error) {
     if (error instanceof Error && error.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
-        message: error.message,
+        message: error.message
       });
     }
     throw error;

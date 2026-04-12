@@ -32,20 +32,20 @@ administrationSessionsRouter.openapi(terminateSessionRoute, async (c) => {
     await useCase.execute(id);
     return c.json(
       { message: `Session ${id} terminated successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
 
     if (err instanceof Error && err.message.includes('Failed to persist')) {
       throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
         message: 'InternalServerError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
 

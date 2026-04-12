@@ -21,7 +21,7 @@ export class GetVersions {
       version: row.version,
       codename: row.codename,
       isSupported: row.isSupported,
-      langHash: row.langHash,
+      langHash: row.langHash
     }));
   }
 }

@@ -9,11 +9,11 @@ const administrationSystemRouter = new OpenAPIHono({ defaultHook });
 
 administrationSystemRouter.route(
   '/languages',
-  administrationSystemLanguagesRouter,
+  administrationSystemLanguagesRouter
 );
 administrationSystemRouter.route(
   '/versions',
-  administrationSystemVersionsRouter,
+  administrationSystemVersionsRouter
 );
 
 export default administrationSystemRouter;

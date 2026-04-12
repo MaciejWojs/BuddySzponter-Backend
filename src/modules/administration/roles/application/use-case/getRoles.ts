@@ -11,7 +11,7 @@ export class GetRoles {
     return roles.map((role) => ({
       id: role.id,
       name: role.name,
-      description: role.description ?? null,
+      description: role.description ?? null
     }));
   }
 }

@@ -4,17 +4,17 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   createRoleRequestSchema,
   patchRoleRequestSchema,
-  roleIdParamSchema,
+  roleIdParamSchema
 } from './schemas/roles.request.schema';
 import {
   getRolesResponseSchema,
-  roleMutationResponseSchema,
+  roleMutationResponseSchema
 } from './schemas/roles.response.schema';
 
 export const getRolesRoute = createRoute({
@@ -28,14 +28,14 @@ export const getRolesRoute = createRoute({
       description: 'Roles retrieved successfully',
       content: {
         'application/json': {
-          schema: getRolesResponseSchema,
-        },
-      },
+          schema: getRolesResponseSchema
+        }
+      }
     },
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const createRoleRoute = createRoute({
@@ -48,25 +48,25 @@ export const createRoleRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: createRoleRequestSchema,
-        },
-      },
-    },
+          schema: createRoleRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Role created successfully',
       content: {
         'application/json': {
-          schema: roleMutationResponseSchema,
-        },
-      },
+          schema: roleMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const updateRoleRoute = createRoute({
@@ -80,25 +80,25 @@ export const updateRoleRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: patchRoleRequestSchema,
-        },
-      },
-    },
+          schema: patchRoleRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Role updated successfully',
       content: {
         'application/json': {
-          schema: roleMutationResponseSchema,
-        },
-      },
+          schema: roleMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteRoleRoute = createRoute({
@@ -108,20 +108,20 @@ export const deleteRoleRoute = createRoute({
   summary: 'Delete role',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: roleIdParamSchema,
+    params: roleIdParamSchema
   },
   responses: {
     200: {
       description: 'Role deleted successfully',
       content: {
         'application/json': {
-          schema: roleMutationResponseSchema,
-        },
-      },
+          schema: roleMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

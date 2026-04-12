@@ -6,7 +6,7 @@ import {
   AppVersionDbRecord,
   CreateAppVersion,
   FindVersionsFilters,
-  ICoreDao,
+  ICoreDao
 } from './ICoreDao';
 
 export class DrizzleCoreDao
@@ -25,35 +25,24 @@ export class DrizzleCoreDao
     return Number(row?.count ?? 0);
   }
 
-  async findMany(offset: number, limit: number): Promise<AppVersionDbRecord[]> {
-    return this.database
-      .select()
-      .from(appVersionTable)
-      .orderBy(desc(appVersionTable.version))
-      .limit(limit)
-      .offset(offset);
+  override async create(
+    data: CreateAppVersion
+  ): Promise<AppVersionDbRecord | null> {
+    const [created] = await this.database
+      .insert(appVersionTable)
+      .values(data)
+      .returning();
+
+    return created ?? null;
   }
 
-  async findManyFiltered(
-    filters: FindVersionsFilters,
-  ): Promise<AppVersionDbRecord[]> {
-    const { offset, limit, version, codename, isSupported } = filters;
+  override async deleteById(id: string): Promise<boolean> {
+    const deleted = await this.database
+      .delete(appVersionTable)
+      .where(eq(appVersionTable.id, id))
+      .returning();
 
-    const whereParts = [
-      version ? eq(appVersionTable.version, version) : undefined,
-      codename ? ilike(appVersionTable.codename, `%${codename}%`) : undefined,
-      typeof isSupported === 'boolean'
-        ? eq(appVersionTable.isSupported, isSupported)
-        : undefined,
-    ].filter(Boolean);
-
-    return this.database
-      .select()
-      .from(appVersionTable)
-      .where(whereParts.length ? and(...whereParts) : undefined)
-      .orderBy(desc(appVersionTable.version))
-      .limit(limit)
-      .offset(offset);
+    return deleted.length > 0;
   }
 
   override async findById(id: string): Promise<AppVersionDbRecord | null> {
@@ -81,31 +70,42 @@ export class DrizzleCoreDao
     return row?.langHash ?? null;
   }
 
+  async findMany(offset: number, limit: number): Promise<AppVersionDbRecord[]> {
+    return this.database
+      .select()
+      .from(appVersionTable)
+      .orderBy(desc(appVersionTable.version))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async findManyFiltered(
+    filters: FindVersionsFilters
+  ): Promise<AppVersionDbRecord[]> {
+    const { offset, limit, version, codename, isSupported } = filters;
+
+    const whereParts = [
+      version ? eq(appVersionTable.version, version) : undefined,
+      codename ? ilike(appVersionTable.codename, `%${codename}%`) : undefined,
+      typeof isSupported === 'boolean'
+        ? eq(appVersionTable.isSupported, isSupported)
+        : undefined
+    ].filter(Boolean);
+
+    return this.database
+      .select()
+      .from(appVersionTable)
+      .where(whereParts.length ? and(...whereParts) : undefined)
+      .orderBy(desc(appVersionTable.version))
+      .limit(limit)
+      .offset(offset);
+  }
+
   async findSupportedVersions(): Promise<AppVersionDbRecord[]> {
     return this.database
       .select()
       .from(appVersionTable)
       .where(eq(appVersionTable.isSupported, true));
-  }
-
-  override async create(
-    data: CreateAppVersion,
-  ): Promise<AppVersionDbRecord | null> {
-    const [created] = await this.database
-      .insert(appVersionTable)
-      .values(data)
-      .returning();
-
-    return created ?? null;
-  }
-
-  override async deleteById(id: string): Promise<boolean> {
-    const deleted = await this.database
-      .delete(appVersionTable)
-      .where(eq(appVersionTable.id, id))
-      .returning();
-
-    return deleted.length > 0;
   }
 
   override async save(record: AppVersionDbRecord): Promise<AppVersionDbRecord> {
@@ -126,7 +126,7 @@ export class DrizzleCoreDao
 
   async updateLangHashByVersion(
     version: string,
-    langHash: string,
+    langHash: string
   ): Promise<boolean> {
     const updated = await this.database
       .update(appVersionTable)

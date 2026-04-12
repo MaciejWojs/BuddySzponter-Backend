@@ -4,7 +4,7 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
@@ -12,7 +12,7 @@ import {
   patchAdminUserSchema,
   postUserAvatarRequestSchema,
   userIdDeviceIdParamSchema,
-  userIdParamSchema,
+  userIdParamSchema
 } from './schemas/user.request.schema';
 import {
   deleteUserResponseSchema,
@@ -21,7 +21,7 @@ import {
   getUserSessionsResponseSchema,
   getUsersResponseSchema,
   patchUserResponseSchema,
-  postUserAvatarResponseSchema,
+  postUserAvatarResponseSchema
 } from './schemas/user.response.schema';
 
 export const getUserByIdRoute = createRoute({
@@ -30,26 +30,26 @@ export const getUserByIdRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Get user by ID',
   request: {
-    params: userIdParamSchema,
+    params: userIdParamSchema
   },
   responses: {
     200: {
       description: 'User retrieved successfully',
       content: {
         'application/json': {
-          schema: getUserResponseSchema,
-        },
-      },
+          schema: getUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getUserDevicesRoute = createRoute({
@@ -58,27 +58,27 @@ export const getUserDevicesRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Get user devices by user ID',
   request: {
-    params: userIdParamSchema,
+    params: userIdParamSchema
   },
   responses: {
     200: {
       description: 'User devices retrieved successfully',
       content: {
         'application/json': {
-          schema: getUserDevicesResponseSchema,
-        },
-      },
+          schema: getUserDevicesResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getUserSessionsRoute = createRoute({
@@ -87,27 +87,27 @@ export const getUserSessionsRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Get user sessions by user ID',
   request: {
-    params: userIdParamSchema,
+    params: userIdParamSchema
   },
   responses: {
     200: {
       description: 'User sessions retrieved successfully',
       content: {
         'application/json': {
-          schema: getUserSessionsResponseSchema,
-        },
-      },
+          schema: getUserSessionsResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteUserDevicesRoute = createRoute({
@@ -116,27 +116,27 @@ export const deleteUserDevicesRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Delete all devices for user by user ID',
   request: {
-    params: userIdParamSchema,
+    params: userIdParamSchema
   },
   responses: {
     200: {
       description: 'User devices deleted successfully',
       content: {
         'application/json': {
-          schema: deleteUserResponseSchema,
-        },
-      },
+          schema: deleteUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteUserDeviceRoute = createRoute({
@@ -145,27 +145,27 @@ export const deleteUserDeviceRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Delete user device by user ID and device ID',
   request: {
-    params: userIdDeviceIdParamSchema,
+    params: userIdDeviceIdParamSchema
   },
   responses: {
     200: {
       description: 'User device deleted successfully',
       content: {
         'application/json': {
-          schema: deleteUserResponseSchema,
-        },
-      },
+          schema: deleteUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getUsersRoute = createRoute({
@@ -175,25 +175,25 @@ export const getUsersRoute = createRoute({
   summary: 'Get users',
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   request: {
-    query: getUsersQuerySchema,
+    query: getUsersQuerySchema
   },
   responses: {
     200: {
       description: 'Users retrieved successfully',
       content: {
         'application/json': {
-          schema: getUsersResponseSchema,
-        },
-      },
+          schema: getUsersResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const updateUserRoute = createRoute({
@@ -203,33 +203,33 @@ export const updateUserRoute = createRoute({
   summary: 'Update user by ID (admin)',
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   request: {
     params: userIdParamSchema,
     body: {
       content: {
         'application/json': {
-          schema: patchAdminUserSchema,
-        },
-      },
-    },
+          schema: patchAdminUserSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User updated successfully',
       content: {
         'application/json': {
-          schema: patchUserResponseSchema,
-        },
-      },
+          schema: patchUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteUserRoute = createRoute({
@@ -239,26 +239,26 @@ export const deleteUserRoute = createRoute({
   summary: 'Delete user by ID (admin)',
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   request: {
-    params: userIdParamSchema,
+    params: userIdParamSchema
   },
   responses: {
     200: {
       description: 'User deleted successfully',
       content: {
         'application/json': {
-          schema: deleteUserResponseSchema,
-        },
-      },
+          schema: deleteUserResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const postUserAvatarRequestRoute = createRoute({
@@ -267,8 +267,8 @@ export const postUserAvatarRequestRoute = createRoute({
   tags: ['Administration/Users'],
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   summary: 'Upload user avatar by ID (admin)',
   request: {
@@ -276,23 +276,23 @@ export const postUserAvatarRequestRoute = createRoute({
     body: {
       content: {
         'multipart/form-data': {
-          schema: postUserAvatarRequestSchema,
-        },
-      },
-    },
+          schema: postUserAvatarRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User avatar uploaded successfully',
       content: {
         'application/json': {
-          schema: postUserAvatarResponseSchema,
-        },
-      },
+          schema: postUserAvatarResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

@@ -9,7 +9,7 @@ export class UpdateDevice {
 
   async execute(deviceId: string, input: PatchDeviceInput): Promise<void> {
     let device = await this.devicesRepository.findById(
-      new DeviceUUID(deviceId),
+      new DeviceUUID(deviceId)
     );
 
     if (!device) {

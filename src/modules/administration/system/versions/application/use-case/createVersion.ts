@@ -17,7 +17,7 @@ export class CreateVersion {
       version: input.version,
       codename: input.codename ?? null,
       isSupported: input.isSupported,
-      langHash: randomBytes(16).toString('hex'),
+      langHash: randomBytes(16).toString('hex')
     });
 
     if (!created) {
