@@ -11,7 +11,6 @@ import {
   supportedLocalesResponseSchema,
   uploadLocaleResponseSchema,
 } from '@/modules/core/api/schemas/core.responses.schema';
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -28,7 +27,6 @@ import { languageDeleteResponseSchema } from './schemas/languages.response.schem
 export const getLocaleRoute = createRoute({
   method: 'get',
   path: '/locale',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Get locale translations payload',
   request: {
@@ -62,7 +60,6 @@ export const getLocaleRoute = createRoute({
 export const uploadLocaleRoute = createRoute({
   method: 'post',
   path: '/upload-locale',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Upload locale JSON file',
   request: {
@@ -95,7 +92,6 @@ export const uploadLocaleRoute = createRoute({
 export const getSupportedLocalesRoute = createRoute({
   method: 'get',
   path: '/{version}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Get available languages for selected app version',
   request: {
@@ -121,7 +117,6 @@ export const getSupportedLocalesRoute = createRoute({
 export const deleteLocaleRoute = createRoute({
   method: 'delete',
   path: '/{version}/{lang}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Delete locale file for selected version and language',
   request: {
@@ -147,7 +142,6 @@ export const deleteLocaleRoute = createRoute({
 export const deleteLocalesByVersionRoute = createRoute({
   method: 'delete',
   path: '/{version}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Delete all locale files for selected version',
   request: {

@@ -1,6 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -22,7 +21,6 @@ import {
 export const getDevicesRoute = createRoute({
   method: 'get',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Get all devices',
   security: [{ AuthorizationBearer: [] }],
@@ -47,7 +45,6 @@ export const getDevicesRoute = createRoute({
 export const getDeviceByIdRoute = createRoute({
   method: 'get',
   path: '/{deviceID}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Get device by ID',
   security: [{ AuthorizationBearer: [] }],
@@ -73,7 +70,6 @@ export const getDeviceByIdRoute = createRoute({
 export const updateDeviceRoute = createRoute({
   method: 'patch',
   path: '/{deviceID}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Update device by ID',
   security: [{ AuthorizationBearer: [] }],
@@ -106,7 +102,6 @@ export const updateDeviceRoute = createRoute({
 export const deleteDeviceRoute = createRoute({
   method: 'delete',
   path: '/{deviceID}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Delete device by ID',
   security: [{ AuthorizationBearer: [] }],

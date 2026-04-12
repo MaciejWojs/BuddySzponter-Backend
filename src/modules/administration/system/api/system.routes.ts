@@ -1,14 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 
 import administrationSystemLanguagesRouter from '../languages/api/languages.routes';
 import administrationSystemVersionsRouter from '../versions/api/versions.routes';
 
 const administrationSystemRouter = new OpenAPIHono({ defaultHook });
-
-administrationSystemRouter.use('*', isAdmin);
 
 administrationSystemRouter.route(
   '/languages',

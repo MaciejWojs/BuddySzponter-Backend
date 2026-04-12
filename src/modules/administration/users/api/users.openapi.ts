@@ -1,6 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -28,7 +27,6 @@ import {
 export const getUserByIdRoute = createRoute({
   method: 'get',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {
@@ -57,7 +55,6 @@ export const getUserByIdRoute = createRoute({
 export const getUserDevicesRoute = createRoute({
   method: 'get',
   path: '/{id}/devices',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {
@@ -87,7 +84,6 @@ export const getUserDevicesRoute = createRoute({
 export const getUserSessionsRoute = createRoute({
   method: 'get',
   path: '/{id}/sessions',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {
@@ -117,7 +113,6 @@ export const getUserSessionsRoute = createRoute({
 export const deleteUserDevicesRoute = createRoute({
   method: 'delete',
   path: '/{id}/devices',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {
@@ -147,7 +142,6 @@ export const deleteUserDevicesRoute = createRoute({
 export const deleteUserDeviceRoute = createRoute({
   method: 'delete',
   path: '/{id}/devices/{deviceId}',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {
@@ -177,7 +171,6 @@ export const deleteUserDeviceRoute = createRoute({
 export const getUsersRoute = createRoute({
   method: 'get',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   summary: 'Get users',
   security: [
@@ -206,7 +199,6 @@ export const getUsersRoute = createRoute({
 export const updateUserRoute = createRoute({
   method: 'patch',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   summary: 'Update user by ID (admin)',
   security: [
@@ -243,7 +235,6 @@ export const updateUserRoute = createRoute({
 export const deleteUserRoute = createRoute({
   method: 'delete',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   summary: 'Delete user by ID (admin)',
   security: [
@@ -273,7 +264,6 @@ export const deleteUserRoute = createRoute({
 export const postUserAvatarRequestRoute = createRoute({
   method: 'post',
   path: '/{id}/avatar',
-  middleware: [isAdmin],
   tags: ['Administration/Users'],
   security: [
     {

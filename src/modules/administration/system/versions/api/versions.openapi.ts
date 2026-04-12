@@ -1,6 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -24,7 +23,6 @@ import {
 export const getVersionsTotalRoute = createRoute({
   method: 'get',
   path: '/total',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Get total app versions count',
   security: [{ AuthorizationBearer: [] }],
@@ -46,7 +44,6 @@ export const getVersionsTotalRoute = createRoute({
 export const getVersionsRoute = createRoute({
   method: 'get',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Get app versions (paginated with optional filters)',
   security: [{ AuthorizationBearer: [] }],
@@ -72,7 +69,6 @@ export const getVersionsRoute = createRoute({
 export const getVersionByIdRoute = createRoute({
   method: 'get',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Get app version by ID',
   security: [{ AuthorizationBearer: [] }],
@@ -98,7 +94,6 @@ export const getVersionByIdRoute = createRoute({
 export const createVersionRoute = createRoute({
   method: 'post',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Create app version',
   security: [{ AuthorizationBearer: [] }],
@@ -130,7 +125,6 @@ export const createVersionRoute = createRoute({
 export const updateVersionRoute = createRoute({
   method: 'patch',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary:
     'Update app version by ID (all fields optional, at least one required)',
@@ -164,7 +158,6 @@ export const updateVersionRoute = createRoute({
 export const deleteVersionRoute = createRoute({
   method: 'delete',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration/System'],
   summary: 'Delete app version by ID',
   security: [{ AuthorizationBearer: [] }],

@@ -1,6 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -21,7 +20,6 @@ import {
 export const getRolesRoute = createRoute({
   method: 'get',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Get available roles',
   security: [{ AuthorizationBearer: [] }],
@@ -43,7 +41,6 @@ export const getRolesRoute = createRoute({
 export const createRoleRoute = createRoute({
   method: 'post',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Create role',
   security: [{ AuthorizationBearer: [] }],
@@ -75,7 +72,6 @@ export const createRoleRoute = createRoute({
 export const updateRoleRoute = createRoute({
   method: 'patch',
   path: '/{roleID}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Update role',
   security: [{ AuthorizationBearer: [] }],
@@ -108,7 +104,6 @@ export const updateRoleRoute = createRoute({
 export const deleteRoleRoute = createRoute({
   method: 'delete',
   path: '/{roleID}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Delete role',
   security: [{ AuthorizationBearer: [] }],

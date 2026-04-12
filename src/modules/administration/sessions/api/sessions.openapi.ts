@@ -1,6 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
 
-import { isAdmin } from '@/shared/api/middleware/isAdmin';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
@@ -20,7 +19,6 @@ import {
 export const getSessionsRoute = createRoute({
   method: 'get',
   path: '/',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Get sessions',
   security: [{ AuthorizationBearer: [] }],
@@ -46,7 +44,6 @@ export const getSessionsRoute = createRoute({
 export const terminateSessionRoute = createRoute({
   method: 'delete',
   path: '/{id}',
-  middleware: [isAdmin],
   tags: ['Administration'],
   summary: 'Terminate session (logout user session)',
   security: [{ AuthorizationBearer: [] }],
