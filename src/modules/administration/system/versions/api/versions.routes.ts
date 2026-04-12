@@ -18,11 +18,11 @@ import {
   getVersionByIdRoute,
   getVersionsRoute,
   getVersionsTotalRoute,
-  updateVersionRoute,
+  updateVersionRoute
 } from './versions.openapi';
 
 const administrationSystemVersionsRouter = new OpenAPIHono<ENV>({
-  defaultHook,
+  defaultHook
 });
 
 administrationSystemVersionsRouter.openapi(getVersionsTotalRoute, async (c) => {
@@ -54,7 +54,7 @@ administrationSystemVersionsRouter.openapi(getVersionByIdRoute, async (c) => {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
     throw err;
@@ -70,13 +70,13 @@ administrationSystemVersionsRouter.openapi(createVersionRoute, async (c) => {
     await useCase.execute(data);
     return c.json(
       { message: `Version ${data.version} created successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message === 'App version already exists') {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',
-        cause: [{ field: 'version', error: err.message }],
+        cause: [{ field: 'version', error: err.message }]
       });
     }
     throw err;
@@ -93,20 +93,20 @@ administrationSystemVersionsRouter.openapi(updateVersionRoute, async (c) => {
     await useCase.execute(id, data);
     return c.json(
       { message: `Version with ID ${id} updated successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message === 'App version already exists') {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',
-        cause: [{ field: 'version', error: err.message }],
+        cause: [{ field: 'version', error: err.message }]
       });
     }
 
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
 
@@ -123,13 +123,13 @@ administrationSystemVersionsRouter.openapi(deleteVersionRoute, async (c) => {
     await useCase.execute(id);
     return c.json(
       { message: `Version with ID ${id} deleted successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
     throw err;

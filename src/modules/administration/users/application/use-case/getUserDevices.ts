@@ -8,7 +8,7 @@ export class GetUserDevices {
 
   async execute(userId: number): Promise<GetUserDeviceResponse[]> {
     const devices = await this.devicesRepository.findByUserId(
-      new UserId(userId),
+      new UserId(userId)
     );
 
     return devices.map((device) => ({
@@ -17,7 +17,7 @@ export class GetUserDevices {
       fingerprint: device.fingerprint.value,
       name: device.name.value,
       os: device.os.value,
-      createdAt: device.createdAt,
+      createdAt: device.createdAt
     }));
   }
 }

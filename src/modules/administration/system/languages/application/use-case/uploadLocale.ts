@@ -34,7 +34,7 @@ export class UploadLocale {
       hash: versionExists.langHash,
       fileUrl: localesClient.file(objectName),
       version: safeVersion.value,
-      lang: input.lang,
+      lang: input.lang
     };
   }
 }

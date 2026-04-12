@@ -14,6 +14,22 @@ import { IUserDAO } from '../dao/IUserDAO';
 export class UserRepository implements IUserRepository {
   constructor(protected readonly dao: IUserDAO) {}
 
+  async countAll(): Promise<number> {
+    return this.dao.countAll();
+  }
+
+  async countFiltered(filters: {
+    offset: number;
+    limit: number;
+    nickname?: string;
+    email?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<number> {
+    return this.dao.countFiltered(filters);
+  }
+
   async createUser(user: User): Promise<User> {
     const userExists = await this.dao.findByEmail(user.email.value);
     if (userExists) {
@@ -72,22 +88,6 @@ export class UserRepository implements IUserRepository {
       result.createdAt,
       result.updatedAt
     );
-  }
-
-  async countAll(): Promise<number> {
-    return this.dao.countAll();
-  }
-
-  async countFiltered(filters: {
-    offset: number;
-    limit: number;
-    nickname?: string;
-    email?: string;
-    role?: string;
-    isBanned?: boolean;
-    isDeleted?: boolean;
-  }): Promise<number> {
-    return this.dao.countFiltered(filters);
   }
 
   async findMany(offset: number, limit: number): Promise<User[]> {

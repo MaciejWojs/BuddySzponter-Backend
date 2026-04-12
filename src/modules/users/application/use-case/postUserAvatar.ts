@@ -13,7 +13,7 @@ export class PostUserAvatar {
   constructor(private readonly userRepository: IUserRepository) {}
 
   private async detectMimeFromBuffer(
-    buffer: Buffer,
+    buffer: Buffer
   ): Promise<SupportedMime | null> {
     const result = await fileTypeFromBuffer(buffer);
     if (!result) return null;
@@ -29,22 +29,6 @@ export class PostUserAvatar {
     return null;
   }
 
-  private async stripMetadata(
-    buffer: Buffer,
-    mime: SupportedMime,
-  ): Promise<Buffer> {
-    if (mime === 'image/png') {
-      return toWebp(buffer);
-    }
-
-    if (mime === 'image/webp') {
-      return stripExif(buffer);
-    }
-
-    const stripped = await stripExif(buffer);
-    return toWebp(stripped);
-  }
-
   private async encodeByMime(buffer: Buffer): Promise<Buffer> {
     return toWebp(buffer);
   }
@@ -52,19 +36,19 @@ export class PostUserAvatar {
   async execute(
     userId: number,
     fileBuffer: Buffer,
-    mime: SupportedMime,
+    mime: SupportedMime
   ): Promise<{ avatar: string }> {
     try {
       const detectedMime = await this.detectMimeFromBuffer(fileBuffer);
 
       if (!detectedMime || detectedMime !== mime) {
         throw new Error(
-          'Plik uszkodzony lub niezgodny z deklarowanym formatem.',
+          'Plik uszkodzony lub niezgodny z deklarowanym formatem.'
         );
       }
     } catch {
       throw new Error(
-        'Nie można przetworzyć pliku. Upewnij się, że jest to poprawny obraz PNG, JPEG lub WEBP.',
+        'Nie można przetworzyć pliku. Upewnij się, że jest to poprawny obraz PNG, JPEG lub WEBP.'
       );
     }
     const name = randomBytes(16).toString('hex');
@@ -80,7 +64,7 @@ export class PostUserAvatar {
       const resized = await resize(original, {
         width: size,
         height: size,
-        fit: 'cover', // fill square
+        fit: 'cover' // fill square
       });
       const encoded = await this.encodeByMime(resized);
       await photosClient.write(`${name}/${size}.${ext}`, encoded);
@@ -89,7 +73,7 @@ export class PostUserAvatar {
     // original
     const originalTask = photosClient.write(
       `${name}/original.${ext}`,
-      original,
+      original
     );
 
     // DB avatar = hash (as requested)
@@ -98,8 +82,8 @@ export class PostUserAvatar {
     if (user.avatar) {
       deleteTasks.push(
         ...sizes.map((size) =>
-          photosClient.delete(`${user.avatar}/${size}.${ext}`),
-        ),
+          photosClient.delete(`${user.avatar}/${size}.${ext}`)
+        )
       );
       deleteTasks.push(photosClient.delete(`${user.avatar}/original.${ext}`));
     }
@@ -108,5 +92,21 @@ export class PostUserAvatar {
     await this.userRepository.updateUser(updated);
 
     return { avatar: name };
+  }
+
+  private async stripMetadata(
+    buffer: Buffer,
+    mime: SupportedMime
+  ): Promise<Buffer> {
+    if (mime === 'image/png') {
+      return toWebp(buffer);
+    }
+
+    if (mime === 'image/webp') {
+      return stripExif(buffer);
+    }
+
+    const stripped = await stripExif(buffer);
+    return toWebp(stripped);
   }
 }

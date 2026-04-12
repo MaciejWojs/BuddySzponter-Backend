@@ -26,7 +26,7 @@ export class UpdateVersion {
       isSupported:
         typeof input.isSupported === 'boolean'
           ? input.isSupported
-          : existing.isSupported,
+          : existing.isSupported
     });
   }
 }

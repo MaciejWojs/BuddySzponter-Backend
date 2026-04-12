@@ -4,20 +4,20 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   createVersionRequestSchema,
   getVersionsQuerySchema,
   patchVersionRequestSchema,
-  versionIdParamSchema,
+  versionIdParamSchema
 } from './schemas/versions.request.schema';
 import {
   versionMutationResponseSchema,
   versionResponseSchema,
   versionsResponseSchema,
-  versionsTotalResponseSchema,
+  versionsTotalResponseSchema
 } from './schemas/versions.response.schema';
 
 export const getVersionsTotalRoute = createRoute({
@@ -31,14 +31,14 @@ export const getVersionsTotalRoute = createRoute({
       description: 'Versions total retrieved successfully',
       content: {
         'application/json': {
-          schema: versionsTotalResponseSchema,
-        },
-      },
+          schema: versionsTotalResponseSchema
+        }
+      }
     },
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getVersionsRoute = createRoute({
@@ -48,22 +48,22 @@ export const getVersionsRoute = createRoute({
   summary: 'Get app versions (paginated with optional filters)',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    query: getVersionsQuerySchema,
+    query: getVersionsQuerySchema
   },
   responses: {
     200: {
       description: 'Versions retrieved successfully',
       content: {
         'application/json': {
-          schema: versionsResponseSchema,
-        },
-      },
+          schema: versionsResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getVersionByIdRoute = createRoute({
@@ -73,22 +73,22 @@ export const getVersionByIdRoute = createRoute({
   summary: 'Get app version by ID',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: versionIdParamSchema,
+    params: versionIdParamSchema
   },
   responses: {
     200: {
       description: 'Version retrieved successfully',
       content: {
         'application/json': {
-          schema: versionResponseSchema,
-        },
-      },
+          schema: versionResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const createVersionRoute = createRoute({
@@ -101,25 +101,25 @@ export const createVersionRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: createVersionRequestSchema,
-        },
-      },
-    },
+          schema: createVersionRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Version created successfully',
       content: {
         'application/json': {
-          schema: versionMutationResponseSchema,
-        },
-      },
+          schema: versionMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const updateVersionRoute = createRoute({
@@ -134,25 +134,25 @@ export const updateVersionRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: patchVersionRequestSchema,
-        },
-      },
-    },
+          schema: patchVersionRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Version updated successfully',
       content: {
         'application/json': {
-          schema: versionMutationResponseSchema,
-        },
-      },
+          schema: versionMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteVersionRoute = createRoute({
@@ -162,20 +162,20 @@ export const deleteVersionRoute = createRoute({
   summary: 'Delete app version by ID',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: versionIdParamSchema,
+    params: versionIdParamSchema
   },
   responses: {
     200: {
       description: 'Version deleted successfully',
       content: {
         'application/json': {
-          schema: versionMutationResponseSchema,
-        },
-      },
+          schema: versionMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

@@ -9,7 +9,7 @@ export class GetDevices {
   async execute(query: GetDevicesQuery): Promise<DeviceResponse[]> {
     const devices = await this.devicesRepository.findMany(
       query.offset,
-      query.limit,
+      query.limit
     );
 
     return devices.map((device) => ({
@@ -18,7 +18,7 @@ export class GetDevices {
       fingerprint: device.fingerprint.value,
       name: device.name.value,
       os: device.os.value,
-      createdAt: device.createdAt,
+      createdAt: device.createdAt
     }));
   }
 }

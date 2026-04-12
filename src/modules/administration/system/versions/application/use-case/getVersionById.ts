@@ -17,7 +17,7 @@ export class GetVersionById {
       version: row.version,
       codename: row.codename,
       isSupported: row.isSupported,
-      langHash: row.langHash,
+      langHash: row.langHash
     };
   }
 }

@@ -3,24 +3,24 @@ import { createRoute } from '@hono/zod-openapi';
 import {
   coreLocaleQuerySchema,
   supportedLocalesByVersionParamsSchema,
-  uploadLocaleFormSchema,
+  uploadLocaleFormSchema
 } from '@/modules/core/api/schemas/core.requests.schema';
 import {
   coreLocaleNotFoundResponseSchema,
   coreLocalePayloadResponseSchema,
   supportedLocalesResponseSchema,
-  uploadLocaleResponseSchema,
+  uploadLocaleResponseSchema
 } from '@/modules/core/api/schemas/core.responses.schema';
 import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   versionLangParamsSchema,
-  versionParamsSchema,
+  versionParamsSchema
 } from './schemas/languages.request.schema';
 import { languageDeleteResponseSchema } from './schemas/languages.response.schema';
 
@@ -30,7 +30,7 @@ export const getLocaleRoute = createRoute({
   tags: ['Administration/System'],
   summary: 'Get locale translations payload',
   request: {
-    query: coreLocaleQuerySchema,
+    query: coreLocaleQuerySchema
   },
   security: [{ AuthorizationBearer: [] }],
   responses: {
@@ -38,23 +38,23 @@ export const getLocaleRoute = createRoute({
       description: 'Locale payload returned successfully',
       content: {
         'application/json': {
-          schema: coreLocalePayloadResponseSchema,
-        },
-      },
+          schema: coreLocalePayloadResponseSchema
+        }
+      }
     },
     404: {
       description: 'Locale not found',
       content: {
         'application/json': {
-          schema: coreLocaleNotFoundResponseSchema,
-        },
-      },
+          schema: coreLocaleNotFoundResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const uploadLocaleRoute = createRoute({
@@ -67,10 +67,10 @@ export const uploadLocaleRoute = createRoute({
       required: true,
       content: {
         'multipart/form-data': {
-          schema: uploadLocaleFormSchema,
-        },
-      },
-    },
+          schema: uploadLocaleFormSchema
+        }
+      }
+    }
   },
   security: [{ AuthorizationBearer: [] }],
   responses: {
@@ -78,15 +78,15 @@ export const uploadLocaleRoute = createRoute({
       description: 'Locale uploaded successfully',
       content: {
         'application/json': {
-          schema: uploadLocaleResponseSchema,
-        },
-      },
+          schema: uploadLocaleResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getSupportedLocalesRoute = createRoute({
@@ -95,7 +95,7 @@ export const getSupportedLocalesRoute = createRoute({
   tags: ['Administration/System'],
   summary: 'Get available languages for selected app version',
   request: {
-    params: supportedLocalesByVersionParamsSchema,
+    params: supportedLocalesByVersionParamsSchema
   },
   security: [{ AuthorizationBearer: [] }],
   responses: {
@@ -103,15 +103,15 @@ export const getSupportedLocalesRoute = createRoute({
       description: 'Available language codes returned successfully',
       content: {
         'application/json': {
-          schema: supportedLocalesResponseSchema,
-        },
-      },
+          schema: supportedLocalesResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteLocaleRoute = createRoute({
@@ -120,7 +120,7 @@ export const deleteLocaleRoute = createRoute({
   tags: ['Administration/System'],
   summary: 'Delete locale file for selected version and language',
   request: {
-    params: versionLangParamsSchema,
+    params: versionLangParamsSchema
   },
   security: [{ AuthorizationBearer: [] }],
   responses: {
@@ -128,15 +128,15 @@ export const deleteLocaleRoute = createRoute({
       description: 'Locale deleted successfully',
       content: {
         'application/json': {
-          schema: languageDeleteResponseSchema,
-        },
-      },
+          schema: languageDeleteResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteLocalesByVersionRoute = createRoute({
@@ -145,7 +145,7 @@ export const deleteLocalesByVersionRoute = createRoute({
   tags: ['Administration/System'],
   summary: 'Delete all locale files for selected version',
   request: {
-    params: versionParamsSchema,
+    params: versionParamsSchema
   },
   security: [{ AuthorizationBearer: [] }],
   responses: {
@@ -153,13 +153,13 @@ export const deleteLocalesByVersionRoute = createRoute({
       description: 'Locales deleted successfully',
       content: {
         'application/json': {
-          schema: languageDeleteResponseSchema,
-        },
-      },
+          schema: languageDeleteResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

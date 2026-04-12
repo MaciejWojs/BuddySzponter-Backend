@@ -14,7 +14,7 @@ export class DeleteLocale {
     }
 
     const hash = await this.coreRepository.getLangHashByVersion(
-      safeVersion.value,
+      safeVersion.value
     );
     if (!hash) {
       throw new Error('Locale not found');

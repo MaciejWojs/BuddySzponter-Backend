@@ -27,126 +27,8 @@ type CachedUserPayload = {
 export class UserCacheRepository implements IUserRepository {
   constructor(
     protected readonly repository: IUserRepository,
-    protected readonly cacheClient: typeof client,
+    protected readonly cacheClient: typeof client
   ) {}
-
-  async createUser(user: User): Promise<User> {
-    const createdUser = await this.repository.createUser(user);
-
-    logger.warn(
-      `User created with email: ${createdUser.email.value}, ID: ${createdUser.id?.value}`,
-    );
-
-    if (!this.cacheClient.connected) {
-      console.warn('Cache client is not connected. Skipping cache write.');
-      return createdUser;
-    }
-
-    const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${user.email.value}`;
-
-    try {
-      const cacheValue = this.serializeUser(createdUser);
-
-      await this.cacheClient.setex(
-        cacheKey,
-        APP_CONFIG.cache.ttl.user,
-        cacheValue,
-      );
-
-      if (createdUser.id) {
-        const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${createdUser.id.value}`;
-        await this.cacheClient.setex(
-          emailIdKey,
-          APP_CONFIG.cache.ttl.user,
-          String(createdUser.email.value),
-        );
-      }
-    } catch (err) {
-      logger.error('Failed to serialize user for caching', err);
-    }
-
-    return createdUser;
-  }
-
-  async findByEmail(email: Email): Promise<User> {
-    const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${email.value}`;
-
-    if (this.cacheClient.connected) {
-      const cachedUser = await this.cacheClient.get(cacheKey);
-      if (cachedUser) {
-        try {
-          return this.deserializeUser(cachedUser);
-        } catch (err) {
-          console.warn(
-            'Failed to parse cached user data. Falling back to DB.',
-            err,
-          );
-        }
-      }
-    } else {
-      console.warn('Cache client is not connected. Skipping cache read.');
-    }
-
-    const userFromDb = await this.repository.findByEmail(email);
-
-    if (userFromDb) {
-      try {
-        const cacheValue = this.serializeUser(userFromDb);
-        await this.cacheClient.setex(
-          cacheKey,
-          APP_CONFIG.cache.ttl.user,
-          cacheValue,
-        );
-      } catch (err) {
-        console.warn('Failed to serialize user for caching', err);
-      }
-    }
-    return userFromDb;
-  }
-  async findById(id: UserId): Promise<User> {
-    const cacheKey = `${APP_CONFIG.cache.keys.userIdPrefix}${id.value}`;
-
-    logger.onlyDev(`Attempting to fetch user with ID: ${id.value} from cache`);
-    if (this.cacheClient.connected) {
-      const cachedEmail = await this.cacheClient.get(cacheKey);
-      if (cachedEmail) {
-        logger.onlyDev(
-          `Cache hit for user ID: ${id.value}, Email: ${cachedEmail}`,
-        );
-        return this.findByEmail(new Email(cachedEmail));
-      }
-    } else {
-      console.warn('Cache client is not connected. Skipping cache read.');
-    }
-
-    const userFromDb = await this.repository.findById(id);
-
-    if (userFromDb) {
-      logger.onlyDev(
-        `User fetched from DB with ID: ${userFromDb.id?.value}, Email: ${userFromDb.email.value}`,
-      );
-      try {
-        const emailCacheKey = `${APP_CONFIG.cache.keys.userPrefix}${userFromDb.email.value}`;
-        const cacheValue = this.serializeUser(userFromDb);
-        await this.cacheClient.setex(
-          emailCacheKey,
-          APP_CONFIG.cache.ttl.user,
-          cacheValue,
-        );
-        if (userFromDb.id) {
-          const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${userFromDb.id.value}`;
-          await this.cacheClient.setex(
-            emailIdKey,
-            APP_CONFIG.cache.ttl.user,
-            String(userFromDb.email.value),
-          );
-        }
-      } catch (err) {
-        console.warn('Failed to serialize user for caching', err);
-      }
-    }
-    return userFromDb;
-  }
 
   async countAll(): Promise<number> {
     return this.repository.countAll();
@@ -164,46 +46,42 @@ export class UserCacheRepository implements IUserRepository {
     return this.repository.countFiltered(filters);
   }
 
-  async findMany(offset: number, limit: number): Promise<User[]> {
-    // listy na razie bez cache
-    return this.repository.findMany(offset, limit);
-  }
+  async createUser(user: User): Promise<User> {
+    const createdUser = await this.repository.createUser(user);
 
-  async findManyFiltered(filters: {
-    offset: number;
-    limit: number;
-    nickname?: string;
-    email?: string;
-    role?: string;
-    isBanned?: boolean;
-    isDeleted?: boolean;
-  }): Promise<User[]> {
-    return this.repository.findManyFiltered(filters);
-  }
+    logger.warn(
+      `User created with email: ${createdUser.email.value}, ID: ${createdUser.id?.value}`
+    );
 
-  async updateUser(user: User): Promise<boolean> {
-    const updated = await this.repository.updateUser(user);
-
-    if (!updated) {
-      return false;
+    if (!this.cacheClient.connected) {
+      console.warn('Cache client is not connected. Skipping cache write.');
+      return createdUser;
     }
 
     const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${user.email.value}`;
 
     try {
-      const cacheValue = this.serializeUser(user);
+      const cacheValue = this.serializeUser(createdUser);
+
       await this.cacheClient.setex(
         cacheKey,
         APP_CONFIG.cache.ttl.user,
-        cacheValue,
+        cacheValue
       );
+
+      if (createdUser.id) {
+        const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${createdUser.id.value}`;
+        await this.cacheClient.setex(
+          emailIdKey,
+          APP_CONFIG.cache.ttl.user,
+          String(createdUser.email.value)
+        );
+      }
     } catch (err) {
-      console.warn('Failed to serialize user for caching', err);
-      // Return true since the DB update succeeded, even if caching failed
-      return true;
+      logger.error('Failed to serialize user for caching', err);
     }
 
-    return true;
+    return createdUser;
   }
 
   async deleteUser(id: UserId): Promise<boolean> {
@@ -225,22 +103,6 @@ export class UserCacheRepository implements IUserRepository {
     return true;
   }
 
-  private serializeUser(user: User): string {
-    return JSON.stringify({
-      id: user.id?.value || null,
-      email: user.email.value,
-      nickname: user.nickname.value,
-      password: user.password.value,
-      roleId: user.role.id,
-      roleName: user.role.name,
-      isBanned: user.isBanned,
-      isDeleted: user.isDeleted,
-      avatar: user.avatar,
-      createdAt: user.createdAt.toISOString(),
-      updatedAt: user.updatedAt.toISOString(),
-    } satisfies CachedUserPayload);
-  }
-
   private deserializeUser(value: string): User {
     const parsed = JSON.parse(value) as CachedUserPayload;
 
@@ -254,7 +116,146 @@ export class UserCacheRepository implements IUserRepository {
       parsed.isDeleted,
       parsed.avatar,
       new Date(parsed.createdAt),
-      new Date(parsed.updatedAt),
+      new Date(parsed.updatedAt)
     );
+  }
+
+  async findByEmail(email: Email): Promise<User> {
+    const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${email.value}`;
+
+    if (this.cacheClient.connected) {
+      const cachedUser = await this.cacheClient.get(cacheKey);
+      if (cachedUser) {
+        try {
+          return this.deserializeUser(cachedUser);
+        } catch (err) {
+          console.warn(
+            'Failed to parse cached user data. Falling back to DB.',
+            err
+          );
+        }
+      }
+    } else {
+      console.warn('Cache client is not connected. Skipping cache read.');
+    }
+
+    const userFromDb = await this.repository.findByEmail(email);
+
+    if (userFromDb) {
+      try {
+        const cacheValue = this.serializeUser(userFromDb);
+        await this.cacheClient.setex(
+          cacheKey,
+          APP_CONFIG.cache.ttl.user,
+          cacheValue
+        );
+      } catch (err) {
+        console.warn('Failed to serialize user for caching', err);
+      }
+    }
+    return userFromDb;
+  }
+
+  async findById(id: UserId): Promise<User> {
+    const cacheKey = `${APP_CONFIG.cache.keys.userIdPrefix}${id.value}`;
+
+    logger.onlyDev(`Attempting to fetch user with ID: ${id.value} from cache`);
+    if (this.cacheClient.connected) {
+      const cachedEmail = await this.cacheClient.get(cacheKey);
+      if (cachedEmail) {
+        logger.onlyDev(
+          `Cache hit for user ID: ${id.value}, Email: ${cachedEmail}`
+        );
+        return this.findByEmail(new Email(cachedEmail));
+      }
+    } else {
+      console.warn('Cache client is not connected. Skipping cache read.');
+    }
+
+    const userFromDb = await this.repository.findById(id);
+
+    if (userFromDb) {
+      logger.onlyDev(
+        `User fetched from DB with ID: ${userFromDb.id?.value}, Email: ${userFromDb.email.value}`
+      );
+      try {
+        const emailCacheKey = `${APP_CONFIG.cache.keys.userPrefix}${userFromDb.email.value}`;
+        const cacheValue = this.serializeUser(userFromDb);
+        await this.cacheClient.setex(
+          emailCacheKey,
+          APP_CONFIG.cache.ttl.user,
+          cacheValue
+        );
+        if (userFromDb.id) {
+          const emailIdKey = `${APP_CONFIG.cache.keys.userIdPrefix}${userFromDb.id.value}`;
+          await this.cacheClient.setex(
+            emailIdKey,
+            APP_CONFIG.cache.ttl.user,
+            String(userFromDb.email.value)
+          );
+        }
+      } catch (err) {
+        console.warn('Failed to serialize user for caching', err);
+      }
+    }
+    return userFromDb;
+  }
+
+  async findMany(offset: number, limit: number): Promise<User[]> {
+    // listy na razie bez cache
+    return this.repository.findMany(offset, limit);
+  }
+
+  async findManyFiltered(filters: {
+    offset: number;
+    limit: number;
+    nickname?: string;
+    email?: string;
+    role?: string;
+    isBanned?: boolean;
+    isDeleted?: boolean;
+  }): Promise<User[]> {
+    return this.repository.findManyFiltered(filters);
+  }
+
+  private serializeUser(user: User): string {
+    return JSON.stringify({
+      id: user.id?.value || null,
+      email: user.email.value,
+      nickname: user.nickname.value,
+      password: user.password.value,
+      roleId: user.role.id,
+      roleName: user.role.name,
+      isBanned: user.isBanned,
+      isDeleted: user.isDeleted,
+      avatar: user.avatar,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString()
+    } satisfies CachedUserPayload);
+  }
+
+  async updateUser(user: User): Promise<boolean> {
+    const updated = await this.repository.updateUser(user);
+
+    if (!updated) {
+      return false;
+    }
+
+    const cacheKey = `${APP_CONFIG.cache.keys.userPrefix}${user.email.value}`;
+
+    try {
+      const cacheValue = this.serializeUser(user);
+      await this.cacheClient.setex(
+        cacheKey,
+        APP_CONFIG.cache.ttl.user,
+        cacheValue
+      );
+    } catch (err) {
+      console.warn('Failed to serialize user for caching', err);
+      // Return true since the DB update succeeded, even if caching failed
+      return true;
+    }
+
+    return true;
   }
 }

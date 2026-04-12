@@ -4,18 +4,18 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   deviceIdParamSchema,
   getDevicesQuerySchema,
-  patchDeviceRequestSchema,
+  patchDeviceRequestSchema
 } from './schemas/devices.request.schema';
 import {
   deviceMutationResponseSchema,
   deviceResponseSchema,
-  devicesResponseSchema,
+  devicesResponseSchema
 } from './schemas/devices.response.schema';
 
 export const getDevicesRoute = createRoute({
@@ -25,21 +25,21 @@ export const getDevicesRoute = createRoute({
   summary: 'Get all devices',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    query: getDevicesQuerySchema,
+    query: getDevicesQuerySchema
   },
   responses: {
     200: {
       description: 'Devices retrieved successfully',
       content: {
         'application/json': {
-          schema: devicesResponseSchema,
-        },
-      },
+          schema: devicesResponseSchema
+        }
+      }
     },
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const getDeviceByIdRoute = createRoute({
@@ -49,22 +49,22 @@ export const getDeviceByIdRoute = createRoute({
   summary: 'Get device by ID',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: deviceIdParamSchema,
+    params: deviceIdParamSchema
   },
   responses: {
     200: {
       description: 'Device retrieved successfully',
       content: {
         'application/json': {
-          schema: deviceResponseSchema,
-        },
-      },
+          schema: deviceResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const updateDeviceRoute = createRoute({
@@ -78,25 +78,25 @@ export const updateDeviceRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: patchDeviceRequestSchema,
-        },
-      },
-    },
+          schema: patchDeviceRequestSchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'Device updated successfully',
       content: {
         'application/json': {
-          schema: deviceMutationResponseSchema,
-        },
-      },
+          schema: deviceMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const deleteDeviceRoute = createRoute({
@@ -106,20 +106,20 @@ export const deleteDeviceRoute = createRoute({
   summary: 'Delete device by ID',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: deviceIdParamSchema,
+    params: deviceIdParamSchema
   },
   responses: {
     200: {
       description: 'Device deleted successfully',
       content: {
         'application/json': {
-          schema: deviceMutationResponseSchema,
-        },
-      },
+          schema: deviceMutationResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });

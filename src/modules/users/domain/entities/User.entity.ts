@@ -13,8 +13,25 @@ export class User {
     readonly isDeleted: boolean,
     readonly avatar: string | null,
     readonly createdAt: Date,
-    readonly updatedAt: Date,
+    readonly updatedAt: Date
   ) {}
+
+  ban(): User {
+    return this.copy({ isBanned: true });
+  }
+
+  canEditAdminFields(): boolean {
+    return this.isAdmin();
+  }
+
+  canEditUser(target: User): boolean {
+    if (!this.id || !target.id) {
+      return false;
+    }
+
+    return this.isAdmin() || this.id.value === target.id.value;
+  }
+
   private copy(changes: Partial<User>): User {
     return new User(
       changes.id ?? this.id,
@@ -26,55 +43,43 @@ export class User {
       changes.isDeleted ?? this.isDeleted,
       changes.avatar ?? this.avatar,
       changes.createdAt ?? this.createdAt,
-      new Date(),
+      new Date()
     );
-  }
-  updateEmail(email: Email): User {
-    return this.copy({ email });
-  }
-  updateNickname(nickname: UserNickname): User {
-    return this.copy({ nickname });
-  }
-  updatePassword(password: Password): User {
-    return this.copy({ password });
-  }
-
-  updateRole(role: UserRole): User {
-    return this.copy({ role });
-  }
-
-  ban(): User {
-    return this.copy({ isBanned: true });
-  }
-  unban(): User {
-    return this.copy({ isBanned: false });
   }
 
   delete(): User {
     return this.copy({ isDeleted: true });
   }
 
-  restore(): User {
-    return this.copy({ isDeleted: false });
-  }
-
   isAdmin(): boolean {
     return this.role.name === 'ADMIN';
   }
 
-  canEditUser(target: User): boolean {
-    if (!this.id || !target.id) {
-      return false;
-    }
-
-    return this.isAdmin() || this.id.value === target.id.value;
+  restore(): User {
+    return this.copy({ isDeleted: false });
   }
 
-  canEditAdminFields(): boolean {
-    return this.isAdmin();
+  unban(): User {
+    return this.copy({ isBanned: false });
   }
 
   updateAvatar(avatar: string): User {
     return this.copy({ avatar });
+  }
+
+  updateEmail(email: Email): User {
+    return this.copy({ email });
+  }
+
+  updateNickname(nickname: UserNickname): User {
+    return this.copy({ nickname });
+  }
+
+  updatePassword(password: Password): User {
+    return this.copy({ password });
+  }
+
+  updateRole(role: UserRole): User {
+    return this.copy({ role });
   }
 }

@@ -8,7 +8,7 @@ export class GetUserSessions {
 
   async execute(userId: number): Promise<GetUserSessionResponse[]> {
     const sessions = await this.authSessionRepository.findAllSessionsByUserId(
-      new UserId(userId),
+      new UserId(userId)
     );
 
     return sessions.map((session) => ({
@@ -19,7 +19,7 @@ export class GetUserSessions {
       userAgent: session.userAgent,
       revoked: session.revoked,
       createdAt: session.createdAt,
-      expiresAt: session.expiresAt,
+      expiresAt: session.expiresAt
     }));
   }
 }

@@ -14,19 +14,6 @@ export class DrizzleUserDao
   constructor() {
     super();
   }
-  override async findById(id: number): Promise<UserDbRecordWithRole | null> {
-    const user = await this.database
-      .select({
-        ...getColumns(usersTable),
-        roleName: rolesTable.name,
-      })
-      .from(usersTable)
-      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
-      .where(eq(usersTable.id, id))
-      .limit(1);
-
-    return user[0] ?? null;
-  }
 
   async countAll(): Promise<number> {
     const [row] = await this.database
@@ -48,7 +35,7 @@ export class DrizzleUserDao
         : undefined,
       role ? ilike(rolesTable.name, role) : undefined,
       email ? ilike(usersTable.email, `%${email}%`) : undefined,
-      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined
     ].filter(Boolean);
 
     const [row] = await this.database
@@ -60,55 +47,8 @@ export class DrizzleUserDao
     return Number(row?.count ?? 0);
   }
 
-  async findMany(
-    offset: number,
-    limit: number,
-  ): Promise<UserDbRecordWithRole[]> {
-    return this.database
-      .select({
-        ...getColumns(usersTable),
-        roleName: rolesTable.name,
-      })
-      .from(usersTable)
-      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
-      .orderBy(desc(usersTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-  }
-
-  async findManyFiltered(
-    filters: FindUsersFilters,
-  ): Promise<UserDbRecordWithRole[]> {
-    const { offset, limit, nickname, email, role, isBanned, isDeleted } =
-      filters;
-
-    const whereParts = [
-      typeof isBanned === 'boolean'
-        ? eq(usersTable.isBanned, isBanned)
-        : undefined,
-      typeof isDeleted === 'boolean'
-        ? eq(usersTable.isDeleted, isDeleted)
-        : undefined,
-      role ? ilike(rolesTable.name, role) : undefined,
-      email ? ilike(usersTable.email, `%${email}%`) : undefined,
-      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined,
-    ].filter(Boolean);
-
-    return this.database
-      .select({
-        ...getColumns(usersTable),
-        roleName: rolesTable.name,
-      })
-      .from(usersTable)
-      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
-      .where(whereParts.length ? and(...whereParts) : undefined)
-      .orderBy(desc(usersTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-  }
-
   override async create(
-    data: CreateUser,
+    data: CreateUser
   ): Promise<UserDbRecordWithRole | null> {
     const { roleName: role, ...insertData } = data;
     const roleName = role.toUpperCase();
@@ -124,8 +64,17 @@ export class DrizzleUserDao
 
     return {
       ...insertedUser,
-      roleName,
+      roleName
     };
+  }
+
+  async deleteByEmail(email: string): Promise<boolean> {
+    const result = await this.database
+      .delete(usersTable)
+      .where(eq(usersTable.email, email))
+      .returning();
+
+    return result.length > 0;
   }
 
   override async deleteById(id: number): Promise<boolean> {
@@ -136,11 +85,12 @@ export class DrizzleUserDao
 
     return result.length > 0;
   }
+
   async findByEmail(email: string): Promise<UserDbRecordWithRole | null> {
     const user = await this.database
       .select({
         ...getColumns(usersTable),
-        roleName: rolesTable.name,
+        roleName: rolesTable.name
       })
       .from(usersTable)
       .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
@@ -149,14 +99,68 @@ export class DrizzleUserDao
 
     return user[0] ?? null;
   }
-  async deleteByEmail(email: string): Promise<boolean> {
-    const result = await this.database
-      .delete(usersTable)
-      .where(eq(usersTable.email, email))
-      .returning();
 
-    return result.length > 0;
+  override async findById(id: number): Promise<UserDbRecordWithRole | null> {
+    const user = await this.database
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name
+      })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .where(eq(usersTable.id, id))
+      .limit(1);
+
+    return user[0] ?? null;
   }
+
+  async findMany(
+    offset: number,
+    limit: number
+  ): Promise<UserDbRecordWithRole[]> {
+    return this.database
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name
+      })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .orderBy(desc(usersTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async findManyFiltered(
+    filters: FindUsersFilters
+  ): Promise<UserDbRecordWithRole[]> {
+    const { offset, limit, nickname, email, role, isBanned, isDeleted } =
+      filters;
+
+    const whereParts = [
+      typeof isBanned === 'boolean'
+        ? eq(usersTable.isBanned, isBanned)
+        : undefined,
+      typeof isDeleted === 'boolean'
+        ? eq(usersTable.isDeleted, isDeleted)
+        : undefined,
+      role ? ilike(rolesTable.name, role) : undefined,
+      email ? ilike(usersTable.email, `%${email}%`) : undefined,
+      nickname ? ilike(usersTable.nickname, `%${nickname}%`) : undefined
+    ].filter(Boolean);
+
+    return this.database
+      .select({
+        ...getColumns(usersTable),
+        roleName: rolesTable.name
+      })
+      .from(usersTable)
+      .innerJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+      .where(whereParts.length ? and(...whereParts) : undefined)
+      .orderBy(desc(usersTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
   override async save(user: UserDbRecord): Promise<UserDbRecord> {
     const { id, ...data } = user;
 

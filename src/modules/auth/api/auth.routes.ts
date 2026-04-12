@@ -31,7 +31,7 @@ import {
   logoutRoute,
   meRoute,
   refreshRoute,
-  registerRoute,
+  registerRoute
 } from './auth.openapi';
 const authRouter = new OpenAPIHono({ defaultHook });
 
@@ -56,43 +56,43 @@ authRouter.openapi(registerRoute, async (c) => {
           cause: [
             {
               field: 'password',
-              error: error.message,
-            },
-          ],
+              error: error.message
+            }
+          ]
         });
       }
 
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
     if (error instanceof UserAlreadyExistError) {
       logger.warn(
-        `User registration failed due to existing user: ${error.message}`,
+        `User registration failed due to existing user: ${error.message}`
       );
       throw new HTTPException(StatusCodes.CONFLICT, {
         message: 'ConflictError',
         cause: [
           {
             field: 'email',
-            error: error.message,
-          },
-        ],
+            error: error.message
+          }
+        ]
       });
     }
     if (error instanceof Error) {
       throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-        message: error.message,
+        message: error.message
       });
     }
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
-      message: 'An unexpected error occurred during registration',
+      message: 'An unexpected error occurred during registration'
     });
   }
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
 
   const payload = {
-    message: 'User registered successfully',
+    message: 'User registered successfully'
   };
 
   return c.json(payload, StatusCodes.OK);
@@ -106,7 +106,7 @@ authRouter.openapi(loginRoute, async (c) => {
   if (!ipAddress) {
     logger.warn(`Login attempt without IP address ${c.req.path}`);
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
-      message: 'Unable to determine client IP address',
+      message: 'Unable to determine client IP address'
     });
   }
 
@@ -118,7 +118,7 @@ authRouter.openapi(loginRoute, async (c) => {
   const createOrFindUserDevice = new CreateOrFindUserDevice(deviceRepository);
   const createAuthSession = new CreateAuthSession(
     authSessionRepository,
-    userCacheRepository,
+    userCacheRepository
   );
   try {
     const user = await loginUser.execute(data);
@@ -126,7 +126,7 @@ authRouter.openapi(loginRoute, async (c) => {
     if (!user.id) {
       logger.error(`User ${user.email.value} has no ID after successful login`);
       throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR
       });
     }
 
@@ -134,7 +134,7 @@ authRouter.openapi(loginRoute, async (c) => {
       data.fingerprint,
       user.id.value,
       data.name,
-      data.os,
+      data.os
     );
 
     const { session: authSession, rawToken: refreshToken } =
@@ -142,14 +142,14 @@ authRouter.openapi(loginRoute, async (c) => {
         userId: user.id,
         deviceId: device.id,
         userAgent: c.req.header('User-Agent') ?? 'Unknown',
-        ipAddress: ipAddress,
+        ipAddress: ipAddress
       });
 
     setCookie(c, 'refreshToken', refreshToken, {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
-      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds,
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
     });
 
     const accessToken = await sign(
@@ -159,17 +159,17 @@ authRouter.openapi(loginRoute, async (c) => {
         sessionId: authSession.id.value,
         exp:
           Math.floor(Date.now() / 1000) +
-          APP_CONFIG.auth.tokens.accessTokenTtlSeconds,
+          APP_CONFIG.auth.tokens.accessTokenTtlSeconds
       },
-      configProvider.get('JWT_ACCESS_SECRET'),
+      configProvider.get('JWT_ACCESS_SECRET')
     );
 
     return c.json(
       {
         message: 'User logged in successfully',
-        accessToken,
+        accessToken
       },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof InvalidEmailAddress) {
@@ -178,18 +178,18 @@ authRouter.openapi(loginRoute, async (c) => {
         cause: [
           {
             field: 'email',
-            error: err.message,
-          },
-        ],
+            error: err.message
+          }
+        ]
       });
     }
     if (err instanceof Error) {
       throw new HTTPException(StatusCodes.UNAUTHORIZED, {
-        message: err.message || 'Invalid credentials',
+        message: err.message || 'Invalid credentials'
       });
     }
     throw new HTTPException(StatusCodes.BAD_REQUEST, {
-      message: 'An unexpected error occurred during login',
+      message: 'An unexpected error occurred during login'
     });
   }
 });
@@ -198,20 +198,20 @@ authRouter.openapi(refreshRoute, async (c) => {
   const data = c.req.valid('cookie');
   try {
     const tokenPayload = await AuthSessionRefreshToken.decode(
-      data.refreshToken,
+      data.refreshToken
     );
 
     logger.onlyDev(
-      `Decoded refresh token payload: ${JSON.stringify(tokenPayload)}`,
+      `Decoded refresh token payload: ${JSON.stringify(tokenPayload)}`
     );
     const repositoryFactory = new RepositoryFactory();
     const refreshToken = new RefreshAuthSession(
       repositoryFactory.authSessionRepository(),
-      repositoryFactory.userCacheRepository(),
+      repositoryFactory.userCacheRepository()
     );
     const refreshedData = {
       sessionId: tokenPayload.sessionId,
-      refreshToken: data.refreshToken,
+      refreshToken: data.refreshToken
     };
     const newData = await refreshToken.execute(refreshedData);
 
@@ -222,28 +222,28 @@ authRouter.openapi(refreshRoute, async (c) => {
         sessionId: tokenPayload.sessionId,
         exp:
           Math.floor(Date.now() / 1000) +
-          APP_CONFIG.auth.tokens.accessTokenTtlSeconds,
+          APP_CONFIG.auth.tokens.accessTokenTtlSeconds
       },
-      configProvider.get('JWT_ACCESS_SECRET'),
+      configProvider.get('JWT_ACCESS_SECRET')
     );
 
     setCookie(c, 'refreshToken', newData.rawToken, {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
-      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds,
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
     });
     const payload = {
       message: 'Authentication token refreshed successfully',
-      accessToken,
+      accessToken
     };
     return c.json(payload, StatusCodes.OK);
   } catch (err) {
     logger.warn(
-      `Failed to decode refresh token: ${err instanceof Error ? err.message : String(err)}`,
+      `Failed to decode refresh token: ${err instanceof Error ? err.message : String(err)}`
     );
     throw new HTTPException(StatusCodes.UNAUTHORIZED, {
-      message: 'Invalid refresh token',
+      message: 'Invalid refresh token'
     });
   }
 });
@@ -255,31 +255,31 @@ authRouter.openapi(logoutRoute, async (c) => {
   const logout = new LogoutUser(authSessionRepository);
   try {
     const tokenPayload = await AuthSessionRefreshToken.decode(
-      data.refreshToken,
+      data.refreshToken
     );
 
     await logout.execute(tokenPayload.sessionId);
   } catch (err) {
     logger.warn(
-      `Failed to decode refresh token during logout: ${err instanceof Error ? err.message : String(err)}`,
+      `Failed to decode refresh token during logout: ${err instanceof Error ? err.message : String(err)}`
     );
   } finally {
     const result = deleteCookie(c, 'refreshToken', {
       httpOnly: true,
-      secure: !configProvider.get('DEVELOPMENT'),
+      secure: !configProvider.get('DEVELOPMENT')
       // sameSite: 'Strict',
     });
     if (!result) {
       logger.onlyDev(
-        'Failed to delete refresh token cookie during logout - cookie not found. Should never happen, validation should have failed if cookie was missing.',
+        'Failed to delete refresh token cookie during logout - cookie not found. Should never happen, validation should have failed if cookie was missing.'
       );
     }
   }
   return c.json(
     {
-      message: 'User logged out successfully',
+      message: 'User logged out successfully'
     },
-    200,
+    200
   );
 });
 
@@ -288,7 +288,7 @@ authRouter.openapi(meRoute, async (c) => {
 
   if (!data) {
     throw new HTTPException(StatusCodes.UNAUTHORIZED, {
-      message: 'Unauthorized',
+      message: 'Unauthorized'
     });
   }
 
@@ -302,14 +302,14 @@ authRouter.openapi(meRoute, async (c) => {
   } catch (err) {
     if (err instanceof Error && err.message === 'User not found') {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
-        message: 'User not found',
+        message: 'User not found'
       });
     }
     logger.error(
-      `Error retrieving user profile for user ID ${data.userId}: ${err instanceof Error ? err.message : String(err)}`,
+      `Error retrieving user profile for user ID ${data.userId}: ${err instanceof Error ? err.message : String(err)}`
     );
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: 'An error occurred while retrieving user information',
+      message: 'An error occurred while retrieving user information'
     });
   }
 });

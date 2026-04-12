@@ -18,7 +18,7 @@ export class TerminateSession {
     }
 
     const saveSucceeded = await this.authSessionRepository.save(
-      session.revoke(),
+      session.revoke()
     );
     if (!saveSucceeded) {
       throw new Error('Failed to persist revoked session');

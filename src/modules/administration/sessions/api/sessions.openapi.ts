@@ -4,16 +4,16 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   getSessionsQuerySchema,
-  sessionIdParamSchema,
+  sessionIdParamSchema
 } from './schemas/sessions.request.schema';
 import {
   sessionsResponseSchema,
-  terminateSessionResponseSchema,
+  terminateSessionResponseSchema
 } from './schemas/sessions.response.schema';
 
 export const getSessionsRoute = createRoute({
@@ -23,22 +23,22 @@ export const getSessionsRoute = createRoute({
   summary: 'Get sessions',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    query: getSessionsQuerySchema,
+    query: getSessionsQuerySchema
   },
   responses: {
     200: {
       description: 'Sessions retrieved successfully',
       content: {
         'application/json': {
-          schema: sessionsResponseSchema,
-        },
-      },
+          schema: sessionsResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const terminateSessionRoute = createRoute({
@@ -48,20 +48,20 @@ export const terminateSessionRoute = createRoute({
   summary: 'Terminate session (logout user session)',
   security: [{ AuthorizationBearer: [] }],
   request: {
-    params: sessionIdParamSchema,
+    params: sessionIdParamSchema
   },
   responses: {
     200: {
       description: 'Session terminated successfully',
       content: {
         'application/json': {
-          schema: terminateSessionResponseSchema,
-        },
-      },
+          schema: terminateSessionResponseSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...unauthorizedErrorResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
