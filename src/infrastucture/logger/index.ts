@@ -1,4 +1,4 @@
-import { configProvider } from 'src/config/configProvider';
+import { configProvider } from '@config/configProvider';
 import winston, { format } from 'winston';
 
 const isDevelopment = configProvider.get('DEVELOPMENT');
@@ -8,8 +8,8 @@ const logger = winston.createLogger({
   level: isDevelopment ? 'debug' : 'info',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.json(),
-  ),
+    format.json()
+  )
 });
 
 logger.add(
@@ -21,14 +21,14 @@ logger.add(
       format.printf(({ timestamp, level, message, ...meta }) => {
         const metaString = Object.keys(meta).length ? JSON.stringify(meta) : '';
         return `${timestamp} [${level}] ${message} ${metaString}`;
-      }),
-    ),
-  }),
+      })
+    )
+  })
 );
 
 if (!isDevelopment) {
   logger.add(
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'error.log', level: 'error' })
   );
   logger.add(new winston.transports.File({ filename: 'combined.log' }));
 }
@@ -42,7 +42,7 @@ const wrapConsole =
   (...args: any[]) => {
     if (!wasDisplayed.get(method)) {
       logger.warn(
-        `Using console.${method} is discouraged. Please use the logger instance instead.`,
+        `Using console.${method} is discouraged. Please use the logger instance instead.`
       );
       wasDisplayed.set(method, true);
     }
@@ -62,7 +62,7 @@ const extendedLogger = Object.assign(logger, {
       const preparedMessage = `[DEV-only] ${message}`;
       logger.debug(preparedMessage, ...meta);
     }
-  },
+  }
 });
 
 export default extendedLogger;

@@ -1,4 +1,4 @@
-import { configProvider } from 'src/config/configProvider';
+import { configProvider } from '@config/configProvider';
 import { z } from 'zod';
 
 const ipV4Schema = z.ipv4();
@@ -10,7 +10,7 @@ const INVALID_IPS = [
   '0.0.0.0',
   '255.255.255.255',
   '::',
-  'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+  'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
 ];
 
 const LOOPBACKS = ['127.', '::1'];
@@ -31,7 +31,7 @@ export class IpAddress {
     if (!isDevelopment) {
       if (
         LOOPBACKS.some((loop) =>
-          loop.endsWith('.') ? address.startsWith(loop) : address === loop,
+          loop.endsWith('.') ? address.startsWith(loop) : address === loop
         )
       ) {
         throw new Error(`IP address cannot be a loopback address: ${address}`);

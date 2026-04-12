@@ -13,16 +13,17 @@ import {
   ConnectionJoinAttemptsExceededError,
   ConnectionNotFoundError,
   ConnectionNotJoinableError,
-  InvalidConnectionPasswordError,
+  InvalidConnectionPasswordError
 } from '@/modules/connection/domain/error/ConnectionBusinessErrors';
 import { ConnectionCode } from '@/modules/connection/domain/value-objects';
 import { defaultHook } from '@/shared/api/openapi/defaultHook';
 import { PasswordValidationError } from '@/shared/errors/Domian/PasswordValidationError';
 import { ENV } from '@/shared/types/honoENV';
 
+import { TokenService } from '../application/TokenService';
 import {
   ConnectionCreateRoute,
-  ConnectionJoinRoute,
+  ConnectionJoinRoute
 } from './connection.openapi';
 
 const connectionsRouter = new OpenAPIHono<ENV>({ defaultHook });
@@ -36,7 +37,7 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
 
   if (!ipAddress) {
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: 'Unable to determine client IP address',
+      message: 'Unable to determine client IP address'
     });
   }
   let device;
@@ -45,12 +46,12 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
   } catch (error) {
     if (error instanceof Error) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
 
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR
     });
   }
 
@@ -58,17 +59,26 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
     const connection = await createConnectionUseCase.execute({
       password: data.password,
       ipAddress,
-      device,
+      device
     });
 
     const expiresAt = new Date(
-      Date.now() + APP_CONFIG.connection.cache.ttl.pendingCodeSeconds * 1000,
+      Date.now() + APP_CONFIG.connection.cache.ttl.pendingCodeSeconds * 1000
     );
+
+    const tokenService = new TokenService();
+
+    const token = await tokenService.createConnectionToken({
+      connectionId: connection.id.value,
+      role: 'HOST',
+      deviceId: device.id.value
+    });
 
     const payload = {
       code: connection.code.value,
       connectionUUID: connection.id.value,
       expiresAt,
+      token
     };
 
     return c.json(payload, StatusCodes.OK);
@@ -79,20 +89,20 @@ connectionsRouter.openapi(ConnectionCreateRoute, async (c) => {
         cause: [
           {
             field: 'password',
-            error: error.message,
-          },
-        ],
+            error: error.message
+          }
+        ]
       });
     }
 
     if (error instanceof ConnectionCreateRetriesExceededError) {
       throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-        message: error.message,
+        message: error.message
       });
     }
 
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR
     });
   }
 });
@@ -106,7 +116,7 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
 
   if (!ipAddress) {
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: 'Unable to determine client IP address',
+      message: 'Unable to determine client IP address'
     });
   }
   let device;
@@ -115,12 +125,12 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
   } catch (error) {
     if (error instanceof Error) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
 
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR
     });
   }
 
@@ -130,12 +140,12 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
   } catch (error) {
     if (error instanceof Error) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
 
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR
     });
   }
 
@@ -144,32 +154,43 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
       code,
       password: data.password,
       device,
-      ipAddress,
+      ipAddress
     });
 
-    return c.json({ connectionUUID: connection.id.value }, StatusCodes.OK);
+    const tokenService = new TokenService();
+
+    const token = await tokenService.createConnectionToken({
+      connectionId: connection.id.value,
+      role: 'GUEST',
+      deviceId: device.id.value
+    });
+
+    return c.json(
+      { connectionUUID: connection.id.value, token },
+      StatusCodes.OK
+    );
   } catch (error) {
     if (!(error instanceof Error)) {
       throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR
       });
     }
 
     if (error instanceof ConnectionNotFoundError) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'Invalid connection code',
+        message: 'Invalid connection code'
       });
     }
 
     if (error instanceof InvalidConnectionPasswordError) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'Incorrect password',
+        message: 'Incorrect password'
       });
     }
 
     if (error instanceof ConnectionJoinAttemptsExceededError) {
       throw new HTTPException(StatusCodes.TOO_MANY_REQUESTS, {
-        message: 'Too many attempts',
+        message: 'Too many attempts'
       });
     }
 
@@ -178,12 +199,12 @@ connectionsRouter.openapi(ConnectionJoinRoute, async (c) => {
       error instanceof ConnectionNotJoinableError
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: error.message,
+        message: error.message
       });
     }
 
     throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-      message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+      message: ReasonPhrases.INTERNAL_SERVER_ERROR
     });
   }
 });
