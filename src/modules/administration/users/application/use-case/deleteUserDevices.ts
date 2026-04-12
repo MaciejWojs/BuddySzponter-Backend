@@ -6,15 +6,12 @@ export class DeleteUserDevices {
 
   async execute(userId: number): Promise<number> {
     const userDevices = await this.devicesRepository.findByUserId(
-      new UserId(userId),
+      new UserId(userId)
     );
 
-    for (const device of userDevices) {
-      const deleted = await this.devicesRepository.deleteById(device.id);
-      if (!deleted) {
-        throw new Error(`Failed to delete device ${device.id.value}`);
-      }
-    }
+    await Promise.all(
+      userDevices.map((device) => this.devicesRepository.deleteById(device.id))
+    );
 
     return userDevices.length;
   }
