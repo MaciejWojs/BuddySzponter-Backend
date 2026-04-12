@@ -29,6 +29,19 @@ import {
 
 const administrationUsersRouter = new OpenAPIHono<ENV>({ defaultHook });
 
+const parsePositiveIntegerParam = (value: unknown, field = 'id'): number => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [{ field, error: 'Must be a positive integer' }]
+    });
+  }
+
+  return parsed;
+};
+
 administrationUsersRouter.openapi(getUsersRoute, async (c) => {
   const query = c.req.valid('query');
   const repo = new RepositoryFactory().userCacheRepository();
@@ -40,7 +53,7 @@ administrationUsersRouter.openapi(getUsersRoute, async (c) => {
 
 administrationUsersRouter.openapi(getUserByIdRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new GetAdminUserProfile(repo);
@@ -58,7 +71,7 @@ administrationUsersRouter.openapi(getUserByIdRoute, async (c) => {
 
 administrationUsersRouter.openapi(getUserDevicesRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const devicesRepository = new RepositoryFactory().deviceRepository();
   const useCase = new GetUserDevices(devicesRepository);
@@ -69,7 +82,7 @@ administrationUsersRouter.openapi(getUserDevicesRoute, async (c) => {
 
 administrationUsersRouter.openapi(getUserSessionsRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const authSessionRepository = new RepositoryFactory().authSessionRepository();
   const useCase = new GetUserSessions(authSessionRepository);
@@ -80,7 +93,7 @@ administrationUsersRouter.openapi(getUserSessionsRoute, async (c) => {
 
 administrationUsersRouter.openapi(deleteUserDevicesRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const devicesRepository = new RepositoryFactory().deviceRepository();
   const useCase = new DeleteUserDevices(devicesRepository);
@@ -94,7 +107,7 @@ administrationUsersRouter.openapi(deleteUserDevicesRoute, async (c) => {
 
 administrationUsersRouter.openapi(deleteUserDeviceRoute, async (c) => {
   const { id, deviceId } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const devicesRepository = new RepositoryFactory().deviceRepository();
   const useCase = new DeleteUserDevice(devicesRepository);
@@ -128,7 +141,7 @@ administrationUsersRouter.openapi(updateUserRoute, async (c) => {
   }
 
   const { id } = c.req.valid('param');
-  const targetUserId = Number(id);
+  const targetUserId = parsePositiveIntegerParam(id);
   const body = c.req.valid('json');
 
   const factory = new RepositoryFactory();
@@ -188,7 +201,7 @@ administrationUsersRouter.openapi(updateUserRoute, async (c) => {
 
 administrationUsersRouter.openapi(deleteUserRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new DeleteUser(repo);
@@ -212,7 +225,7 @@ administrationUsersRouter.openapi(deleteUserRoute, async (c) => {
 
 administrationUsersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const userId = Number(id);
+  const userId = parsePositiveIntegerParam(id);
 
   const contentType = (c.req.header('content-type') || '').toLowerCase();
   const allowed = new Set(['image/png', 'image/jpeg', 'image/webp']);
