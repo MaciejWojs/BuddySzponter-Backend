@@ -24,7 +24,7 @@ import {
   getUserSessionsRoute,
   getUsersRoute,
   postUserAvatarRequestRoute,
-  updateUserRoute,
+  updateUserRoute
 } from './users.openapi';
 
 const administrationUsersRouter = new OpenAPIHono<ENV>({ defaultHook });
@@ -88,7 +88,7 @@ administrationUsersRouter.openapi(deleteUserDevicesRoute, async (c) => {
   const deletedCount = await useCase.execute(userId);
   return c.json(
     { message: `Deleted ${deletedCount} device(s) for user with ID ${id}` },
-    StatusCodes.OK,
+    StatusCodes.OK
   );
 });
 
@@ -103,15 +103,15 @@ administrationUsersRouter.openapi(deleteUserDeviceRoute, async (c) => {
     await useCase.execute(userId, deviceId);
     return c.json(
       {
-        message: `Device ${deviceId} deleted for user with ID ${id}`,
+        message: `Device ${deviceId} deleted for user with ID ${id}`
       },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'deviceId', error: err.message }],
+        cause: [{ field: 'deviceId', error: err.message }]
       });
     }
     throw err;
@@ -123,7 +123,7 @@ administrationUsersRouter.openapi(updateUserRoute, async (c) => {
   if (!jwtPayload) {
     throw new HTTPException(StatusCodes.UNAUTHORIZED, {
       message: 'Unauthorized',
-      cause: [{ field: 'authorization', error: 'Missing or invalid token' }],
+      cause: [{ field: 'authorization', error: 'Missing or invalid token' }]
     });
   }
 
@@ -140,34 +140,34 @@ administrationUsersRouter.openapi(updateUserRoute, async (c) => {
     await useCase.execute(jwtPayload.userId, targetUserId, body);
     return c.json(
       { message: `User with ID ${id} updated successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message === 'Forbidden') {
       throw new HTTPException(StatusCodes.FORBIDDEN, {
         message: 'Forbidden',
-        cause: [{ field: 'authorization', error: 'Insufficient permissions' }],
+        cause: [{ field: 'authorization', error: 'Insufficient permissions' }]
       });
     }
 
     if (err instanceof Error && err.message === 'Cannot change own role') {
       throw new HTTPException(StatusCodes.FORBIDDEN, {
         message: 'Forbidden',
-        cause: [{ field: 'roleId', error: err.message }],
+        cause: [{ field: 'roleId', error: err.message }]
       });
     }
 
     if (err instanceof Error && err.message === 'Role not found') {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'roleId', error: err.message }],
+        cause: [{ field: 'roleId', error: err.message }]
       });
     }
 
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
 
@@ -178,7 +178,7 @@ administrationUsersRouter.openapi(updateUserRoute, async (c) => {
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',
-        cause: [{ field: 'body', error: err.message }],
+        cause: [{ field: 'body', error: err.message }]
       });
     }
 
@@ -197,13 +197,13 @@ administrationUsersRouter.openapi(deleteUserRoute, async (c) => {
     await useCase.execute(userId);
     return c.json(
       { message: `User with ID ${id} deleted successfully` },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
     throw err;
@@ -218,77 +218,58 @@ administrationUsersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
   const allowed = new Set(['image/png', 'image/jpeg', 'image/webp']);
   const maxBytes = 10 * 1024 * 1024;
 
-  let buffer: Buffer;
-  let mime: 'image/png' | 'image/jpeg' | 'image/webp';
-
-  if (contentType.startsWith('multipart/form-data')) {
-    const body = await c.req.parseBody();
-
-    const keys = Object.keys(body);
-    if (keys.length !== 1 || !('avatar' in body)) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [
-          {
-            field: 'avatar',
-            error: "Expected only form.append('avatar', file)",
-          },
-        ],
-      });
-    }
-
-    const avatar = body.avatar;
-    if (!(avatar instanceof File)) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [{ field: 'avatar', error: 'Avatar must be a file' }],
-      });
-    }
-
-    if (avatar.size > maxBytes) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [{ field: 'avatar', error: 'Max avatar size is 10MB' }],
-      });
-    }
-
-    const detected = avatar.type.toLowerCase();
-    if (!allowed.has(detected)) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [{ field: 'avatar', error: 'Allowed: png, jpg/jpeg, webp' }],
-      });
-    }
-
-    buffer = Buffer.from(await avatar.arrayBuffer());
-    mime = detected as 'image/png' | 'image/jpeg' | 'image/webp';
-  } else {
-    const rawMime = contentType.split(';')[0]?.trim();
-    if (!rawMime || !allowed.has(rawMime)) {
-      throw new HTTPException(StatusCodes.UNSUPPORTED_MEDIA_TYPE, {
-        message: 'Unsupported Media Type',
-        cause: [
-          {
-            field: 'content-type',
-            error:
-              'Use multipart/form-data (avatar) or raw image/png|jpeg|webp',
-          },
-        ],
-      });
-    }
-
-    const ab = await c.req.arrayBuffer();
-    buffer = Buffer.from(ab);
-
-    if (buffer.length === 0 || buffer.length > maxBytes) {
-      throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: 'ValidationError',
-        cause: [{ field: 'body', error: 'Invalid image size (1B - 10MB)' }],
-      });
-    }
-
-    mime = rawMime as 'image/png' | 'image/jpeg' | 'image/webp';
+  if (!contentType.startsWith('multipart/form-data')) {
+    throw new HTTPException(StatusCodes.UNSUPPORTED_MEDIA_TYPE, {
+      message: 'Unsupported Media Type',
+      cause: [
+        {
+          field: 'content-type',
+          error: 'Use multipart/form-data with avatar file field'
+        }
+      ]
+    });
   }
+
+  const body = await c.req.parseBody();
+
+  const keys = Object.keys(body);
+  if (keys.length !== 1 || !('avatar' in body)) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [
+        {
+          field: 'avatar',
+          error: "Expected only form.append('avatar', file)"
+        }
+      ]
+    });
+  }
+
+  const avatar = body.avatar;
+  if (!(avatar instanceof File)) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [{ field: 'avatar', error: 'Avatar must be a file' }]
+    });
+  }
+
+  if (avatar.size > maxBytes) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [{ field: 'avatar', error: 'Max avatar size is 10MB' }]
+    });
+  }
+
+  const detected = avatar.type.toLowerCase();
+  if (!allowed.has(detected)) {
+    throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
+      message: 'ValidationError',
+      cause: [{ field: 'avatar', error: 'Allowed: png, jpg/jpeg, webp' }]
+    });
+  }
+
+  const buffer = Buffer.from(await avatar.arrayBuffer());
+  const mime = detected as 'image/png' | 'image/jpeg' | 'image/webp';
 
   const repo = new RepositoryFactory().userCacheRepository();
   const useCase = new PostUserAvatar(repo);
@@ -299,15 +280,15 @@ administrationUsersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
     return c.json(
       {
         message: 'Avatar uploaded successfully',
-        avatar: result.avatar,
+        avatar: result.avatar
       },
-      StatusCodes.OK,
+      StatusCodes.OK
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes('not found')) {
       throw new HTTPException(StatusCodes.NOT_FOUND, {
         message: 'NotFoundError',
-        cause: [{ field: 'id', error: err.message }],
+        cause: [{ field: 'id', error: err.message }]
       });
     }
     if (
@@ -317,7 +298,7 @@ administrationUsersRouter.openapi(postUserAvatarRequestRoute, async (c) => {
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',
-        cause: [{ field: 'avatar', error: err.message }],
+        cause: [{ field: 'avatar', error: err.message }]
       });
     }
     throw err;
