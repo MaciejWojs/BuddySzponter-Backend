@@ -211,6 +211,8 @@ export function initSocket() {
       };
 
       socket.send({ payload: payload });
+
+      io.to(socket.data.connectionTokenData!.connectionId).disconnectSockets();
     });
 
     // host -> server -> guest
