@@ -5,8 +5,9 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
+    "rootDir": ".",
     "outDir": ".dist",
-    "baseUrl": ".",
+    "types": ["bun", "node"],
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
@@ -24,7 +25,8 @@
       "@infra/*": ["./src/infrastucture/*"],
       "@core/*": ["./src/core/*"],
       "@shared/*": ["./src/shared/*"],
-      "@logger": ["./src/infrastucture/logger"]
+      "@logger": ["./src/infrastucture/logger"],
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": ["src/**/*.ts"]

@@ -55,6 +55,12 @@ export const APP_CONFIG = {
   },
 
   connection: {
+    security: {
+      /** Length of the randomly generated connection code in bytes (before encoding). */
+      tokenLengthBytes: 32,
+      /** Lifetime of the connection token in seconds (2 minutes). */
+      tokenTTLSeconds: 120,
+    },
     retries: {
       /** Maximum retries when generating a unique connection code. */
       createPendingMax: 5,
@@ -69,6 +75,8 @@ export const APP_CONFIG = {
         uuidPrefix: 'connection_UUID:',
         /** Prefix for failed join attempts counter: `connection_attempts:<code>` */
         attemptsPrefix: 'connection_attempts:',
+        /** Prefix for connection tokens: `connection_token:<token>` */
+        tokenPrefix: 'connection_token:',
       },
       ttl: {
         /** Pending connection code lifetime (2 minutes). */
