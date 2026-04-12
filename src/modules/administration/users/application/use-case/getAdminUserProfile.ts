@@ -1,7 +1,8 @@
+import { IUserRepository } from '@modules/users/domain/repositories/IUserRepository';
+
 import { UserId } from '@/shared/value-objects';
 
 import { GetUserResponse } from '../../api/schemas/user.response.schema';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
 
 export class GetAdminUserProfile {
   constructor(private readonly userRepository: IUserRepository) {}

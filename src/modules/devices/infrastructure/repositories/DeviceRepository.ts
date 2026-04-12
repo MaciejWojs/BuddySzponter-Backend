@@ -9,6 +9,15 @@ import { IDevicesDAO } from '../dao/IDevicesDao';
 export class DeviceRepository implements IDevicesRepository {
   constructor(protected readonly dao: IDevicesDAO) {}
 
+  async countAll(): Promise<number> {
+    return this.dao.countAll();
+  }
+
+  async findMany(offset: number, limit: number): Promise<Device[]> {
+    const deviceRecords = await this.dao.findMany(offset, limit);
+    return deviceRecords.map(DeviceMapper.toDomain);
+  }
+
   async findById(id: DeviceUUID): Promise<Device | null> {
     const deviceRecord = await this.dao.findById(id.value);
     return deviceRecord ? DeviceMapper.toDomain(deviceRecord) : null;

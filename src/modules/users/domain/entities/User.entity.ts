@@ -38,6 +38,11 @@ export class User {
   updatePassword(password: Password): User {
     return this.copy({ password });
   }
+
+  updateRole(role: UserRole): User {
+    return this.copy({ role });
+  }
+
   ban(): User {
     return this.copy({ isBanned: true });
   }
@@ -55,6 +60,18 @@ export class User {
 
   isAdmin(): boolean {
     return this.role.name === 'ADMIN';
+  }
+
+  canEditUser(target: User): boolean {
+    if (!this.id || !target.id) {
+      return false;
+    }
+
+    return this.isAdmin() || this.id.value === target.id.value;
+  }
+
+  canEditAdminFields(): boolean {
+    return this.isAdmin();
   }
 
   updateAvatar(avatar: string): User {

@@ -4,6 +4,8 @@ import { Device } from '../entities/Device.entity';
 import { DeviceFingerprint } from '../value-objects';
 
 export interface IDevicesRepository {
+  countAll(): Promise<number>;
+  findMany(offset: number, limit: number): Promise<Device[]>;
   findById(id: DeviceUUID): Promise<Device | null>;
   create(device: Device): Promise<Device>;
   deleteById(id: DeviceUUID): Promise<boolean>;

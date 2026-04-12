@@ -1,6 +1,7 @@
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
+import administrationRouter from '@modules/administration/api/administration.routes';
 import authRouter from '@modules/auth/api/auth.routes';
 import connectionRouter from '@modules/connection/api/connection.routes';
 import coreRouter from '@modules/core/api/core.routes';
@@ -128,6 +129,7 @@ app.get('/', (c) =>
     'This is the Buddy Szponter backend. WebSocket endpoint is at /socket.io/'
   )
 );
+app.route('/administration', administrationRouter);
 app.route('/auth', authRouter);
 app.route('/users', usersRouter);
 app.route('/connections', connectionRouter);

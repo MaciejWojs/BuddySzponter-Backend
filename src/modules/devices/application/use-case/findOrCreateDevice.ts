@@ -30,10 +30,10 @@ export class FindOrCreateDevice {
     const existingDevices =
       await this.deviceRepository.findByFingerprint(fingerprintVO);
     if (existingDevices.length > 0) {
-      if (existingDevices[0]!.userId) {
-        throw new Error('Device is already registered to a user');
+      const unassignedDevice = existingDevices.find((device) => !device.userId);
+      if (unassignedDevice) {
+        return unassignedDevice;
       }
-      return existingDevices[0]!;
     }
     const deviceNameVO = new DeviceName(deviceName);
     const deviceOsVO = new DeviceOS(deviceOs);

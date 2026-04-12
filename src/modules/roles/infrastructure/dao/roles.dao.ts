@@ -1,6 +1,6 @@
 import { BaseDao } from '@infra/db/base.dao';
 import { rolesTable } from '@infra/db/schema';
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 
 import { CreateRole, IRolesDAO, RoleDbRecord } from './IRolesDao';
 
@@ -11,6 +11,11 @@ export class DrizzleRoleDao
   constructor() {
     super();
   }
+
+  async findMany(): Promise<RoleDbRecord[]> {
+    return this.database.select().from(rolesTable).orderBy(asc(rolesTable.id));
+  }
+
   override async findById(id: number): Promise<RoleDbRecord | null> {
     const role = await this.database
       .select()
