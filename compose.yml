@@ -137,6 +137,8 @@ services:
 
       mc mb simplestorage/locales || true; mc anonymous set download simplestorage/locales || true;
 
+      mc mb simplestorage/loki || true; mc anonymous set download simplestorage/loki || true;
+
       echo '✅ Buckets initialized.'; sleep 2s; wait "
 
   prometheus:
@@ -161,6 +163,7 @@ services:
       - "monitoring"
     depends_on:
       - prometheus
+      - loki
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
@@ -183,6 +186,44 @@ services:
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+  loki:
+    image: grafana/loki
+    container_name: BS-Loki
+    profiles:
+      - "monitoring"
+    restart: unless-stopped
+    user: root
+    depends_on:
+      - db
+      - simple-storage
+    networks:
+      - backend
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/config.yaml:/etc/loki/local-config.yaml
+      - ./monitoring/loki/data:/loki
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+      - -config.expand-env=true
+  alloy:
+    image: grafana/alloy:latest
+    user: root
+    container_name: BS-Alloy
+    profiles:
+      - "monitoring"
+    restart: unless-stopped
+    depends_on:
+      - loki
+    networks:
+      - backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy
+    command: ["run", "/etc/alloy/config.alloy"]
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter
     command:
