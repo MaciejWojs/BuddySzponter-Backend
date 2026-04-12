@@ -2,12 +2,12 @@ import { createRoute } from '@hono/zod-openapi';
 
 import {
   internalServerErrorResponse,
-  serviceUnavailableErrorResponse,
+  serviceUnavailableErrorResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   deepHealthResponseSchema,
-  healthPayloadResponseSchema,
+  healthPayloadResponseSchema
 } from './schemas/health.responses.schema';
 
 export const healthRoute = createRoute({
@@ -21,12 +21,12 @@ export const healthRoute = createRoute({
       description: 'Service is healthy',
       content: {
         'application/json': {
-          schema: healthPayloadResponseSchema,
-        },
-      },
+          schema: healthPayloadResponseSchema
+        }
+      }
     },
-    ...internalServerErrorResponse,
-  },
+    ...internalServerErrorResponse
+  }
 });
 
 export const deepHealthRoute = createRoute({
@@ -40,11 +40,11 @@ export const deepHealthRoute = createRoute({
       description: 'Service is healthy',
       content: {
         'application/json': {
-          schema: deepHealthResponseSchema,
-        },
-      },
+          schema: deepHealthResponseSchema
+        }
+      }
     },
     ...internalServerErrorResponse,
-    ...serviceUnavailableErrorResponse,
-  },
+    ...serviceUnavailableErrorResponse
+  }
 });

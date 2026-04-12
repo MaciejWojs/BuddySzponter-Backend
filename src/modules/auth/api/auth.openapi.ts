@@ -4,20 +4,20 @@ import {
   decryptionErrorResponse,
   internalServerErrorResponse,
   unauthorizedErrorResponse,
-  unprocessableEntityResponse,
+  unprocessableEntityResponse
 } from '@/shared/api/openapi/error.openapi';
 
 import {
   loginBodySchema,
   refreshTokenCookieSchema,
-  registerBodySchema,
+  registerBodySchema
 } from './schemas/auth.requests.schema';
 import {
   loginPayloadSchema,
   logoutPayloadSchema,
   mePayloadSchema,
   refreshPayloadSchema,
-  registerPayloadSchema,
+  registerPayloadSchema
 } from './schemas/auth.responses.schema';
 
 export const registerRoute = createRoute({
@@ -29,24 +29,24 @@ export const registerRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: registerBodySchema,
-        },
-      },
-    },
+          schema: registerBodySchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User registered successfully',
       content: {
         'application/json': {
-          schema: registerPayloadSchema,
-        },
-      },
+          schema: registerPayloadSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
-    ...decryptionErrorResponse,
-  },
+    ...decryptionErrorResponse
+  }
 });
 
 export const loginRoute = createRoute({
@@ -58,25 +58,25 @@ export const loginRoute = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: loginBodySchema,
-        },
-      },
-    },
+          schema: loginBodySchema
+        }
+      }
+    }
   },
   responses: {
     200: {
       description: 'User logged in successfully',
       content: {
         'application/json': {
-          schema: loginPayloadSchema,
-        },
-      },
+          schema: loginPayloadSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
     ...decryptionErrorResponse,
-    ...unauthorizedErrorResponse,
-  },
+    ...unauthorizedErrorResponse
+  }
 });
 
 export const refreshRoute = createRoute({
@@ -86,26 +86,26 @@ export const refreshRoute = createRoute({
   summary: 'Refresh authentication token',
   security: [
     {
-      RefreshTokenCookie: [],
-    },
+      RefreshTokenCookie: []
+    }
   ],
   request: {
-    cookies: refreshTokenCookieSchema,
+    cookies: refreshTokenCookieSchema
   },
   responses: {
     200: {
       description: 'Token refreshed successfully',
       content: {
         'application/json': {
-          schema: refreshPayloadSchema,
-        },
-      },
+          schema: refreshPayloadSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
     ...decryptionErrorResponse,
-    ...unauthorizedErrorResponse,
-  },
+    ...unauthorizedErrorResponse
+  }
 });
 
 export const logoutRoute = createRoute({
@@ -115,28 +115,28 @@ export const logoutRoute = createRoute({
   summary: 'Log out a user',
   security: [
     {
-      RefreshTokenCookie: [],
-    },
+      RefreshTokenCookie: []
+    }
   ],
   description:
     'Logs out the user by revoking the refresh token and clearing the cookie.',
   request: {
-    cookies: refreshTokenCookieSchema,
+    cookies: refreshTokenCookieSchema
   },
   responses: {
     200: {
       description: 'User logged out successfully',
       content: {
         'application/json': {
-          schema: logoutPayloadSchema,
-        },
-      },
+          schema: logoutPayloadSchema
+        }
+      }
     },
     ...unprocessableEntityResponse,
     ...internalServerErrorResponse,
     ...decryptionErrorResponse,
-    ...unauthorizedErrorResponse,
-  },
+    ...unauthorizedErrorResponse
+  }
 });
 
 export const meRoute = createRoute({
@@ -146,19 +146,19 @@ export const meRoute = createRoute({
   summary: 'Get authenticated user info',
   security: [
     {
-      AuthorizationBearer: [],
-    },
+      AuthorizationBearer: []
+    }
   ],
   responses: {
     200: {
       description: 'Authenticated user information retrieved successfully',
       content: {
         'application/json': {
-          schema: mePayloadSchema,
-        },
-      },
+          schema: mePayloadSchema
+        }
+      }
     },
     ...internalServerErrorResponse,
-    ...unauthorizedErrorResponse,
-  },
+    ...unauthorizedErrorResponse
+  }
 });

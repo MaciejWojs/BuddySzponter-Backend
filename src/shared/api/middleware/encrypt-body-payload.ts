@@ -28,36 +28,36 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
   const sessionId = c.req.header(APP_CONFIG.headers.sessionId);
   if (!sessionId) {
     logger.warn(
-      `Encryption required but X-session-id header is missing — path: ${c.req.path}`,
+      `Encryption required but X-session-id header is missing — path: ${c.req.path}`
     );
     c.res = c.json(
       { message: 'Missing X-session-id header' },
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.UNAUTHORIZED
     );
     return;
   }
 
   if (!client.connected) {
     logger.error(
-      'Redis client is not connected — cannot retrieve session encryption key',
+      'Redis client is not connected — cannot retrieve session encryption key'
     );
     c.res = c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
-      StatusCodes.INTERNAL_SERVER_ERROR,
+      StatusCodes.INTERNAL_SERVER_ERROR
     );
     return;
   }
 
   const key = await client.get(
-    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`
   );
   if (!key) {
     logger.warn(
-      `Encryption required but no session key found for session: ${sessionId} — path: ${c.req.path}`,
+      `Encryption required but no session key found for session: ${sessionId} — path: ${c.req.path}`
     );
     c.res = c.json(
       { message: 'Invalid or expired session UUID' },
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.UNAUTHORIZED
     );
     return;
   }
@@ -83,7 +83,7 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
   }
 
   const encrypted = {
-    payload: encryptPayload(data, keyBuffer),
+    payload: encryptPayload(data, keyBuffer)
   };
 
   const headers = new Headers(res.headers);
@@ -92,6 +92,6 @@ export const encryptPayloadBody = createMiddleware(async (c, next) => {
 
   c.res = new Response(JSON.stringify(encrypted), {
     status: res.status,
-    headers,
+    headers
   });
 });

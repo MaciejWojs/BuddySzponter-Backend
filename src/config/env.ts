@@ -22,7 +22,7 @@ export const envSchema = z.object({
   MONITORING_ENABLED: z
     .enum(['true', 'false', '1', '0'])
     .default('false')
-    .transform((val) => val === 'true' || val === '1'),
+    .transform((val) => val === 'true' || val === '1')
 });
 
 export type ENV = z.infer<typeof envSchema>;

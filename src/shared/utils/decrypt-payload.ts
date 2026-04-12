@@ -19,7 +19,7 @@ export function decryptPayload(p: EncryptedPayload, key: string): object {
 
     const decrypted = Buffer.concat([
       decipher.update(encrypted),
-      decipher.final(),
+      decipher.final()
     ]);
 
     return JSON.parse(decrypted.toString());

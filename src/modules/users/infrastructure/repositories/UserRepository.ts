@@ -24,7 +24,7 @@ export class UserRepository implements IUserRepository {
       password: user.password.value,
       nickname: user.nickname.value,
       roleId: user.role.id,
-      roleName: user.role.name,
+      roleName: user.role.name
     });
 
     if (!result) {
@@ -33,6 +33,14 @@ export class UserRepository implements IUserRepository {
 
     const finalUser = UserMapper.toDomain(result);
     return finalUser;
+  }
+
+  async deleteUser(id: UserId): Promise<boolean> {
+    const result = await this.dao.deleteById(id.value);
+    if (!result) {
+      throw new Error('Failed to delete user');
+    }
+    return true;
   }
 
   async findByEmail(email: Email): Promise<User> {
@@ -60,7 +68,7 @@ export class UserRepository implements IUserRepository {
       result.isDeleted,
       result.avatar,
       result.createdAt,
-      result.updatedAt,
+      result.updatedAt
     );
   }
 
@@ -79,19 +87,12 @@ export class UserRepository implements IUserRepository {
         avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: new Date(),
-        roleId: user.role.id,
+        roleId: user.role.id
       });
     } catch {
       throw new Error('Failed to update user');
     }
 
-    return true;
-  }
-  async deleteUser(id: UserId): Promise<boolean> {
-    const result = await this.dao.deleteById(id.value);
-    if (!result) {
-      throw new Error('Failed to delete user');
-    }
     return true;
   }
 }

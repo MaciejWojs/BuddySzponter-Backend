@@ -14,23 +14,23 @@ export class RepositoryFactory {
     this.dao = new DaoFactory();
   }
 
-  userRepository() {
-    return new UserRepository(this.dao.db.userDao());
-  }
-
-  userCacheRepository() {
-    return new UserCacheRepository(this.userRepository(), client);
-  }
-
   authSessionRepository() {
     return new AuthSessionRepository(this.dao.db.authSessionDao());
+  }
+
+  connectionRepository() {
+    return new ConnectionRepository();
   }
 
   deviceRepository() {
     return new DeviceRepository(this.dao.db.devicesDao());
   }
 
-  connectionRepository() {
-    return new ConnectionRepository();
+  userCacheRepository() {
+    return new UserCacheRepository(this.userRepository(), client);
+  }
+
+  userRepository() {
+    return new UserRepository(this.dao.db.userDao());
   }
 }

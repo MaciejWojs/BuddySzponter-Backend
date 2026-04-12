@@ -8,6 +8,7 @@ export class RoleName {
     }
     this.name = this.name.toUpperCase();
   }
+
   get value(): string {
     return this.name;
   }

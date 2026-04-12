@@ -2,7 +2,7 @@ import { Connection } from '@/modules/connection/domain/entities/Connection.enti
 import { ConnectionParticipant } from '@/modules/connection/domain/entities/ConnectionParticipant.entity';
 import {
   ConnectionCode,
-  ConnectionStatus,
+  ConnectionStatus
 } from '@/modules/connection/domain/value-objects';
 import { DeviceFingerprint } from '@/modules/devices/domain/value-objects';
 import { Password } from '@/modules/users/domain/value-objects/Password.vo';
@@ -10,7 +10,7 @@ import {
   ConnectionUUID,
   DeviceUUID,
   IpAddress,
-  UserId,
+  UserId
 } from '@/shared/value-objects';
 
 import { ConnectionPrimitive } from '../types/Connection';
@@ -21,7 +21,7 @@ export class ConnectionMapper {
       raw.hostId ? new UserId(raw.hostId) : null,
       raw.hostDeviceId ? new DeviceUUID(raw.hostDeviceId) : null,
       new IpAddress(raw.hostIpAddress),
-      new DeviceFingerprint(raw.hostFingerprint),
+      new DeviceFingerprint(raw.hostFingerprint)
     );
 
     const guest =
@@ -33,7 +33,7 @@ export class ConnectionMapper {
             new UserId(raw.guestId),
             new DeviceUUID(raw.guestDeviceId),
             new IpAddress(raw.guestIpAddress),
-            new DeviceFingerprint(raw.guestFingerprint),
+            new DeviceFingerprint(raw.guestFingerprint)
           )
         : null;
 
@@ -45,7 +45,7 @@ export class ConnectionMapper {
       Password.fromHash(raw.password),
       raw.startedAt ? new Date(raw.startedAt) : null,
       ConnectionStatus.fromString(raw.status),
-      raw.joinAttempts ?? 0,
+      raw.joinAttempts ?? 0
     );
   }
   // TODO TRY CATCH ON THROWABLE METHODS/CONSTRUCTORS

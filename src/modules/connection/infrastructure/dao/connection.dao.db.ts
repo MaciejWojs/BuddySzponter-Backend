@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import {
   ConnectionDbRecord,
   CreateConnection,
-  IConnectionDAO,
+  IConnectionDAO
 } from './IConnectionDao.db';
 
 export class DrizzleConnectionDao
@@ -15,54 +15,9 @@ export class DrizzleConnectionDao
   constructor() {
     super();
   }
-  override async findById(id: string): Promise<ConnectionDbRecord | null> {
-    const Connection = await this.database
-      .select()
-      .from(connectionLogsTable)
-      .where(eq(connectionLogsTable.id, id))
-      .limit(1);
-
-    return Connection[0] ?? null;
-  }
-
-  async findByGuestId(userId: number): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionLogsTable)
-      .where(eq(connectionLogsTable.guestId, userId));
-
-    return Connections;
-  }
-
-  async findByHostId(userId: number): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionLogsTable)
-      .where(eq(connectionLogsTable.hostId, userId));
-
-    return Connections;
-  }
-
-  async findByGuestDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionLogsTable)
-      .where(eq(connectionLogsTable.guestDeviceId, deviceId));
-
-    return Connections;
-  }
-
-  async findByHostDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
-    const Connections = await this.database
-      .select()
-      .from(connectionLogsTable)
-      .where(eq(connectionLogsTable.hostDeviceId, deviceId));
-
-    return Connections;
-  }
 
   override async create(
-    data: CreateConnection,
+    data: CreateConnection
   ): Promise<ConnectionDbRecord | null> {
     const [newConnection] = await this.database
       .insert(connectionLogsTable)
@@ -78,6 +33,52 @@ export class DrizzleConnectionDao
       .returning();
 
     return result.length > 0;
+  }
+
+  async findByGuestDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
+    const Connections = await this.database
+      .select()
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.guestDeviceId, deviceId));
+
+    return Connections;
+  }
+
+  async findByGuestId(userId: number): Promise<ConnectionDbRecord[]> {
+    const Connections = await this.database
+      .select()
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.guestId, userId));
+
+    return Connections;
+  }
+
+  async findByHostDeviceId(deviceId: string): Promise<ConnectionDbRecord[]> {
+    const Connections = await this.database
+      .select()
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.hostDeviceId, deviceId));
+
+    return Connections;
+  }
+
+  async findByHostId(userId: number): Promise<ConnectionDbRecord[]> {
+    const Connections = await this.database
+      .select()
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.hostId, userId));
+
+    return Connections;
+  }
+
+  override async findById(id: string): Promise<ConnectionDbRecord | null> {
+    const Connection = await this.database
+      .select()
+      .from(connectionLogsTable)
+      .where(eq(connectionLogsTable.id, id))
+      .limit(1);
+
+    return Connection[0] ?? null;
   }
 
   override async save(record: ConnectionDbRecord): Promise<ConnectionDbRecord> {

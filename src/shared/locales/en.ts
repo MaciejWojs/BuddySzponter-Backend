@@ -9,13 +9,13 @@ export const en = {
     emailError: {
       required: 'Email is required',
       invalid: 'Please enter a valid email address',
-      maxLength: 'Email is too long',
+      maxLength: 'Email is too long'
     },
     passwordError: {
       minLength: 'Password must be at least 8 characters',
       required: 'Password is required',
-      weak: 'Password is too weak',
-    },
+      weak: 'Password is too weak'
+    }
   },
   validation: {
     invalidEmail: 'Please enter a valid email address',
@@ -27,7 +27,7 @@ export const en = {
     passwordRequiresUppercase: 'Password must contain an uppercase letter',
     passwordRequiresDigit: 'Password must contain a digit',
     passwordRequiresSpecialCharacter:
-      'Password must contain a special character',
+      'Password must contain a special character'
   },
   hostForm: {
     title: 'Share Control',
@@ -35,22 +35,22 @@ export const en = {
       'Enter the session code to hand over control of your device to another user.',
     sessionCode: 'Access code',
     sessionPassword: 'Password',
-    timeToJoin: 'Time left:',
+    timeToJoin: 'Time left:'
   },
   alert: {
     success: 'Success',
     error: 'Error',
     warning: 'Warning',
     info: 'Information',
-    copy: 'Copied',
+    copy: 'Copied'
   },
   languageSwitcher: {
     en: 'English',
     pl: 'Polish',
     es: 'Spanish',
     plX67: 'Szponterski',
-    choice: 'Choose language',
-  },
+    choice: 'Choose language'
+  }
 } as const;
 
 export type LocaleKeys = keyof typeof en;

@@ -61,7 +61,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   if (!sessionId) {
     return c.json(
       { message: 'Missing X-session-id header' },
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.UNAUTHORIZED
     );
   }
 
@@ -69,17 +69,17 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
     logger.error('Redis client is not connected');
     return c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
-      StatusCodes.INTERNAL_SERVER_ERROR,
+      StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 
   const key = await client.get(
-    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`,
+    `${APP_CONFIG.cache.keys.handshakePrefix}${sessionId}`
   );
   if (!key) {
     return c.json(
       { message: 'Invalid or expired session UUID' },
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.UNAUTHORIZED
     );
   }
 
@@ -99,7 +99,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   } catch {
     return c.json(
       { message: 'Invalid JSON request body' },
-      StatusCodes.BAD_REQUEST,
+      StatusCodes.BAD_REQUEST
     );
   }
 
@@ -108,7 +108,7 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
   if (!result.success) {
     return c.json(
       { message: 'Data is not encrypted or wrong payload format' },
-      StatusCodes.BAD_REQUEST,
+      StatusCodes.BAD_REQUEST
     );
   }
 
@@ -128,11 +128,11 @@ export const decryptBodyPayload = createMiddleware(async (c, next) => {
 
     return c.json(
       { message: ReasonPhrases.INTERNAL_SERVER_ERROR },
-      StatusCodes.INTERNAL_SERVER_ERROR,
+      StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 
-  //! WORKAROUND - Modified req.json to return decrypted data for the rest of the handlers
+  // ! WORKAROUND - Modified req.json to return decrypted data for the rest of the handlers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   c.req.json = async <T = any>() => decrypted as unknown as T;
   await next();

@@ -10,7 +10,7 @@ async function main() {
 
   if (!isDevelopment) {
     logger.warn(
-      'Seeding is only allowed in development environment. Aborting.',
+      'Seeding is only allowed in development environment. Aborting.'
     );
     return;
   }
@@ -23,18 +23,18 @@ async function main() {
       columns: {
         name: f.valuesFromArray({
           values: ['ADMIN', 'USER', 'SUPERADMIN'],
-          isUnique: true,
-        }),
-      },
+          isUnique: true
+        })
+      }
     },
     usersTable: {
       count: 10,
       columns: {
         roleId: f.valuesFromArray({
-          values: [1, 2, 3],
-        }),
-      },
-    },
+          values: [1, 2, 3]
+        })
+      }
+    }
   }));
 }
 

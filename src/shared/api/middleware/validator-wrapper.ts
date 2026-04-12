@@ -6,10 +6,10 @@ import * as zod from 'zod';
 
 export const zValidator = <
   T extends zod.ZodType,
-  Target extends keyof ValidationTargets,
+  Target extends keyof ValidationTargets
 >(
   target: Target,
-  schema: T,
+  schema: T
 ) =>
   // prettier-ignore
   zv(target, schema, (result, _c) => {  
@@ -18,8 +18,8 @@ export const zValidator = <
         message: 'ValidationError',
         cause: result.error.issues.map((issue) => ({
           field: `${issue.path.join('.')}`,
-          error: `${issue.message}`,
-        })),
+          error: `${issue.message}`
+        }))
       });
     }
   });

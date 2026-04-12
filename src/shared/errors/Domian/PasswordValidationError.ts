@@ -8,6 +8,7 @@ export class PasswordValidationError extends ValidationError {
   static fromPasswordError(error: Error): PasswordValidationError {
     return new PasswordValidationError(error.message);
   }
+
   override formatError(): string {
     return `PasswordValidationError: ${this.name}: ${this.message}`;
   }

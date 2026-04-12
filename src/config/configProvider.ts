@@ -3,8 +3,9 @@ import { env } from 'bun';
 import { type ENV, envSchema } from './env';
 
 class ConfigProvider {
-  private readonly config: ENV;
   private static instance: ConfigProvider | undefined;
+
+  private readonly config: ENV;
 
   private constructor(environment: Record<string, string | undefined> = env) {
     try {
@@ -16,7 +17,7 @@ class ConfigProvider {
   }
 
   public static getInstance(
-    environment?: Record<string, string | undefined>,
+    environment?: Record<string, string | undefined>
   ): ConfigProvider {
     if (!ConfigProvider.instance) {
       ConfigProvider.instance = new ConfigProvider(environment ?? env);

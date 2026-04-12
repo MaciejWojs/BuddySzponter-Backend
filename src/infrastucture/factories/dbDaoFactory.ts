@@ -7,20 +7,8 @@ import { DrizzleAuthSessionDAO } from '@/modules/auth/infratsucture/dao/authSess
 import { DrizzleConnectionDao } from '@/modules/connection/infrastructure/dao/connection.dao.db';
 
 export class DbDaoFactory {
-  userDao() {
-    return new DrizzleUserDao();
-  }
-
-  devicesDao() {
-    return new DrizzleDevicesDao();
-  }
-
   authSessionDao() {
     return new DrizzleAuthSessionDAO();
-  }
-
-  roleDao() {
-    return new DrizzleRoleDao();
   }
 
   connectionDao() {
@@ -29,5 +17,17 @@ export class DbDaoFactory {
 
   coreDao() {
     return new DrizzleCoreDao();
+  }
+
+  devicesDao() {
+    return new DrizzleDevicesDao();
+  }
+
+  roleDao() {
+    return new DrizzleRoleDao();
+  }
+
+  userDao() {
+    return new DrizzleUserDao();
   }
 }

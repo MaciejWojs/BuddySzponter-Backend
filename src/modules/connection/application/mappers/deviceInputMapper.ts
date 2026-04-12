@@ -2,7 +2,7 @@ import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import {
   DeviceFingerprint,
   DeviceName,
-  DeviceOS,
+  DeviceOS
 } from '@/modules/devices/domain/value-objects';
 import { DeviceUUID, UserId } from '@/shared/value-objects';
 
@@ -20,6 +20,6 @@ export function mapToDeviceInput(data: DeviceInputData): Device {
     new DeviceFingerprint(data.fingerprint),
     new DeviceName(data.name),
     new DeviceOS(data.os ?? 'Unknown OS'),
-    new Date(),
+    new Date()
   );
 }

@@ -18,12 +18,12 @@ const checkDependency = async (fn: () => Promise<unknown>) => {
     await fn();
     return {
       status: 'OK' as const,
-      responseTimeMs: Math.max(1, Math.round(performance.now() - start)),
+      responseTimeMs: Math.max(1, Math.round(performance.now() - start))
     };
   } catch {
     return {
       status: 'ERROR' as const,
-      responseTimeMs: Math.max(1, Math.round(performance.now() - start)),
+      responseTimeMs: Math.max(1, Math.round(performance.now() - start))
     };
   }
 };
@@ -33,9 +33,9 @@ healthRouter.openapi(healthRoute, async (c) => {
     {
       service: APP_CONFIG.basic.appName,
       version: APP_CONFIG.basic.version,
-      timestamp: new Date(),
+      timestamp: new Date()
     },
-    StatusCodes.OK,
+    StatusCodes.OK
   );
 });
 
@@ -55,7 +55,7 @@ healthRouter.openapi(deepHealthRoute, async (c) => {
     }),
     checkDependency(async () => {
       await localesClient.file('__healthcheck__/ping.txt').exists();
-    }),
+    })
   ]);
 
   const isHealthy =
@@ -64,7 +64,7 @@ healthRouter.openapi(deepHealthRoute, async (c) => {
   if (!isHealthy) {
     return c.json(
       { message: 'Service Unavailable' },
-      StatusCodes.SERVICE_UNAVAILABLE,
+      StatusCodes.SERVICE_UNAVAILABLE
     );
   }
 
@@ -75,9 +75,9 @@ healthRouter.openapi(deepHealthRoute, async (c) => {
       timestamp: new Date(),
       database,
       cache,
-      minio,
+      minio
     },
-    StatusCodes.OK,
+    StatusCodes.OK
   );
 });
 

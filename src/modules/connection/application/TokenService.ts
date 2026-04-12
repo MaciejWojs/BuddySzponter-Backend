@@ -13,16 +13,6 @@ export type ConnectionTokenData = {
 };
 
 export class TokenService {
-  private generateToken(): string {
-    return randomBytes(
-      APP_CONFIG.connection.security.tokenLengthBytes,
-    ).toString('hex');
-  }
-
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
-  }
-
   /** Creates a connection token, stores it in cache, and returns the raw token.
    * The token is hashed before storage for security. The stored data includes the connection ID, role, and device ID, and it expires after a configured TTL.
    * Throws an error if the cache client is not connected, if required parameters are missing, or if storing the token in cache fails.
@@ -30,14 +20,14 @@ export class TokenService {
   async createConnectionToken(data: ConnectionTokenData): Promise<string> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot store connection token.',
+        'Cache client is not connected. Cannot store connection token.'
       );
     }
 
     const { deviceId, role, connectionId } = data;
     if (!deviceId || !role || !connectionId) {
       throw new Error(
-        'Missing required parameters to create connection token.',
+        'Missing required parameters to create connection token.'
       );
     }
 
@@ -49,7 +39,7 @@ export class TokenService {
     const result = await client.setex(
       `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`,
       APP_CONFIG.connection.security.tokenTTLSeconds,
-      payload,
+      payload
     );
 
     if (result !== 'OK') {
@@ -58,12 +48,12 @@ export class TokenService {
 
     const lookup = await client.sadd(
       `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:tokens`,
-      hashedToken,
+      hashedToken
     );
 
     if (lookup === 0) {
       logger.warn(
-        `Failed to add token to connection token set for connection ${connectionId}. Token may not be properly tracked for cleanup.`,
+        `Failed to add token to connection token set for connection ${connectionId}. Token may not be properly tracked for cleanup.`
       );
     }
 
@@ -77,12 +67,12 @@ export class TokenService {
   } | null> {
     if (!client.connected) {
       throw new Error(
-        'Cache client is not connected. Cannot retrieve connection token.',
+        'Cache client is not connected. Cannot retrieve connection token.'
       );
     }
 
     const data = await client.get(
-      `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`,
+      `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`
     );
 
     if (!data) {
@@ -96,14 +86,19 @@ export class TokenService {
     }
   }
 
-  async verifyToken(raw: string): Promise<ConnectionTokenData | null> {
-    const hashedToken = this.hashToken(raw);
-    return this.findTokenData(hashedToken);
+  private generateToken(): string {
+    return randomBytes(
+      APP_CONFIG.connection.security.tokenLengthBytes
+    ).toString('hex');
+  }
+
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
   }
 
   async revokeToken(
     hashedToken: string,
-    connectionId: string,
+    connectionId: string
   ): Promise<boolean> {
     if (!client.connected) {
       throw new Error('Cache client is not connected.');
@@ -113,19 +108,19 @@ export class TokenService {
 
     const tasks = await Promise.all([
       client.del(tokenKey),
-      client.srem(setKey, hashedToken),
+      client.srem(setKey, hashedToken)
     ]);
 
     if (tasks[0] === 0) {
       logger.warn(
-        `Attempted to revoke token ${hashedToken} for connection ${connectionId}, but it was not found in cache.`,
+        `Attempted to revoke token ${hashedToken} for connection ${connectionId}, but it was not found in cache.`
       );
       return false;
     }
 
     if (tasks[1] === 0) {
       logger.warn(
-        `Token ${hashedToken} was revoked but was not found in connection token set for connection ${connectionId}. This may indicate a tracking issue.`,
+        `Token ${hashedToken} was revoked but was not found in connection token set for connection ${connectionId}. This may indicate a tracking issue.`
       );
     }
 
@@ -146,10 +141,15 @@ export class TokenService {
     }
 
     const revokeTasks = hashedTokens.map((hashedToken) =>
-      this.revokeToken(hashedToken, connectionId),
+      this.revokeToken(hashedToken, connectionId)
     );
 
     await Promise.all(revokeTasks);
     await client.del(setKey);
+  }
+
+  async verifyToken(raw: string): Promise<ConnectionTokenData | null> {
+    const hashedToken = this.hashToken(raw);
+    return this.findTokenData(hashedToken);
   }
 }

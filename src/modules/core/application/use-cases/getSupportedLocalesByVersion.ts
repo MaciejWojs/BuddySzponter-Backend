@@ -27,11 +27,11 @@ export class GetSupportedLocalesByVersion {
         const objectName = `${safeVersion}/${lang}/${hash}.json`;
         const fileExists = await localesClient.file(objectName).exists();
         return fileExists ? lang : null;
-      }),
+      })
     );
 
     return available.filter(
-      (lang): lang is (typeof supportedLocales)[number] => lang !== null,
+      (lang): lang is (typeof supportedLocales)[number] => lang !== null
     );
   }
 }

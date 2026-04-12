@@ -6,5 +6,5 @@ export const handshakeRequestSchema = z.object({
     .refine((v) => {
       const buf = Buffer.from(v, 'base64');
       return buf.length === 65;
-    }, 'Invalid ECDH public key'),
+    }, 'Invalid ECDH public key')
 });

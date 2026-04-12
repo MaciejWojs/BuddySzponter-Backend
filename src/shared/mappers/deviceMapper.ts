@@ -2,7 +2,7 @@ import { Device } from '@/modules/devices/domain/entities/Device.entity';
 import {
   DeviceFingerprint,
   DeviceName,
-  DeviceOS,
+  DeviceOS
 } from '@/modules/devices/domain/value-objects';
 import { DeviceDbRecord } from '@/modules/devices/infrastructure/dao/IDevicesDao';
 
@@ -16,7 +16,7 @@ export class DeviceMapper {
       new DeviceFingerprint(deviceRecord.fingerprint),
       new DeviceName(deviceRecord.name ?? 'unknown'),
       new DeviceOS(deviceRecord.os ?? 'unknown'),
-      deviceRecord.createdAt,
+      deviceRecord.createdAt
     );
   }
 
@@ -28,8 +28,8 @@ export class DeviceMapper {
       name: device.name.value,
       os: device.os.value,
       createdAt: device.createdAt,
-      //TODO: add lastUsedAt to device entity and set it here
-      lastUsedAt: null,
+      // TODO: add lastUsedAt to device entity and set it here
+      lastUsedAt: null
     };
   }
 }

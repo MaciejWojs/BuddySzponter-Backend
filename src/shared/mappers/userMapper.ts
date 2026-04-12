@@ -2,7 +2,7 @@ import { User } from '@/modules/users/domain/entities/User.entity';
 import {
   Email,
   Password,
-  UserNickname,
+  UserNickname
 } from '@/modules/users/domain/value-objects';
 import { RoleId } from '@/modules/users/domain/value-objects/RoleId.vo';
 import { RoleName } from '@/modules/users/domain/value-objects/RoleName.vo';
@@ -25,20 +25,20 @@ export class UserMapper {
         Password.fromHash(userDbRecord.password),
         new UserRole(
           new RoleId(userDbRecord.roleId),
-          new RoleName(userDbRecord.roleName),
+          new RoleName(userDbRecord.roleName)
         ),
         userDbRecord.isBanned,
         userDbRecord.isDeleted,
         userDbRecord.avatar,
         userDbRecord.createdAt,
-        userDbRecord.updatedAt,
+        userDbRecord.updatedAt
       );
     } catch (err) {
       if (err instanceof ValidationError) {
         throw err;
       }
       throw new Error('Failed to map user record to domain entity', {
-        cause: err,
+        cause: err
       });
     }
 
@@ -60,7 +60,7 @@ export class UserMapper {
       isDeleted: user.isDeleted,
       avatar: user.avatar,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      updatedAt: user.updatedAt
     };
   }
 }

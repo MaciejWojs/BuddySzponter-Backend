@@ -42,13 +42,13 @@ const getFirstForwardedHeaderValue = (value: string | null): string | null => {
 const getPublicOrigin = (request: Request): string => {
   const url = new URL(request.url);
   const forwardedProto = getFirstForwardedHeaderValue(
-    request.headers.get('x-forwarded-proto'),
+    request.headers.get('x-forwarded-proto')
   );
   const forwardedHost = getFirstForwardedHeaderValue(
-    request.headers.get('x-forwarded-host'),
+    request.headers.get('x-forwarded-host')
   );
   const forwardedPort = getFirstForwardedHeaderValue(
-    request.headers.get('x-forwarded-port'),
+    request.headers.get('x-forwarded-port')
   );
 
   if (forwardedProto) {
@@ -79,7 +79,7 @@ if (configProvider.get('MONITORING_ENABLED')) {
   app.use('*', registerMetrics);
 } else {
   logger.warn(
-    'Monitoring is disabled. Metrics endpoint will not be available.',
+    'Monitoring is disabled. Metrics endpoint will not be available.'
   );
 }
 
@@ -92,7 +92,7 @@ app.onError((err, c) => {
   if (err instanceof HTTPException) {
     const errorResponse = {
       message: err.message,
-      cause: err.cause,
+      cause: err.cause
     };
 
     const result = defaultErrorResponseSchema.safeParse(errorResponse);
@@ -119,14 +119,14 @@ app.onError((err, c) => {
   }
   return c.json(
     { message: 'Internal Server Error' },
-    StatusCodes.INTERNAL_SERVER_ERROR,
+    StatusCodes.INTERNAL_SERVER_ERROR
   );
 });
 
 app.get('/', (c) =>
   c.text(
-    'This is the Buddy Szponter backend. WebSocket endpoint is at /socket.io/',
-  ),
+    'This is the Buddy Szponter backend. WebSocket endpoint is at /socket.io/'
+  )
 );
 app.route('/auth', authRouter);
 app.route('/users', usersRouter);
@@ -144,8 +144,8 @@ if (isDevelopment) {
       type: 'http',
       scheme: 'bearer',
       bearerFormat: 'JWT',
-      in: 'header',
-    },
+      in: 'header'
+    }
   );
 
   app.openAPIRegistry.registerComponent(
@@ -155,8 +155,8 @@ if (isDevelopment) {
       type: 'apiKey',
       in: 'cookie',
       name: 'refreshToken',
-      bearerFormat: 'JWT',
-    },
+      bearerFormat: 'JWT'
+    }
   );
 
   app.doc('/docs', (c) => ({
@@ -164,14 +164,14 @@ if (isDevelopment) {
     info: {
       version: APP_CONFIG.basic.version,
       title: APP_CONFIG.api.title,
-      description: APP_CONFIG.api.description,
+      description: APP_CONFIG.api.description
     },
     servers: [
       {
         url: getPublicOrigin(c.req.raw),
-        description: 'development server',
-      },
-    ],
+        description: 'development server'
+      }
+    ]
   }));
   app.get(
     '/docs/scalar',
@@ -179,8 +179,8 @@ if (isDevelopment) {
       url: '/api/v1/docs',
       layout: 'classic',
       defaultOpenAllTags: true,
-      theme: 'bluePlanet',
-    }),
+      theme: 'bluePlanet'
+    })
   );
   app.get('/docs/ui', swaggerUI({ url: '/api/v1/docs' }));
   showRoutes(app);
@@ -190,7 +190,7 @@ export default {
   port: APP_CONFIG.server.port,
   idleTimeout: APP_CONFIG.server.idleTimeout,
 
-  //@ts-expect-error Its from Socket.IO Bun Engine github example, but it seems to be missing from types
+  // @ts-expect-error Its from Socket.IO Bun Engine github example, but it seems to be missing from types
   fetch(req, server) {
     const url = new URL(req.url);
     url.protocol = req.headers.get('x-forwarded-proto') ?? url.protocol;
@@ -202,5 +202,5 @@ export default {
     }
   },
 
-  websocket,
+  websocket
 };

@@ -9,8 +9,16 @@ export class Device {
     readonly fingerprint: DeviceFingerprint,
     readonly name: DeviceName,
     readonly os: DeviceOS,
-    readonly createdAt: Date,
+    readonly createdAt: Date
   ) {}
+
+  changeUser(userId: UserId): Device {
+    if (!this.userId) {
+      return this.copy({ userId });
+    }
+    throw new Error('Cannot change user for a device that is already assigned');
+  }
+
   private copy(changes: Partial<Device>): Device {
     return new Device(
       changes.id ?? this.id,
@@ -18,17 +26,11 @@ export class Device {
       changes.fingerprint ?? this.fingerprint,
       changes.name ?? this.name,
       changes.os ?? this.os,
-      changes.createdAt ?? this.createdAt,
+      changes.createdAt ?? this.createdAt
     );
   }
+
   updateName(name: DeviceName): Device {
     return this.copy({ name });
-  }
-
-  changeUser(userId: UserId): Device {
-    if (!this.userId) {
-      return this.copy({ userId });
-    }
-    throw new Error('Cannot change user for a device that is already assigned');
   }
 }
