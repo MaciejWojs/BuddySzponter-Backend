@@ -3,18 +3,24 @@ server:
   http_listen_port: 3100
   grpc_listen_port: 9095
 
+common:
+  replication_factor: 1
+
 ingester:
   lifecycler:
     address: 127.0.0.1
     ring:
       kvstore:
         store: inmemory
-      replication_factor: 1
-  chunk_idle_period: 5m
-  max_chunk_age: 1h
-  chunk_target_size: 1048576
+  chunk_idle_period: 30m
+  chunk_target_size: 1572864
+  chunk_encoding: LZ4
+  max_chunk_age: 2h
   wal:
-    enabled: false
+    enabled: true
+    dir: /loki/wal
+    checkpoint_duration: 5m
+    flush_on_shutdown: true
 
 storage_config:
   tsdb_shipper:
@@ -38,8 +44,30 @@ schema_config:
         period: 24h
 
 limits_config:
+  volume_enabled: true
+  retention_period: 168h
+  max_streams_per_user: 10000
+  ingestion_rate_strategy: global
+  ingestion_rate_mb: 10
+  ingestion_burst_size_mb: 20
+  per_stream_rate_limit: 3MB
+  per_stream_rate_limit_burst: 15MB
+  max_global_streams_per_user: 10000
+  max_line_size: 256KB
+  max_line_size_truncate: false
+  max_label_name_length: 1024
+  max_label_value_length: 2048
+  max_label_names_per_series: 15
   reject_old_samples: true
   reject_old_samples_max_age: 168h
+  creation_grace_period: 10m
+  unordered_writes: true
+
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  delete_request_store: s3
 
 ruler:
   storage:
