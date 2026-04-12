@@ -10,8 +10,8 @@ services:
       start_period: 2s
       retries: 3
     ports:
-      - '80:80'
-      - '443:443'
+      - '8080:80'
+#      - '443:443'
     volumes:
       # - ./nginx-waf/modsecurity.conf:/etc/nginx/modsecurity.conf
       - ./nginx-waf/nginx.conf:/etc/nginx/templates/conf.d/default.conf.template
@@ -104,7 +104,7 @@ services:
       - backend
 
   simple-storage:
-    image: minio/minio:latest
+    image: pgsty/minio:latest
     container_name: BS-MinIO
     restart: unless-stopped
     ports:
@@ -174,7 +174,11 @@ services:
       - backend
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "false"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
     volumes:
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
@@ -189,7 +193,7 @@ services:
       - prometheus
       - waf
     ports:
-      - "9113:9113"
+      - "127.0.0.1:9113:9113"
     networks:
       - backend
   postgres-exporter:
@@ -197,7 +201,7 @@ services:
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
     ports:
-      - "9187:9187"
+      - "127.0.0.1:9187:9187"
     depends_on:
       - prometheus
     profiles:
@@ -216,7 +220,7 @@ services:
       REDIS_ADDR: "cache:6379"
       REDIS_PASSWORD: ${VALKEY_PASSWORD}
     ports:
-      - "9121:9121"
+      - "127.0.0.1:9121:9121"
     networks:
       - backend
 
