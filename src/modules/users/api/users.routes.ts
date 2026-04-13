@@ -182,8 +182,8 @@ usersRouter.openapi(postSelfUserAvatarRequestRoute, async (c) => {
     }
     if (
       err instanceof Error &&
-      (err.message.includes('Plik uszkodzony lub niezgodny') ||
-        err.message.includes('Nie można przetworzyć pliku'))
+      (err.message.includes('File is corrupted or does not match') ||
+        err.message.includes('Unable to process file'))
     ) {
       throw new HTTPException(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: 'ValidationError',

@@ -43,12 +43,12 @@ export class PostUserAvatar {
 
       if (!detectedMime || detectedMime !== mime) {
         throw new Error(
-          'Plik uszkodzony lub niezgodny z deklarowanym formatem.'
+          'File is corrupted or does not match the declared format.'
         );
       }
     } catch {
       throw new Error(
-        'Nie można przetworzyć pliku. Upewnij się, że jest to poprawny obraz PNG, JPEG lub WEBP.'
+        'Unable to process file. Ensure it is a valid PNG, JPEG, or WEBP image.'
       );
     }
     const name = randomBytes(16).toString('hex');
