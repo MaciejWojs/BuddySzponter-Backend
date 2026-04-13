@@ -1,84 +1,129 @@
 import { prometheus } from '@hono/prometheus';
 import { Counter, Gauge, Registry } from 'prom-client';
-import { Server } from 'socket.io';
 
-const registry = new Registry();
+import { configProvider } from '@/config/configProvider';
 
-export const { registerMetrics, printMetrics } = prometheus({
-  registry,
-  collectDefaultMetrics: true
-});
+type PrometheusHandlers = ReturnType<typeof prometheus>;
 
-const socketConnectionAttemptsTotal =
-  (registry.getSingleMetric(
-    'ws_connection_attempts_total'
-  ) as Counter<string>) ||
-  new Counter({
-    name: 'ws_connection_attempts_total',
-    help: 'Total number of host-guest WebSocket connection attempts (with connection token)',
-    registers: [registry]
+type MetricsState = {
+  handlers: PrometheusHandlers;
+  socketConnectionAttemptsTotal: Counter<string>;
+  socketConnectionsRejectedTotal: Counter<'reason'>;
+  socketKickedTotal: Counter<'reason'>;
+  activeSocketsGauge: Gauge<string>;
+  activeHostGuestRoomsGauge: Gauge<string>;
+};
+
+let metricsState: MetricsState | undefined;
+
+const isMonitoringEnabled = () => configProvider.get('MONITORING_ENABLED');
+
+function getMetricsState(): MetricsState {
+  if (metricsState) {
+    return metricsState;
+  }
+
+  const registry = new Registry();
+  const handlers = prometheus({
+    registry,
+    collectDefaultMetrics: true
   });
 
-const socketConnectionsRejectedTotal =
-  (registry.getSingleMetric(
-    'ws_connections_rejected_total'
-  ) as Counter<'reason'>) ||
-  new Counter({
-    name: 'ws_connections_rejected_total',
-    help: 'Total number of rejected host-guest WebSocket connection attempts',
-    labelNames: ['reason'],
-    registers: [registry]
-  });
+  const socketConnectionAttemptsTotal =
+    (registry.getSingleMetric(
+      'ws_connection_attempts_total'
+    ) as Counter<string>) ||
+    new Counter({
+      name: 'ws_connection_attempts_total',
+      help: 'Total number of host-guest WebSocket connection attempts (with connection token)',
+      registers: [registry]
+    });
 
-const socketKickedTotal =
-  (registry.getSingleMetric('ws_kicked_total') as Counter<'reason'>) ||
-  new Counter({
-    name: 'ws_kicked_total',
-    help: 'Total number of sockets disconnected by server-side actions',
-    labelNames: ['reason'],
-    registers: [registry]
-  });
+  const socketConnectionsRejectedTotal =
+    (registry.getSingleMetric(
+      'ws_connections_rejected_total'
+    ) as Counter<'reason'>) ||
+    new Counter({
+      name: 'ws_connections_rejected_total',
+      help: 'Total number of rejected host-guest WebSocket connection attempts',
+      labelNames: ['reason'],
+      registers: [registry]
+    });
 
-const activeSocketsGauge =
-  (registry.getSingleMetric('ws_active_sockets') as Gauge<string>) ||
-  new Gauge({
-    name: 'ws_active_sockets',
-    help: 'Current number of active WebSocket connections',
-    registers: [registry]
-  });
+  const socketKickedTotal =
+    (registry.getSingleMetric('ws_kicked_total') as Counter<'reason'>) ||
+    new Counter({
+      name: 'ws_kicked_total',
+      help: 'Total number of sockets disconnected by server-side actions',
+      labelNames: ['reason'],
+      registers: [registry]
+    });
 
-const activeHostGuestRoomsGauge =
-  (registry.getSingleMetric('ws_active_host_guest_rooms') as Gauge<string>) ||
-  new Gauge({
-    name: 'ws_active_host_guest_rooms',
-    help: 'Current number of active host-guest rooms (exactly 2 clients)',
-    registers: [registry]
-  });
+  const activeSocketsGauge =
+    (registry.getSingleMetric('ws_active_sockets') as Gauge<string>) ||
+    new Gauge({
+      name: 'ws_active_sockets',
+      help: 'Current number of active WebSocket connections',
+      registers: [registry]
+    });
 
-activeSocketsGauge.set(0);
-activeHostGuestRoomsGauge.set(0);
+  const activeHostGuestRoomsGauge =
+    (registry.getSingleMetric('ws_active_host_guest_rooms') as Gauge<string>) ||
+    new Gauge({
+      name: 'ws_active_host_guest_rooms',
+      help: 'Current number of active host-guest rooms (exactly 2 clients)',
+      registers: [registry]
+    });
+
+  activeSocketsGauge.set(0);
+  activeHostGuestRoomsGauge.set(0);
+
+  metricsState = {
+    handlers,
+    socketConnectionAttemptsTotal,
+    socketConnectionsRejectedTotal,
+    socketKickedTotal,
+    activeSocketsGauge,
+    activeHostGuestRoomsGauge
+  };
+
+  return metricsState;
+}
+
+export function registerMetrics(
+  ...args: Parameters<PrometheusHandlers['registerMetrics']>
+) {
+  return getMetricsState().handlers.registerMetrics(...args);
+}
+
+export function printMetrics(
+  ...args: Parameters<PrometheusHandlers['printMetrics']>
+) {
+  return getMetricsState().handlers.printMetrics(...args);
+}
 
 export function recordSocketConnectionAttempt() {
-  socketConnectionAttemptsTotal.inc();
+  if (!isMonitoringEnabled()) return;
+  getMetricsState().socketConnectionAttemptsTotal.inc();
 }
 
 export function recordSocketConnectionRejected(reason: string) {
-  socketConnectionsRejectedTotal.inc({ reason });
+  if (!isMonitoringEnabled()) return;
+  getMetricsState().socketConnectionsRejectedTotal.inc({ reason });
 }
 
 export function recordSocketKicked(reason: string, amount = 1) {
-  socketKickedTotal.inc({ reason }, amount);
+  if (!isMonitoringEnabled()) return;
+  getMetricsState().socketKickedTotal.inc({ reason }, amount);
 }
 
-export function updateSocketGauges(io: Server) {
-  activeSocketsGauge.set(io.sockets.sockets.size);
+export function updateSocketGauges(
+  activeSockets: number,
+  activeHostGuestRooms: number
+) {
+  if (!isMonitoringEnabled()) return;
 
-  const socketIds = new Set(io.sockets.sockets.keys());
-  const activeHostGuestRooms = Array.from(
-    io.sockets.adapter.rooms.entries()
-  ).filter(
-    ([roomId, sockets]) => !socketIds.has(roomId) && sockets.size === 2
-  ).length;
-
+  const { activeSocketsGauge, activeHostGuestRoomsGauge } = getMetricsState();
+  activeSocketsGauge.set(activeSockets);
   activeHostGuestRoomsGauge.set(activeHostGuestRooms);
 }

@@ -132,9 +132,39 @@ export function initSocket() {
 
   io = new Server();
   engine = new Engine();
+  let activeHostGuestRoomsCount = 0;
 
   io.bind(engine);
-  updateSocketGauges(io);
+
+  const refreshSocketGauges = () => {
+    updateSocketGauges(io.sockets.sockets.size, activeHostGuestRoomsCount);
+  };
+
+  io.of('/').adapter.on('join-room', (room, id) => {
+    // Ignore per-socket private rooms (room name equals socket id).
+    if (room === id) return;
+
+    const roomSize = io.sockets.adapter.rooms.get(room)?.size ?? 0;
+    if (roomSize === 2) {
+      activeHostGuestRoomsCount += 1;
+    }
+
+    refreshSocketGauges();
+  });
+
+  io.of('/').adapter.on('leave-room', (room, id) => {
+    // Ignore per-socket private rooms (room name equals socket id).
+    if (room === id) return;
+
+    const roomSizeAfterLeave = io.sockets.adapter.rooms.get(room)?.size ?? 0;
+    if (roomSizeAfterLeave === 1 && activeHostGuestRoomsCount > 0) {
+      activeHostGuestRoomsCount -= 1;
+    }
+
+    refreshSocketGauges();
+  });
+
+  refreshSocketGauges();
 
   if (configProvider.get('PAYLOAD_ENCRYPTED')) {
     // Inject session ID and encryption key
@@ -156,7 +186,7 @@ export function initSocket() {
   io.use(connTokenMiddleware.use.bind(connTokenMiddleware));
 
   io.on('connection', (socket) => {
-    updateSocketGauges(io);
+    refreshSocketGauges();
 
     const roomId = socket.data.connectionTokenData?.connectionId;
     if (!roomId) {
@@ -165,7 +195,7 @@ export function initSocket() {
       );
       recordSocketKicked('missing_connection_token_data');
       socket.disconnect(true);
-      updateSocketGauges(io);
+      refreshSocketGauges();
       return;
     }
 
@@ -176,7 +206,7 @@ export function initSocket() {
       );
       recordSocketKicked('room_not_found_after_connection');
       socket.disconnect(true);
-      updateSocketGauges(io);
+      refreshSocketGauges();
       return;
     }
     const numClients = room.size;
@@ -233,7 +263,7 @@ export function initSocket() {
       }
 
       io.to(targetRoomId).disconnectSockets();
-      updateSocketGauges(io);
+      refreshSocketGauges();
     });
 
     // host -> server -> guest
@@ -396,7 +426,7 @@ export function initSocket() {
       logger.info(
         `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
       );
-      updateSocketGauges(io);
+      refreshSocketGauges();
     });
 
     const partialPayload = {
