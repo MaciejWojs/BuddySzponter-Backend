@@ -104,6 +104,19 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Post-Connection Rejections by Reason",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum by (reason) (rate(ws_post_connection_rejected_total[5m]))",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "refresh": "10s",
@@ -120,6 +133,6 @@
   "timezone": "",
   "title": "WebSocket Metrics",
   "uid": "ws-metrics",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
