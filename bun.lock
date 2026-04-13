@@ -14,7 +14,7 @@
         "drizzle-kit": "1.0.0-beta.22-41a7d21",
         "drizzle-orm": "1.0.0-beta.20",
         "email-validator": "^2.0.4",
-        "file-type": "^22.0.0",
+        "file-type": "^22.0.1",
         "hono": "^4.12.12",
         "http-status-codes": "^2.3.0",
         "imgkit": "^2.2.1",
@@ -557,7 +557,7 @@
 
     "file-entry-cache": ["file-entry-cache@8.0.0", "", { "dependencies": { "flat-cache": "^4.0.0" } }, "sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ=="],
 
-    "file-type": ["file-type@22.0.0", "", { "dependencies": { "@tokenizer/inflate": "^0.4.1", "strtok3": "^10.3.5", "token-types": "^6.1.2", "uint8array-extras": "^1.5.0" } }, "sha512-cmBmnYo8Zymabm2+qAP7jTFbKF10bQpYmxoGfuZbRFRcq00BRddJdGNH/P7GA1EMpJy5yQbqa9B7yROb3z8Ziw=="],
+    "file-type": ["file-type@22.0.1", "", { "dependencies": { "@tokenizer/inflate": "^0.4.1", "strtok3": "^10.3.5", "token-types": "^6.1.2", "uint8array-extras": "^1.5.0" } }, "sha512-ww5Mhre0EE+jmBvOXTmXAbEMuZE7uX4a3+oRCQFNj8w++g3ev913N6tXQz0XTXbueQ5TWQfm6BdaViEHHn8bhA=="],
 
     "find-up": ["find-up@5.0.0", "", { "dependencies": { "locate-path": "^6.0.0", "path-exists": "^4.0.0" } }, "sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng=="],
 
