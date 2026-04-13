@@ -33,7 +33,7 @@
     "@scalar/hono-api-reference": "^0.10.7",
     "@socket.io/bun-engine": "^0.1.0",
     "drizzle-kit": "1.0.0-beta.22-41a7d21",
-    "drizzle-orm": "1.0.0-beta.20",
+    "drizzle-orm": "1.0.0-beta.22-41a7d21",
     "email-validator": "^2.0.4",
     "file-type": "^22.0.0",
     "hono": "^4.12.12",
