@@ -2,12 +2,13 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { Server, Socket } from 'socket.io';
 
-import { configProvider } from './config/configProvider';
 import {
-  recordSocketConnectionRejected,
   recordSocketKicked,
+  recordSocketPostConnectionRejected,
   updateSocketGauges
 } from '@/core/infrastucture/metrics';
+
+import { configProvider } from './config/configProvider';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
   IncomingEventNames,
@@ -188,6 +189,13 @@ export function initSocket() {
   io.on('connection', (socket) => {
     refreshSocketGauges();
 
+    socket.on('disconnect', () => {
+      logger.info(
+        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
+      );
+      refreshSocketGauges();
+    });
+
     const roomId = socket.data.connectionTokenData?.connectionId;
     if (!roomId) {
       logger.warn(
@@ -195,7 +203,6 @@ export function initSocket() {
       );
       recordSocketKicked('missing_connection_token_data');
       socket.disconnect(true);
-      refreshSocketGauges();
       return;
     }
 
@@ -206,7 +213,6 @@ export function initSocket() {
       );
       recordSocketKicked('room_not_found_after_connection');
       socket.disconnect(true);
-      refreshSocketGauges();
       return;
     }
     const numClients = room.size;
@@ -263,7 +269,6 @@ export function initSocket() {
       }
 
       io.to(targetRoomId).disconnectSockets();
-      refreshSocketGauges();
     });
 
     // host -> server -> guest
@@ -272,7 +277,7 @@ export function initSocket() {
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
 
-      recordSocketConnectionRejected('host_rejected_guest');
+      recordSocketPostConnectionRejected('host_rejected_guest');
 
       emitToOtherSocket(
         socket,
@@ -420,13 +425,6 @@ export function initSocket() {
     socket.on('error', (err) => {
       // logger.error(`Socket error from ${socket.id}:`, err);
       socket.emit('error', { message: err.message });
-    });
-
-    socket.on('disconnect', () => {
-      logger.info(
-        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
-      );
-      refreshSocketGauges();
     });
 
     const partialPayload = {

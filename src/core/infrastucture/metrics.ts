@@ -9,6 +9,7 @@ type MetricsState = {
   handlers: PrometheusHandlers;
   socketConnectionAttemptsTotal: Counter<string>;
   socketConnectionsRejectedTotal: Counter<'reason'>;
+  socketPostConnectionRejectedTotal: Counter<'reason'>;
   socketKickedTotal: Counter<'reason'>;
   activeSocketsGauge: Gauge<string>;
   activeHostGuestRoomsGauge: Gauge<string>;
@@ -59,6 +60,17 @@ function getMetricsState(): MetricsState {
       registers: [registry]
     });
 
+  const socketPostConnectionRejectedTotal =
+    (registry.getSingleMetric(
+      'ws_post_connection_rejected_total'
+    ) as Counter<'reason'>) ||
+    new Counter({
+      name: 'ws_post_connection_rejected_total',
+      help: 'Total number of host-guest rejections after connection is established',
+      labelNames: ['reason'],
+      registers: [registry]
+    });
+
   const activeSocketsGauge =
     (registry.getSingleMetric('ws_active_sockets') as Gauge<string>) ||
     new Gauge({
@@ -82,6 +94,7 @@ function getMetricsState(): MetricsState {
     handlers,
     socketConnectionAttemptsTotal,
     socketConnectionsRejectedTotal,
+    socketPostConnectionRejectedTotal,
     socketKickedTotal,
     activeSocketsGauge,
     activeHostGuestRoomsGauge
@@ -110,6 +123,11 @@ export function recordSocketConnectionAttempt() {
 export function recordSocketConnectionRejected(reason: string) {
   if (!isMonitoringEnabled()) return;
   getMetricsState().socketConnectionsRejectedTotal.inc({ reason });
+}
+
+export function recordSocketPostConnectionRejected(reason: string) {
+  if (!isMonitoringEnabled()) return;
+  getMetricsState().socketPostConnectionRejectedTotal.inc({ reason });
 }
 
 export function recordSocketKicked(reason: string, amount = 1) {
