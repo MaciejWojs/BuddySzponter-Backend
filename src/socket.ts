@@ -2,6 +2,12 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { Server, Socket } from 'socket.io';
 
+import {
+  recordSocketKicked,
+  recordSocketPostConnectionRejected,
+  updateSocketGauges
+} from '@/core/infrastucture/metrics';
+
 import { configProvider } from './config/configProvider';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
@@ -127,8 +133,39 @@ export function initSocket() {
 
   io = new Server();
   engine = new Engine();
+  let activeHostGuestRoomsCount = 0;
 
   io.bind(engine);
+
+  const refreshSocketGauges = () => {
+    updateSocketGauges(io.sockets.sockets.size, activeHostGuestRoomsCount);
+  };
+
+  io.of('/').adapter.on('join-room', (room, id) => {
+    // Ignore per-socket private rooms (room name equals socket id).
+    if (room === id) return;
+
+    const roomSize = io.sockets.adapter.rooms.get(room)?.size ?? 0;
+    if (roomSize === 2) {
+      activeHostGuestRoomsCount += 1;
+    }
+
+    refreshSocketGauges();
+  });
+
+  io.of('/').adapter.on('leave-room', (room, id) => {
+    // Ignore per-socket private rooms (room name equals socket id).
+    if (room === id) return;
+
+    const roomSizeAfterLeave = io.sockets.adapter.rooms.get(room)?.size ?? 0;
+    if (roomSizeAfterLeave === 1 && activeHostGuestRoomsCount > 0) {
+      activeHostGuestRoomsCount -= 1;
+    }
+
+    refreshSocketGauges();
+  });
+
+  refreshSocketGauges();
 
   if (configProvider.get('PAYLOAD_ENCRYPTED')) {
     // Inject session ID and encryption key
@@ -150,11 +187,21 @@ export function initSocket() {
   io.use(connTokenMiddleware.use.bind(connTokenMiddleware));
 
   io.on('connection', (socket) => {
+    refreshSocketGauges();
+
+    socket.on('disconnect', () => {
+      logger.info(
+        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
+      );
+      refreshSocketGauges();
+    });
+
     const roomId = socket.data.connectionTokenData?.connectionId;
     if (!roomId) {
       logger.warn(
         `Socket ${socket.id} connected without valid connection token data. Disconnecting socket.`
       );
+      recordSocketKicked('missing_connection_token_data');
       socket.disconnect(true);
       return;
     }
@@ -164,6 +211,7 @@ export function initSocket() {
       logger.warn(
         `Room ${roomId} not found for socket ${socket.id} after connection. Disconnecting socket.`
       );
+      recordSocketKicked('room_not_found_after_connection');
       socket.disconnect(true);
       return;
     }
@@ -212,7 +260,15 @@ export function initSocket() {
 
       socket.send({ payload: payload });
 
-      io.to(socket.data.connectionTokenData!.connectionId).disconnectSockets();
+      const targetRoomId = socket.data.connectionTokenData!.connectionId;
+      const targetRoom = io.sockets.adapter.rooms.get(targetRoomId);
+      const socketsToDisconnect = targetRoom?.size ?? 0;
+
+      if (socketsToDisconnect > 0) {
+        recordSocketKicked('connection_disconnect_event', socketsToDisconnect);
+      }
+
+      io.to(targetRoomId).disconnectSockets();
     });
 
     // host -> server -> guest
@@ -220,6 +276,8 @@ export function initSocket() {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
+
+      recordSocketPostConnectionRejected('host_rejected_guest');
 
       emitToOtherSocket(
         socket,
@@ -367,12 +425,6 @@ export function initSocket() {
     socket.on('error', (err) => {
       // logger.error(`Socket error from ${socket.id}:`, err);
       socket.emit('error', { message: err.message });
-    });
-
-    socket.on('disconnect', () => {
-      logger.info(
-        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
-      );
     });
 
     const partialPayload = {
