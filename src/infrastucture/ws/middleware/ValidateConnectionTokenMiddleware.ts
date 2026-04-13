@@ -1,5 +1,9 @@
 import { Server } from 'socket.io';
 
+import {
+  recordSocketConnectionAttempt,
+  recordSocketConnectionRejected
+} from '@/core/infrastucture/metrics';
 import logger from '@/infrastucture/logger';
 import {
   ConnectionTokenData,
@@ -27,6 +31,7 @@ export class ValidateConnectionTokenMiddleware
 
   override async use(...args: IoMiddlewareParams): Promise<void> {
     const [socket, next] = args;
+
     try {
       const token = socket.handshake.auth.connectionToken;
       if (!token) {
@@ -34,11 +39,15 @@ export class ValidateConnectionTokenMiddleware
         return next(new Error('Authentication error: No token provided'));
       }
 
+      // Host-guest attempt starts only when a connection token is provided.
+      recordSocketConnectionAttempt();
+
       const isValidFormat = connectionTokenSchema.safeParse(token);
       if (!isValidFormat.success) {
         logger.onlyDev(
           `Connection token format validation failed: ${JSON.stringify(isValidFormat.error.issues)}`
         );
+        recordSocketConnectionRejected('invalid_token_format');
         return next(new Error('Authentication error: Invalid token format'));
       }
 
@@ -49,6 +58,7 @@ export class ValidateConnectionTokenMiddleware
         logger.warn(
           'Socket connection rejected: Invalid connection token - expired or malformed'
         );
+        recordSocketConnectionRejected('invalid_or_expired_token');
         return next(new Error('Authentication error: Invalid token'));
       }
 
@@ -68,6 +78,7 @@ export class ValidateConnectionTokenMiddleware
         logger.warn(
           `Socket connection rejected: Room ${connectionTokenData.connectionId} already has 2 clients.`
         );
+        recordSocketConnectionRejected('room_full');
         return next(
           new Error('Authentication error: Connection already has 2 clients')
         );
@@ -76,6 +87,7 @@ export class ValidateConnectionTokenMiddleware
       next();
     } catch (error) {
       logger.error('Error verifying token during socket connection:', error);
+      recordSocketConnectionRejected('token_verification_failed');
       return next(new Error('Authentication error: Token verification failed'));
     }
   }
