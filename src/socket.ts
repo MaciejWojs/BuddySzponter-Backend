@@ -7,7 +7,7 @@ import {
   recordSocketConnectionRejected,
   recordSocketKicked,
   updateSocketGauges
-} from './core/infrastucture/metrics';
+} from '@/core/infrastucture/metrics';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
 import {
   IncomingEventNames,
