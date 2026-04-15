@@ -1,7 +1,32 @@
+import ISO6391 from 'iso-639-1';
+
 import { localesClient } from '@/infrastucture/s3/client';
 
 const getManifestObjectName = (version: string, hash: string) =>
   `${version}/_meta/${hash}.json`;
+
+const normalizeLocaleCode = (value: string): string | null => {
+  const normalized = value.trim().toLowerCase();
+
+  if (!normalized) {
+    return null;
+  }
+
+  if (!ISO6391.validate(normalized)) {
+    return null;
+  }
+
+  return normalized;
+};
+
+const normalizeLocaleList = (locales: string[]): string[] =>
+  Array.from(
+    new Set(
+      locales
+        .map(normalizeLocaleCode)
+        .filter((lang): lang is string => lang !== null)
+    )
+  );
 
 export async function getLocalesManifest(
   version: string,
@@ -18,9 +43,11 @@ export async function getLocalesManifest(
       return [];
     }
 
-    return parsed
-      .map((value) => (typeof value === 'string' ? value.trim() : ''))
-      .filter((value) => value.length > 0);
+    const rawLocales = parsed.filter(
+      (value): value is string => typeof value === 'string'
+    );
+
+    return normalizeLocaleList(rawLocales);
   } catch {
     return [];
   }
@@ -32,11 +59,7 @@ export async function setLocalesManifest(
   locales: string[]
 ): Promise<void> {
   const objectName = getManifestObjectName(version, hash);
-  const normalized = Array.from(
-    new Set(
-      locales.map((lang) => lang.trim()).filter((lang) => lang.length > 0)
-    )
-  );
+  const normalized = normalizeLocaleList(locales);
 
   await localesClient.write(objectName, JSON.stringify(normalized));
 }
@@ -47,9 +70,14 @@ export async function addLocaleToManifest(
   lang: string
 ): Promise<void> {
   const locales = await getLocalesManifest(version, hash);
+  const normalizedLang = normalizeLocaleCode(lang);
 
-  if (!locales.includes(lang)) {
-    locales.push(lang);
+  if (!normalizedLang) {
+    return;
+  }
+
+  if (!locales.includes(normalizedLang)) {
+    locales.push(normalizedLang);
     await setLocalesManifest(version, hash, locales);
   }
 }
@@ -60,6 +88,12 @@ export async function removeLocaleFromManifest(
   lang: string
 ): Promise<void> {
   const locales = await getLocalesManifest(version, hash);
-  const filtered = locales.filter((item) => item !== lang);
+  const normalizedLang = normalizeLocaleCode(lang);
+
+  if (!normalizedLang) {
+    return;
+  }
+
+  const filtered = locales.filter((item) => item !== normalizedLang);
   await setLocalesManifest(version, hash, filtered);
 }
