@@ -1,7 +1,5 @@
 import { z } from '@hono/zod-openapi';
 
-import { supportedLocales } from '@/shared/locales';
-
 export const appVersionSchema = z.object({
   version: z.string().min(1),
   codename: z.string().nullable(),
@@ -10,7 +8,7 @@ export const appVersionSchema = z.object({
 
 export const supportedVersionsResponseSchema = z.array(appVersionSchema);
 
-export const supportedLocalesResponseSchema = z.array(z.enum(supportedLocales));
+export const supportedLocalesResponseSchema = z.array(z.string());
 
 export const coreLocalePayloadResponseSchema = z
   .record(z.string(), z.unknown())

@@ -1,13 +1,11 @@
-import { localesClient } from '@/infrastucture/s3/client';
-import { supportedLocales } from '@/shared/locales';
-
 import { ICoreRepository } from '../../domain/repositories/ICoreRepository';
 import { Version } from '../../domain/value-objects/version.vo';
+import { getLocalesManifest } from './localesManifest';
 
 export class GetSupportedLocalesByVersion {
   constructor(private readonly coreRepository: ICoreRepository) {}
 
-  async execute(version: string): Promise<(typeof supportedLocales)[number][]> {
+  async execute(version: string): Promise<string[]> {
     const safeVersion = version.trim();
 
     const versionVO = new Version(safeVersion);
@@ -22,16 +20,6 @@ export class GetSupportedLocalesByVersion {
       return [];
     }
 
-    const available = await Promise.all(
-      supportedLocales.map(async (lang) => {
-        const objectName = `${safeVersion}/${lang}/${hash}.json`;
-        const fileExists = await localesClient.file(objectName).exists();
-        return fileExists ? lang : null;
-      })
-    );
-
-    return available.filter(
-      (lang): lang is (typeof supportedLocales)[number] => lang !== null
-    );
+    return getLocalesManifest(safeVersion, hash);
   }
 }

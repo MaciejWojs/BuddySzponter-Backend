@@ -1,11 +1,14 @@
 import { z } from '@hono/zod-openapi';
+import ISO6391 from 'iso-639-1';
 
 export const localeCodeSchema = z
   .string()
   .trim()
-  .min(2)
-  .max(16)
-  .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid language code')
+  .toLowerCase()
+  .refine(
+    (code) => ISO6391.validate(code),
+    'Invalid language code (must be ISO-639-1)'
+  )
   .openapi({
     description: 'Language code used for locale file path',
     example: 'it'
