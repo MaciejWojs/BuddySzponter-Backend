@@ -1,4 +1,5 @@
 import { localesClient } from '@/infrastucture/s3/client';
+import { addLocaleToManifest } from '@/modules/core/application/use-cases/localesManifest';
 import { ICoreRepository } from '@/modules/core/domain/repositories/ICoreRepository';
 import { Version } from '@/modules/core/domain/value-objects/version.vo';
 
@@ -29,6 +30,11 @@ export class UploadLocale {
     const objectName = `${versionExists.version.value}/${input.lang}/${versionExists.langHash}.json`;
 
     await localesClient.write(objectName, input.buffer);
+    await addLocaleToManifest(
+      versionExists.version.value,
+      versionExists.langHash,
+      input.lang
+    );
 
     return {
       hash: versionExists.langHash,

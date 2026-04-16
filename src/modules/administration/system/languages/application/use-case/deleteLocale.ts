@@ -1,4 +1,5 @@
 import { localesClient } from '@/infrastucture/s3/client';
+import { removeLocaleFromManifest } from '@/modules/core/application/use-cases/localesManifest';
 import { ICoreRepository } from '@/modules/core/domain/repositories/ICoreRepository';
 import { Version } from '@/modules/core/domain/value-objects/version.vo';
 
@@ -28,5 +29,6 @@ export class DeleteLocale {
     }
 
     await localesClient.delete(objectName);
+    await removeLocaleFromManifest(safeVersion.value, hash, lang);
   }
 }
