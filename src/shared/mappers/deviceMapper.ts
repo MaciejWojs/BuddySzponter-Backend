@@ -16,7 +16,9 @@ export class DeviceMapper {
       new DeviceFingerprint(deviceRecord.fingerprint),
       new DeviceName(deviceRecord.name ?? 'unknown'),
       new DeviceOS(deviceRecord.os ?? 'unknown'),
-      deviceRecord.createdAt
+      deviceRecord.createdAt,
+      deviceRecord.lastUsedAt,
+      deviceRecord.lastIpAddress
     );
   }
 
@@ -27,9 +29,9 @@ export class DeviceMapper {
       fingerprint: device.fingerprint.value,
       name: device.name.value,
       os: device.os.value,
+      lastIpAddress: device.lastIpAddress,
       createdAt: device.createdAt,
-      // TODO: add lastUsedAt to device entity and set it here
-      lastUsedAt: null
+      lastUsedAt: device.lastUsedAt
     };
   }
 }

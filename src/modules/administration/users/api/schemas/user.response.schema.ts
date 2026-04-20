@@ -62,6 +62,10 @@ export const getUserDeviceResponseSchema = z.object({
     description: 'Operating system name',
     example: 'Windows 10'
   }),
+  lastUsedAt: z.date().nullable().openapi({
+    description: 'Timestamp when the device was last used',
+    example: '2026-04-20T12:00:00.000Z'
+  }),
   createdAt: z.date().openapi({
     description: 'Timestamp when the device record was created',
     example: '2026-03-29T15:55:00.386Z'

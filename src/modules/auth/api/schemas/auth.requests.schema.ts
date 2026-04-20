@@ -17,6 +17,22 @@ export const registerBodySchema = z
     passwordConfirm: z.string().min(8).openapi({
       description: 'Confirmation of the user password',
       example: 'SecurePassword123#'
+    }),
+    deviceId: z.uuid().optional().openapi({
+      description: 'Optional device UUID from cookie/client',
+      example: '3d1dbf9f-6f23-4fdf-8a8f-746ac7a80b7d'
+    }),
+    fingerprint: z.string().min(1).openapi({
+      description: 'Fingerprint of the user device',
+      example: 'unique-device-fingerprint'
+    }),
+    os: z.string().openapi({
+      description: 'Operating system of the user device',
+      example: 'Windows 11'
+    }),
+    name: z.string().openapi({
+      description: 'Name of the user device',
+      example: "John's Laptop"
     })
   })
   .superRefine((data, ctx) => {
@@ -38,8 +54,12 @@ export const loginBodySchema = z.object({
     description: 'Password of the user, must be at least 8 characters',
     example: 'SecurePassword123#'
   }),
+  deviceId: z.uuid().optional().openapi({
+    description: 'Optional device UUID from cookie/client',
+    example: '3d1dbf9f-6f23-4fdf-8a8f-746ac7a80b7d'
+  }),
   fingerprint: z.string().min(1).openapi({
-    description: 'Fingerprint of the user',
+    description: 'Device fingerprint',
     example: 'unique-device-fingerprint'
   }),
   os: z.string().optional().openapi({

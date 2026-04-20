@@ -61,6 +61,8 @@ export const devicesTable = pgTable('devices', {
   name: varchar({ length: 255 }),
   os: varchar({ length: 100 }),
 
+  lastIpAddress: inet(),
+
   createdAt: timestamp().defaultNow().notNull(),
   lastUsedAt: timestamp()
 });

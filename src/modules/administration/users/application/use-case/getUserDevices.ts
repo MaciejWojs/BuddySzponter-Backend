@@ -17,6 +17,7 @@ export class GetUserDevices {
       fingerprint: device.fingerprint.value,
       name: device.name.value,
       os: device.os.value,
+      lastUsedAt: device.lastUsedAt,
       createdAt: device.createdAt
     }));
   }

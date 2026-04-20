@@ -9,7 +9,9 @@ export class Device {
     readonly fingerprint: DeviceFingerprint,
     readonly name: DeviceName,
     readonly os: DeviceOS,
-    readonly createdAt: Date
+    readonly createdAt: Date,
+    readonly lastUsedAt: Date | null = null,
+    readonly lastIpAddress: string | null = null
   ) {}
 
   changeUser(userId: UserId): Device {
@@ -26,8 +28,18 @@ export class Device {
       changes.fingerprint ?? this.fingerprint,
       changes.name ?? this.name,
       changes.os ?? this.os,
-      changes.createdAt ?? this.createdAt
+      changes.createdAt ?? this.createdAt,
+      changes.lastUsedAt ?? this.lastUsedAt,
+      changes.lastIpAddress ?? this.lastIpAddress
     );
+  }
+
+  markAsUsed(at: Date = new Date()): Device {
+    return this.copy({ lastUsedAt: at });
+  }
+
+  updateLastIpAddress(lastIpAddress: string): Device {
+    return this.copy({ lastIpAddress });
   }
 
   updateName(name: DeviceName): Device {

@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import logger from '@logger';
 import { defaultHook } from '@shared/api/openapi/defaultHook';
-import { deleteCookie, setCookie } from 'hono/cookie';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
 import { sign } from 'hono/jwt';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
@@ -33,11 +33,27 @@ import {
   refreshRoute,
   registerRoute
 } from './auth.openapi';
+
+const UUID_V4_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUUID(value: string | undefined): value is string {
+  return !!value && UUID_V4_REGEX.test(value);
+}
+
 const authRouter = new OpenAPIHono({ defaultHook });
 
 authRouter.openapi(registerRoute, async (c) => {
   // Example validated data access
   const data = c.req.valid('json');
+  const ipAddress = c.get('client-ip') ?? null;
+
+  if (!ipAddress) {
+    logger.warn(`Registration attempt without IP address ${c.req.path}`);
+    throw new HTTPException(StatusCodes.BAD_REQUEST, {
+      message: 'Unable to determine client IP address'
+    });
+  }
 
   const daoFactory = new DaoFactory();
   const userDao = daoFactory.db.userDao();
@@ -45,9 +61,35 @@ authRouter.openapi(registerRoute, async (c) => {
   const userRepository = new UserRepository(userDao);
   const userCacheRepository = new UserCacheRepository(userRepository, client);
   const registerUser = new RegisterUser(userCacheRepository, roleDao);
+  const repositoryFactory = new RepositoryFactory();
+  const createOrFindUserDevice = new CreateOrFindUserDevice(
+    repositoryFactory.deviceRepository()
+  );
+
+  let userId: number;
+  let createdDeviceId: string;
 
   try {
-    await registerUser.execute(data);
+    const user = await registerUser.execute(data);
+
+    if (!user.id) {
+      logger.error(`User ${user.email.value} has no ID after registration`);
+      throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR
+      });
+    }
+
+    const device = await createOrFindUserDevice.execute(
+      data.deviceId,
+      user.id.value,
+      data.name,
+      data.os,
+      data.fingerprint,
+      ipAddress
+    );
+
+    userId = user.id.value;
+    createdDeviceId = device.id.value;
   } catch (error) {
     if (error instanceof ValidationError) {
       if (error instanceof PasswordValidationError) {
@@ -89,6 +131,19 @@ authRouter.openapi(registerRoute, async (c) => {
       message: 'An unexpected error occurred during registration'
     });
   }
+
+  setCookie(c, 'userId', String(userId), {
+    httpOnly: true,
+    secure: !configProvider.get('DEVELOPMENT'),
+    maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
+  });
+
+  setCookie(c, 'deviceId', createdDeviceId, {
+    httpOnly: true,
+    secure: !configProvider.get('DEVELOPMENT'),
+    maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
+  });
+
   // Here you would handle the logic for registering a new user, such as validating input and storing user data.
 
   const payload = {
@@ -100,6 +155,10 @@ authRouter.openapi(registerRoute, async (c) => {
 
 authRouter.openapi(loginRoute, async (c) => {
   const data = c.req.valid('json');
+  const cookieDeviceId = getCookie(c, 'deviceId');
+  const resolvedDeviceId = isValidUUID(cookieDeviceId)
+    ? cookieDeviceId
+    : data.deviceId;
 
   const ipAddress = c.get('client-ip') ?? null;
 
@@ -131,10 +190,12 @@ authRouter.openapi(loginRoute, async (c) => {
     }
 
     const device = await createOrFindUserDevice.execute(
-      data.fingerprint,
+      resolvedDeviceId,
       user.id.value,
       data.name,
-      data.os
+      data.os,
+      data.fingerprint,
+      ipAddress
     );
 
     const { session: authSession, rawToken: refreshToken } =
@@ -149,6 +210,18 @@ authRouter.openapi(loginRoute, async (c) => {
       httpOnly: true,
       secure: !configProvider.get('DEVELOPMENT'),
       // sameSite: 'Strict',
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
+    });
+
+    setCookie(c, 'userId', String(user.id.value), {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
+      maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
+    });
+
+    setCookie(c, 'deviceId', device.id.value, {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT'),
       maxAge: APP_CONFIG.auth.tokens.refreshCookieMaxAgeSeconds
     });
 
@@ -274,6 +347,16 @@ authRouter.openapi(logoutRoute, async (c) => {
         'Failed to delete refresh token cookie during logout - cookie not found. Should never happen, validation should have failed if cookie was missing.'
       );
     }
+
+    deleteCookie(c, 'userId', {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT')
+    });
+
+    deleteCookie(c, 'deviceId', {
+      httpOnly: true,
+      secure: !configProvider.get('DEVELOPMENT')
+    });
   }
   return c.json(
     {

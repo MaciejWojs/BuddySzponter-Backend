@@ -1,0 +1,10 @@
+
+DUO: http api (na razie deklaracje)
+wywalenie połączenia (admin)
+terminate połączenia (admin)
+wylistowanie aktywnych połączeń 
+
+TRES: seeder
+4 userów (w tym jeden admin)
+kilka wersji
+seeder języków

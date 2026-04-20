@@ -11,28 +11,39 @@ export class FindOrCreateDevice {
   constructor(private readonly deviceRepository: IDevicesRepository) {}
 
   async execute(
-    fingerprint: string,
+    deviceId: string,
     userId: number | null,
     deviceName: string = 'Unknown Device',
-    deviceOs: string = 'Unknown OS'
+    deviceOs: string = 'Unknown OS',
+    fingerprint?: string
   ): Promise<Device> {
     if (userId) {
       const createUserDevice = new CreateUserDevice(this.deviceRepository);
       return await createUserDevice.execute(
-        fingerprint,
+        deviceId,
         userId,
         deviceName,
-        deviceOs
+        deviceOs,
+        fingerprint
       );
     }
-    const fingerprintVO = new DeviceFingerprint(fingerprint);
+
+    const deviceIdVO = new DeviceUUID(deviceId);
+    const existingById = await this.deviceRepository.findById(deviceIdVO);
+    if (existingById && !existingById.userId) {
+      return this.deviceRepository.save(existingById.markAsUsed());
+    }
+
+    const fingerprintVO = new DeviceFingerprint(
+      fingerprint?.trim() || deviceId
+    );
 
     const existingDevices =
       await this.deviceRepository.findByFingerprint(fingerprintVO);
     if (existingDevices.length > 0) {
       const unassignedDevice = existingDevices.find((device) => !device.userId);
       if (unassignedDevice) {
-        return unassignedDevice;
+        return this.deviceRepository.save(unassignedDevice.markAsUsed());
       }
     }
     const deviceNameVO = new DeviceName(deviceName);
@@ -40,11 +51,12 @@ export class FindOrCreateDevice {
 
     const newDevice = await this.deviceRepository.create(
       new Device(
-        new DeviceUUID(),
+        deviceIdVO,
         null,
         fingerprintVO,
         deviceNameVO,
         deviceOsVO,
+        new Date(),
         new Date()
       )
     );
