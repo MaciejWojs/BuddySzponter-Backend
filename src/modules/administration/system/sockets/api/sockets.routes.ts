@@ -32,7 +32,7 @@ administrationSystemSocketsRouter.openapi(
     const useCase = new TerminateSocketConnection();
 
     try {
-      const disconnectedSockets = useCase.execute(connectionId);
+      const disconnectedSockets = await useCase.execute(connectionId);
 
       return c.json(
         {

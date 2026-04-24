@@ -70,7 +70,11 @@ export class ConnectionRepository implements IConnectionRepository {
       );
     }
     const uuidKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${id}`;
-    const code = await client.get(uuidKey);
+    let code = await client.get(uuidKey);
+
+    if (!code) {
+      code = await this.findCodeByConnectionId(id);
+    }
 
     if (code) {
       const codeKey = `${APP_CONFIG.connection.cache.keys.codePrefix}${code}`;
@@ -131,6 +135,33 @@ export class ConnectionRepository implements IConnectionRepository {
     return connections;
   }
 
+  private async findCodeByConnectionId(id: string): Promise<string | null> {
+    const keys = await client.keys(
+      `${APP_CONFIG.connection.cache.keys.codePrefix}*`
+    );
+
+    for (const key of keys) {
+      const raw = await client.get(key);
+      if (!raw) {
+        continue;
+      }
+
+      try {
+        const parsed = JSON.parse(raw) as {
+          connectionUUID?: string;
+          code?: string;
+        };
+        if (parsed.connectionUUID === id && parsed.code) {
+          return parsed.code;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return null;
+  }
+
   async updateConnection(connection: Connection): Promise<boolean> {
     if (!client.connected) {
       throw new Error(
@@ -171,6 +202,12 @@ export class ConnectionRepository implements IConnectionRepository {
       throw new Error('Failed to serialize connection data for cache update.');
     }
     const updatedDataStatus = await client.set(key, payloadData);
+
+    if (updatedDataStatus === 'OK') {
+      const uuidLookupKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connection.id.value}`;
+      await client.set(uuidLookupKey, connection.code.value);
+    }
+
     return updatedDataStatus === 'OK';
   }
 }
