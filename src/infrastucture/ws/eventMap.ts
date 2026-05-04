@@ -7,13 +7,16 @@ import {
   disconnectFromConnectionSchema,
   guestAcknowledgeConnectionSchema,
   rejectConnectionEventSchema,
-  requestAccessEventSchema
+  requestAccessEventSchema,
+  resumeConnectionEventSchema
 } from './schemas/events/incoming/connectionMange.events';
 import {
   ConnectionAcceptedEventSchema,
   ConnectionDisconnectedEventSchema,
   connectionErrorEventSchema,
   ConnectionRejectedEventSchema,
+  connectionResumedEventSchema,
+  connectionResumeFailedEventSchema,
   kickFromConnectionEventSchema,
   terminateConnectionEventSchema
 } from './schemas/events/outgoing/connectionMange.events';
@@ -45,7 +48,8 @@ export const incomingEventSchemas = {
   'connection:accept': acceptConnectionEventSchema,
   'connection:reject': rejectConnectionEventSchema,
   'connection:disconnect': disconnectFromConnectionSchema,
-  'connection:acknowledge': guestAcknowledgeConnectionSchema
+  'connection:acknowledge': guestAcknowledgeConnectionSchema,
+  'connection:resume': resumeConnectionEventSchema
 } as const;
 
 /** Events sent by the server */
@@ -57,7 +61,9 @@ export const outgoingEventSchemas = {
   'connection:disconnected': ConnectionDisconnectedEventSchema,
   'connection:terminate': terminateConnectionEventSchema,
   'connection:kick': kickFromConnectionEventSchema,
-  'connection:error': connectionErrorEventSchema
+  'connection:error': connectionErrorEventSchema,
+  'connection:resumed': connectionResumedEventSchema,
+  'connection:resume-failed': connectionResumeFailedEventSchema
 } as const;
 
 export const IncomingEventNames = new Set<keyof IncomingEventPayloads>(

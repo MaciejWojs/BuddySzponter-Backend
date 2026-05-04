@@ -27,3 +27,17 @@ export const connectionErrorEventSchema = z.object({
   message: z.string(),
   code: z.number().optional()
 });
+
+export const connectionResumedEventSchema = z.object({
+  sessionId: z.uuid()
+});
+
+export const connectionResumeFailedEventSchema = z.object({
+  reason: z.enum([
+    'expired',
+    'invalid',
+    'room_closed',
+    'room_full',
+    'device_mismatch'
+  ])
+});

@@ -26,3 +26,10 @@ export const disconnectFromConnectionSchema = z.object({
 export const guestAcknowledgeConnectionSchema = z.object({
   sessionId: z.uuid()
 });
+
+/** Used by client to resume a previously established connection after temporary disconnect */
+export const resumeConnectionEventSchema = z.object({
+  sessionId: z.uuid(),
+  resumeToken: z.string(),
+  deviceId: z.string().min(1)
+});

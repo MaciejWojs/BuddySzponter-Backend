@@ -12,6 +12,8 @@ export type ConnectionTokenData = {
   deviceId: string;
 };
 
+type CachedTokenSet = 'primary' | 'resume';
+
 export class TokenService {
   /** Creates a connection token, stores it in cache, and returns the raw token.
    * The token is hashed before storage for security. The stored data includes the connection ID, role, and device ID, and it expires after a configured TTL.
@@ -37,7 +39,7 @@ export class TokenService {
     const payload = JSON.stringify(data);
 
     const result = await client.setex(
-      `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`,
+      this.getTokenKey(hashedToken),
       APP_CONFIG.connection.security.tokenTTLSeconds,
       payload
     );
@@ -47,7 +49,7 @@ export class TokenService {
     }
 
     const lookup = await client.sadd(
-      `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:tokens`,
+      this.getConnectionTokenSetKey(connectionId),
       hashedToken
     );
 
@@ -60,7 +62,10 @@ export class TokenService {
     return raw;
   }
 
-  private async findTokenData(hashedToken: string): Promise<{
+  private async findTokenData(
+    hashedToken: string,
+    source: CachedTokenSet = 'primary'
+  ): Promise<{
     connectionId: string;
     role: ConnectionRole;
     deviceId: string;
@@ -71,9 +76,12 @@ export class TokenService {
       );
     }
 
-    const data = await client.get(
-      `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`
-    );
+    const key =
+      source === 'primary'
+        ? this.getTokenKey(hashedToken)
+        : this.getResumeTokenKey(hashedToken);
+
+    const data = await client.get(key);
 
     if (!data) {
       return null;
@@ -92,19 +100,103 @@ export class TokenService {
     ).toString('hex');
   }
 
+  private getConnectionResumeTokenSetKey(connectionId: string): string {
+    return `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:resume_tokens`;
+  }
+
+  private getConnectionTokenSetKey(connectionId: string): string {
+    return `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:tokens`;
+  }
+
+  private getResumeTokenKey(hashedToken: string): string {
+    return `${APP_CONFIG.connection.cache.keys.resumeTokenPrefix}${hashedToken}`;
+  }
+
+  private getTokenKey(hashedToken: string): string {
+    return `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`;
+  }
+
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  async revokeToken(
+  async markTokenForReconnect(
+    rawToken: string
+  ): Promise<ConnectionTokenData | null> {
+    const hashedToken = this.hashToken(rawToken);
+    const primaryData = await this.findTokenData(hashedToken, 'primary');
+
+    if (primaryData) {
+      const primaryRevoked = await this.revokeTokenByHash(
+        hashedToken,
+        primaryData.connectionId,
+        'primary'
+      );
+
+      if (primaryRevoked) {
+        await this.upsertResumeToken(
+          hashedToken,
+          primaryData.connectionId,
+          primaryData
+        );
+        return primaryData;
+      }
+
+      const resumeDataAfterRace = await this.findTokenData(
+        hashedToken,
+        'resume'
+      );
+      if (!resumeDataAfterRace) {
+        return null;
+      }
+
+      await this.upsertResumeToken(
+        hashedToken,
+        resumeDataAfterRace.connectionId,
+        resumeDataAfterRace
+      );
+      return resumeDataAfterRace;
+    }
+
+    const resumeData = await this.findTokenData(hashedToken, 'resume');
+    if (!resumeData) {
+      return null;
+    }
+
+    await this.upsertResumeToken(
+      hashedToken,
+      resumeData.connectionId,
+      resumeData
+    );
+    return resumeData;
+  }
+
+  async revokeToken(rawToken: string, connectionId: string): Promise<boolean> {
+    const hashedToken = this.hashToken(rawToken);
+    const [primaryRevoked, resumeRevoked] = await Promise.all([
+      this.revokeTokenByHash(hashedToken, connectionId, 'primary'),
+      this.revokeTokenByHash(hashedToken, connectionId, 'resume')
+    ]);
+
+    return primaryRevoked || resumeRevoked;
+  }
+
+  private async revokeTokenByHash(
     hashedToken: string,
-    connectionId: string
+    connectionId: string,
+    source: CachedTokenSet = 'primary'
   ): Promise<boolean> {
     if (!client.connected) {
       throw new Error('Cache client is not connected.');
     }
-    const tokenKey = `${APP_CONFIG.connection.cache.keys.tokenPrefix}${hashedToken}`;
-    const setKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:tokens`;
+    const tokenKey =
+      source === 'primary'
+        ? this.getTokenKey(hashedToken)
+        : this.getResumeTokenKey(hashedToken);
+    const setKey =
+      source === 'primary'
+        ? this.getConnectionTokenSetKey(connectionId)
+        : this.getConnectionResumeTokenSetKey(connectionId);
 
     const tasks = await Promise.all([
       client.del(tokenKey),
@@ -113,14 +205,14 @@ export class TokenService {
 
     if (tasks[0] === 0) {
       logger.warn(
-        `Attempted to revoke token ${hashedToken} for connection ${connectionId}, but it was not found in cache.`
+        `Attempted to revoke ${source} token ${hashedToken} for connection ${connectionId}, but it was not found in cache.`
       );
       return false;
     }
 
     if (tasks[1] === 0) {
       logger.warn(
-        `Token ${hashedToken} was revoked but was not found in connection token set for connection ${connectionId}. This may indicate a tracking issue.`
+        `Token ${hashedToken} was revoked but was not found in ${source} token set for connection ${connectionId}. This may indicate a tracking issue.`
       );
     }
 
@@ -132,24 +224,60 @@ export class TokenService {
       throw new Error('Cache client is not connected.');
     }
 
-    const setKey = `${APP_CONFIG.connection.cache.keys.uuidPrefix}${connectionId}:tokens`;
-    const hashedTokens = await client.smembers(setKey);
+    const setKey = this.getConnectionTokenSetKey(connectionId);
+    const resumeSetKey = this.getConnectionResumeTokenSetKey(connectionId);
+    const [hashedTokens, hashedResumeTokens] = await Promise.all([
+      client.smembers(setKey),
+      client.smembers(resumeSetKey)
+    ]);
 
-    if (hashedTokens.length === 0) {
+    if (hashedTokens.length === 0 && hashedResumeTokens.length === 0) {
       logger.info(`No tokens found to revoke for connection ${connectionId}.`);
       return;
     }
 
     const revokeTasks = hashedTokens.map((hashedToken) =>
-      this.revokeToken(hashedToken, connectionId)
+      this.revokeTokenByHash(hashedToken, connectionId, 'primary')
     );
 
-    await Promise.all(revokeTasks);
+    const revokeResumeTasks = hashedResumeTokens.map((hashedToken) =>
+      this.revokeTokenByHash(hashedToken, connectionId, 'resume')
+    );
+
+    await Promise.all([...revokeTasks, ...revokeResumeTasks]);
     await client.del(setKey);
+    await client.del(resumeSetKey);
+  }
+
+  private async upsertResumeToken(
+    hashedToken: string,
+    connectionId: string,
+    data: ConnectionTokenData
+  ): Promise<void> {
+    const payload = JSON.stringify(data);
+    const setResult = await client.setex(
+      this.getResumeTokenKey(hashedToken),
+      APP_CONFIG.connection.security.resumeTokenTTLSeconds,
+      payload
+    );
+
+    if (setResult !== 'OK') {
+      throw new Error('Failed to store resume token. Please try again.');
+    }
+
+    await client.sadd(
+      this.getConnectionResumeTokenSetKey(connectionId),
+      hashedToken
+    );
   }
 
   async verifyToken(raw: string): Promise<ConnectionTokenData | null> {
     const hashedToken = this.hashToken(raw);
-    return this.findTokenData(hashedToken);
+    const primaryToken = await this.findTokenData(hashedToken, 'primary');
+    if (primaryToken) {
+      return primaryToken;
+    }
+
+    return this.findTokenData(hashedToken, 'resume');
   }
 }

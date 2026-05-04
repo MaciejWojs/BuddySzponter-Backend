@@ -51,10 +51,10 @@ export class ValidateConnectionTokenMiddleware
         return next(new Error('Authentication error: Invalid token format'));
       }
 
-      const connectionTokenData: ConnectionTokenData | null =
+      const verifiedTokenData: ConnectionTokenData | null =
         await this.tokenService.verifyToken(token);
 
-      if (!connectionTokenData) {
+      if (!verifiedTokenData) {
         logger.warn(
           'Socket connection rejected: Invalid connection token - expired or malformed'
         );
@@ -62,27 +62,54 @@ export class ValidateConnectionTokenMiddleware
         return next(new Error('Authentication error: Invalid token'));
       }
 
-      await this.tokenService.revokeToken(
-        token,
-        connectionTokenData.connectionId
-      );
-
-      socket.data.connectionTokenData = connectionTokenData;
+      socket.data.connectionTokenData = verifiedTokenData;
 
       const room = this.io.sockets.adapter.rooms.get(
-        connectionTokenData.connectionId
+        verifiedTokenData.connectionId
       );
       if (!room || room.size < 2) {
-        socket.join(connectionTokenData.connectionId);
+        socket.join(verifiedTokenData.connectionId);
       } else {
-        logger.warn(
-          `Socket connection rejected: Room ${connectionTokenData.connectionId} already has 2 clients.`
+        const existingSockets = Array.from(room)
+          .map((socketId) => this.io.sockets.sockets.get(socketId))
+          .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+        const reconnectingSocket = existingSockets.find(
+          (existingSocket) =>
+            existingSocket.data.connectionTokenData?.deviceId ===
+              verifiedTokenData.deviceId &&
+            existingSocket.data.connectionTokenData?.role ===
+              verifiedTokenData.role
         );
-        recordSocketConnectionRejected('room_full');
-        return next(
-          new Error('Authentication error: Connection already has 2 clients')
-        );
+
+        if (reconnectingSocket) {
+          logger.info(
+            `Replacing stale socket ${reconnectingSocket.id} with reconnecting socket ${socket.id} for connection ${verifiedTokenData.connectionId}`
+          );
+          reconnectingSocket.disconnect(true);
+          socket.join(verifiedTokenData.connectionId);
+        } else {
+          logger.warn(
+            `Socket connection rejected: Room ${verifiedTokenData.connectionId} already has 2 clients.`
+          );
+          recordSocketConnectionRejected('room_full');
+          return next(
+            new Error('Authentication error: Connection already has 2 clients')
+          );
+        }
       }
+
+      const refreshedTokenData =
+        await this.tokenService.markTokenForReconnect(token);
+      if (!refreshedTokenData) {
+        logger.warn(
+          `Socket connection rejected: Token race detected for socket ${socket.id}`
+        );
+        recordSocketConnectionRejected('invalid_or_expired_token');
+        return next(new Error('Authentication error: Invalid token'));
+      }
+
+      socket.data.connectionTokenData = refreshedTokenData;
 
       next();
     } catch (error) {

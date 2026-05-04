@@ -247,3 +247,4 @@ diagrams/**/*.jpg
 diagrams/**/*.svg
 ws-client/*
 monitoring/loki/data/
+src/scripts/

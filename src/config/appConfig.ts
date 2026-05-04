@@ -59,7 +59,11 @@ export const APP_CONFIG = {
       /** Length of the randomly generated connection code in bytes (before encoding). */
       tokenLengthBytes: 32,
       /** Lifetime of the connection token in seconds (2 minutes). */
-      tokenTTLSeconds: 120
+      tokenTTLSeconds: 120,
+      /** Lifetime of reconnect/resume token in seconds (90 seconds). */
+      resumeTokenTTLSeconds: 90,
+      /** Grace period after disconnect where reconnect should still be accepted (60 seconds). */
+      disconnectGracePeriodSeconds: 60
     },
     retries: {
       /** Maximum retries when generating a unique connection code. */
@@ -76,7 +80,9 @@ export const APP_CONFIG = {
         /** Prefix for failed join attempts counter: `connection_attempts:<code>` */
         attemptsPrefix: 'connection_attempts:',
         /** Prefix for connection tokens: `connection_token:<token>` */
-        tokenPrefix: 'connection_token:'
+        tokenPrefix: 'connection_token:',
+        /** Prefix for reconnect/resume tokens: `connection_resume_token:<token>` */
+        resumeTokenPrefix: 'connection_resume_token:'
       },
       ttl: {
         /** Pending connection code lifetime (2 minutes). */

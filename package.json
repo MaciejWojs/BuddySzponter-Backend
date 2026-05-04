@@ -19,6 +19,7 @@
     "typecheck": "bunx --bun tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "test:ws-reconnect": "bun run --bun src/scripts/test-ws-reconnect.ts",
     "migrate": "bun --bun drizzle-kit migrate",
     "generate": "bun --bun drizzle-kit generate",
     "push": "bun --bun drizzle-kit push",
@@ -69,6 +70,7 @@
     "prettier": "^3.8.3",
     "prettier-plugin-embed": "^0.5.1",
     "prettier-plugin-sql": "^0.20.0",
+    "socket.io-client": "^4.8.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0"
   }

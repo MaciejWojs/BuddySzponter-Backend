@@ -2,6 +2,7 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { Server, Socket } from 'socket.io';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import {
   recordSocketKicked,
   recordSocketPostConnectionRejected,
@@ -29,6 +30,13 @@ let io: Server;
 let engine: Engine;
 
 const tokenService = new TokenService();
+const disconnectGraceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+const getParticipantKey = (
+  connectionId: string,
+  role: string,
+  deviceId: string
+) => `${connectionId}:${role}:${deviceId}`;
 
 /** Socket ID - Encryption Key Mapping */
 const keyMapping = new Map<string, string>();
@@ -189,12 +197,9 @@ export function initSocket() {
   io.on('connection', (socket) => {
     refreshSocketGauges();
 
-    socket.on('disconnect', () => {
-      logger.info(
-        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
-      );
-      refreshSocketGauges();
-    });
+    if (configProvider.get('PAYLOAD_ENCRYPTED')) {
+      keyMapping.set(socket.id, socket.data.encryptionKey);
+    }
 
     const roomId = socket.data.connectionTokenData?.connectionId;
     if (!roomId) {
@@ -226,6 +231,70 @@ export function initSocket() {
       );
     }
 
+    const participantKey = getParticipantKey(
+      socket.data.connectionTokenData.connectionId,
+      socket.data.connectionTokenData.role,
+      socket.data.connectionTokenData.deviceId
+    );
+    const reconnectTimer = disconnectGraceTimers.get(participantKey);
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      disconnectGraceTimers.delete(participantKey);
+    }
+
+    socket.on('disconnect', () => {
+      logger.info(
+        `Client disconnected: [${socket.handshake.address ?? 'Unknown IP address'}] - ${socket.id} `
+      );
+      refreshSocketGauges();
+
+      const connectionTokenData = socket.data.connectionTokenData;
+      if (!connectionTokenData) {
+        if (configProvider.get('PAYLOAD_ENCRYPTED')) {
+          keyMapping.delete(socket.id);
+        }
+        return;
+      }
+
+      if (configProvider.get('PAYLOAD_ENCRYPTED')) {
+        keyMapping.delete(socket.id);
+      }
+
+      const key = getParticipantKey(
+        connectionTokenData.connectionId,
+        connectionTokenData.role,
+        connectionTokenData.deviceId
+      );
+
+      const previousTimer = disconnectGraceTimers.get(key);
+      if (previousTimer) {
+        clearTimeout(previousTimer);
+      }
+
+      const timeout = setTimeout(async () => {
+        try {
+          const targetRoom = io.sockets.adapter.rooms.get(
+            connectionTokenData.connectionId
+          );
+
+          if (!targetRoom || targetRoom.size === 0) {
+            await tokenService.revokeTokensForConnection(
+              connectionTokenData.connectionId
+            );
+          }
+        } catch (error) {
+          logger.error('Failed to cleanup reconnect tokens after disconnect', {
+            error: error instanceof Error ? error.message : error,
+            connectionId: connectionTokenData.connectionId
+          });
+        } finally {
+          disconnectGraceTimers.delete(key);
+        }
+      }, APP_CONFIG.connection.security.disconnectGracePeriodSeconds * 1000);
+
+      disconnectGraceTimers.set(key, timeout);
+    });
+
     if (configProvider.get('PAYLOAD_ENCRYPTED')) {
       // Middleware to decrypt incoming messages only if encryption is enabled
       const decryptMiddleware = new DecryptEventPayloadMiddleware(socket);
@@ -249,7 +318,7 @@ export function initSocket() {
     });
 
     // guest or host -> server -> the other party
-    on(socket, 'connection:disconnect', (data) => {
+    on(socket, 'connection:disconnect', async (data) => {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
@@ -268,7 +337,143 @@ export function initSocket() {
         recordSocketKicked('connection_disconnect_event', socketsToDisconnect);
       }
 
+      await tokenService.revokeTokensForConnection(targetRoomId);
+
       io.to(targetRoomId).disconnectSockets();
+    });
+
+    on(socket, 'connection:resume', async (data) => {
+      logger.info(
+        `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
+      );
+
+      const currentTokenData = socket.data.connectionTokenData;
+      if (
+        currentTokenData &&
+        currentTokenData.connectionId !== data.sessionId
+      ) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'invalid'
+        });
+        return;
+      }
+
+      const connectionTokenData = await tokenService.verifyToken(
+        data.resumeToken
+      );
+
+      if (!connectionTokenData) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'expired'
+        });
+        return;
+      }
+
+      if (connectionTokenData.connectionId !== data.sessionId) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'invalid'
+        });
+        return;
+      }
+
+      if (
+        currentTokenData &&
+        currentTokenData.connectionId !== connectionTokenData.connectionId
+      ) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'invalid'
+        });
+        return;
+      }
+
+      if (connectionTokenData.deviceId !== data.deviceId) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'device_mismatch'
+        });
+        return;
+      }
+
+      const existingRoom = io.sockets.adapter.rooms.get(
+        connectionTokenData.connectionId
+      );
+
+      if (!existingRoom) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'room_closed'
+        });
+        return;
+      }
+
+      const existingSockets = Array.from(existingRoom)
+        .map((socketId) => io.sockets.sockets.get(socketId))
+        .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+      const staleSocket = existingSockets.find(
+        (existingSocket) =>
+          existingSocket.id !== socket.id &&
+          existingSocket.data.connectionTokenData?.deviceId ===
+            connectionTokenData.deviceId &&
+          existingSocket.data.connectionTokenData?.role ===
+            connectionTokenData.role
+      );
+
+      if (staleSocket) {
+        staleSocket.disconnect(true);
+      }
+
+      const roomAfterStaleDisconnect = io.sockets.adapter.rooms.get(
+        connectionTokenData.connectionId
+      );
+
+      if (
+        roomAfterStaleDisconnect &&
+        roomAfterStaleDisconnect.size >= 2 &&
+        !roomAfterStaleDisconnect.has(socket.id)
+      ) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'room_full'
+        });
+        return;
+      }
+
+      const refreshedTokenData = await tokenService.markTokenForReconnect(
+        data.resumeToken
+      );
+
+      if (!refreshedTokenData) {
+        emit(socket, 'connection:resume-failed', {
+          reason: 'expired'
+        });
+        return;
+      }
+
+      socket.data.connectionTokenData = refreshedTokenData;
+      socket.join(refreshedTokenData.connectionId);
+
+      const key = getParticipantKey(
+        refreshedTokenData.connectionId,
+        refreshedTokenData.role,
+        refreshedTokenData.deviceId
+      );
+      const timer = disconnectGraceTimers.get(key);
+      if (timer) {
+        clearTimeout(timer);
+        disconnectGraceTimers.delete(key);
+      }
+
+      const resumedRoom = io.sockets.adapter.rooms.get(
+        refreshedTokenData.connectionId
+      );
+      if (resumedRoom?.size === 2) {
+        const sockets = Array.from(resumedRoom);
+        const socketsInRoom = sockets.map((id) => io.sockets.sockets.get(id));
+        socketsInRoom[0]!.data.otherSocketId = socketsInRoom[1]!.id;
+        socketsInRoom[1]!.data.otherSocketId = socketsInRoom[0]!.id;
+      }
+
+      emit(socket, 'connection:resumed', {
+        sessionId: refreshedTokenData.connectionId
+      });
     });
 
     // host -> server -> guest
