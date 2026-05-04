@@ -13,3 +13,15 @@ export const iceCandidateSchema = z.object({
 });
 
 export const readySchema = z.object({});
+
+export const e2eHandshakeInitSchema = z.object({
+  publicKey: z.string().min(1).max(2048)
+});
+
+export const e2eHandshakeRespondSchema = z.object({
+  publicKey: z.string().min(1).max(2048)
+});
+
+export const e2eHandshakeCompleteSchema = z.object({
+  peerPublicKey: z.string().min(1).max(2048)
+});

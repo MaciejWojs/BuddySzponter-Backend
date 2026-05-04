@@ -19,18 +19,32 @@ import {
 } from './schemas/events/outgoing/connectionMange.events';
 import { connectionAknowledgedEventSchema } from './schemas/events/shared/connectionMange.events';
 import {
+  e2eHandshakeCompleteSchema,
+  e2eHandshakeInitSchema,
+  e2eHandshakeRespondSchema,
   iceCandidateSchema,
   readySchema,
   webrtcAnswerSchema,
   webrtcOfferSchema
 } from './schemas/events/shared/socket.webrtc.schemas';
 
-/** Webrtc events (shared) */
-const webrtcEventSchemas = {
+/** Webrtc events sent by clients */
+const incomingWebrtcEventSchemas = {
   'webrtc:offer': webrtcOfferSchema,
   'webrtc:answer': webrtcAnswerSchema,
   'webrtc:ice-candidate': iceCandidateSchema,
-  'webrtc:ready': readySchema
+  'webrtc:ready': readySchema,
+  'webrtc:e2e-handshake:init': e2eHandshakeInitSchema,
+  'webrtc:e2e-handshake:respond': e2eHandshakeRespondSchema
+} as const;
+
+/** Webrtc events sent by server */
+const outgoingWebrtcEventSchemas = {
+  'webrtc:offer': webrtcOfferSchema,
+  'webrtc:answer': webrtcAnswerSchema,
+  'webrtc:ice-candidate': iceCandidateSchema,
+  'webrtc:ready': readySchema,
+  'webrtc:e2e-handshake:complete': e2eHandshakeCompleteSchema
 } as const;
 
 const sharedEventSchemas = {
@@ -40,7 +54,7 @@ const sharedEventSchemas = {
 
 /** Events sent by the client */
 export const incomingEventSchemas = {
-  ...webrtcEventSchemas,
+  ...incomingWebrtcEventSchemas,
   ...sharedEventSchemas,
   'connection:accept': acceptConnectionEventSchema,
   'connection:reject': rejectConnectionEventSchema,
@@ -50,7 +64,7 @@ export const incomingEventSchemas = {
 
 /** Events sent by the server */
 export const outgoingEventSchemas = {
-  ...webrtcEventSchemas,
+  ...outgoingWebrtcEventSchemas,
   ...sharedEventSchemas,
   'connection:accepted': ConnectionAcceptedEventSchema,
   'connection:rejected': ConnectionRejectedEventSchema,

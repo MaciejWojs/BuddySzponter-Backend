@@ -30,6 +30,8 @@ export const APP_CONFIG = {
     keys: {
       /** Prefix for ECDH session keys: `handshake:<sessionId>` */
       handshakePrefix: 'handshake:',
+      /** Prefix for WebRTC peer handshake payloads: `webrtc:handshake:<connectionId>` */
+      webrtcHandshakePrefix: 'webrtc:handshake:',
       /** Prefix for cached user records keyed by email: `user:<email>` */
       userPrefix: 'user:',
       /** `user:id:<userId>` -> email mapping to allow cache lookups by user ID */
@@ -39,6 +41,8 @@ export const APP_CONFIG = {
     ttl: {
       /** Lifetime of a handshake/encryption session key (15 minutes). */
       handshakeSession: 900,
+      /** Lifetime of WebRTC peer key-exchange payload (2 minutes). */
+      webrtcHandshakeSeconds: 120,
       /** Cached user record lifetime (1 minute). */
       user: 60
     }

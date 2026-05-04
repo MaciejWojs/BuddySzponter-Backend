@@ -2,11 +2,13 @@ import logger from '@logger';
 import { Server as Engine } from '@socket.io/bun-engine';
 import { Server, Socket } from 'socket.io';
 
+import { APP_CONFIG } from '@/config/appConfig';
 import {
   recordSocketKicked,
   recordSocketPostConnectionRejected,
   updateSocketGauges
 } from '@/core/infrastucture/metrics';
+import { client } from '@/infrastucture/cache/client';
 
 import { configProvider } from './config/configProvider';
 import { RepositoryFactory } from './infrastucture/factories/RepositoryFactory';
@@ -29,6 +31,15 @@ let io: Server;
 let engine: Engine;
 
 const tokenService = new TokenService();
+
+type WebrtcHandshakeCachePayload = {
+  initiatorSocketId: string;
+  initiatorPublicKey: string;
+};
+
+function getWebrtcHandshakeCacheKey(connectionId: string) {
+  return `${APP_CONFIG.cache.keys.webrtcHandshakePrefix}${connectionId}`;
+}
 
 /** Socket ID - Encryption Key Mapping */
 const keyMapping = new Map<string, string>();
@@ -420,6 +431,135 @@ export function initSocket() {
       logger.info(
         `[${data.event}] data from ${socket.id}: ${JSON.stringify(data)}`
       );
+    });
+
+    on(socket, 'webrtc:e2e-handshake:init', (data) => {
+      logger.info(`[${data.event}] data from ${socket.id}`);
+
+      void (async () => {
+        if (!client.connected) {
+          logger.error(
+            'Redis client is not connected - cannot initialize WebRTC E2E handshake'
+          );
+          return emit(socket, 'connection:error', {
+            message: 'E2E handshake cache unavailable'
+          });
+        }
+
+        const connectionId = socket.data.connectionTokenData!.connectionId;
+        const cacheKey = getWebrtcHandshakeCacheKey(connectionId);
+
+        try {
+          const cachedHandshake = await client.get(cacheKey);
+          if (cachedHandshake) {
+            return emit(socket, 'connection:error', {
+              message: 'E2E handshake already initialized'
+            });
+          }
+
+          const handshakePayload: WebrtcHandshakeCachePayload = {
+            initiatorSocketId: socket.id,
+            initiatorPublicKey: data.publicKey
+          };
+
+          const result = await client.setex(
+            cacheKey,
+            APP_CONFIG.cache.ttl.webrtcHandshakeSeconds,
+            JSON.stringify(handshakePayload)
+          );
+
+          if (result !== 'OK') {
+            logger.warn(
+              `[webrtc:e2e-handshake:init] Failed to store handshake payload for room ${connectionId}`
+            );
+            return emit(socket, 'connection:error', {
+              message: 'Could not initialize E2E handshake'
+            });
+          }
+        } catch (error) {
+          logger.error(
+            `[webrtc:e2e-handshake:init] Failed for socket ${socket.id}: ${error instanceof Error ? error.message : 'unknown error'}`
+          );
+          return emit(socket, 'connection:error', {
+            message: 'Could not initialize E2E handshake'
+          });
+        }
+      })();
+    });
+
+    on(socket, 'webrtc:e2e-handshake:respond', (data) => {
+      logger.info(`[${data.event}] data from ${socket.id}`);
+
+      void (async () => {
+        if (!client.connected) {
+          logger.error(
+            'Redis client is not connected - cannot complete WebRTC E2E handshake'
+          );
+          return emit(socket, 'connection:error', {
+            message: 'E2E handshake cache unavailable'
+          });
+        }
+
+        const connectionId = socket.data.connectionTokenData!.connectionId;
+        const cacheKey = getWebrtcHandshakeCacheKey(connectionId);
+
+        try {
+          const cachedHandshake = await client.get(cacheKey);
+          if (!cachedHandshake) {
+            return emit(socket, 'connection:error', {
+              message: 'E2E handshake session not found or expired'
+            });
+          }
+
+          const parsedHandshake = JSON.parse(
+            cachedHandshake
+          ) as WebrtcHandshakeCachePayload;
+
+          if (parsedHandshake.initiatorSocketId === socket.id) {
+            return emit(socket, 'connection:error', {
+              message: 'E2E handshake initiator cannot respond to itself'
+            });
+          }
+
+          const initiatorSocket = io.sockets.sockets.get(
+            parsedHandshake.initiatorSocketId
+          );
+
+          if (!initiatorSocket) {
+            await client.del(cacheKey);
+            return emit(socket, 'connection:error', {
+              message: 'E2E handshake initiator disconnected'
+            });
+          }
+
+          const initiatorConnectionId =
+            initiatorSocket.data.connectionTokenData?.connectionId;
+
+          if (initiatorConnectionId !== connectionId) {
+            await client.del(cacheKey);
+            return emit(socket, 'connection:error', {
+              message: 'E2E handshake room mismatch'
+            });
+          }
+
+          emit(initiatorSocket, 'webrtc:e2e-handshake:complete', {
+            peerPublicKey: data.publicKey
+          });
+
+          emit(socket, 'webrtc:e2e-handshake:complete', {
+            peerPublicKey: parsedHandshake.initiatorPublicKey
+          });
+
+          await client.del(cacheKey);
+        } catch (error) {
+          logger.error(
+            `[webrtc:e2e-handshake:respond] Failed for socket ${socket.id}: ${error instanceof Error ? error.message : 'unknown error'}`
+          );
+          return emit(socket, 'connection:error', {
+            message: 'Could not complete E2E handshake'
+          });
+        }
+      })();
     });
 
     socket.on('error', (err) => {
